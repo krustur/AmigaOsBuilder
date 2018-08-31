@@ -29,7 +29,7 @@ namespace AmigaOsBuilder
                 {
                     new Package
                     {
-                        Include = true,
+                        Include = false,
                         Name = "Workbench 3.1 (Clean Install)",
                         Path = "Workbench (clean install)_3.1",
                         Category = "OS",
@@ -66,13 +66,44 @@ namespace AmigaOsBuilder
 
             var syncList = new List<Sync>();
 
+            AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
+            AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
+
+            var outputEntries = Directory.GetFileSystemEntries(outputBasePath, "*", SearchOption.AllDirectories);
+            foreach (var outputEntry in outputEntries)
+            {
+                if (syncList.Any(x => outputEntry.ToLowerInvariant() == x.TargetPath.ToLowerInvariant()) == false)
+                {
+                    syncList.Add(new Sync
+                    {
+                        SyncType = SyncType.DeleteTarget,
+                        FileType = GetFileType(outputEntry),
+                        TargetPath = outputEntry
+                    });
+                }
+                
+            }
+
+            Console.WriteLine("Building sync list done!");
+            Console.WriteLine();
+
+            Console.WriteLine();
+            Console.WriteLine("Synchronizing in progress ...");
+            Console.WriteLine("Synchronizing done!");
+            Console.WriteLine();
+        }
+
+        private static void AddContentToSyncList(string sourceBasePath, string outputBasePath, Config config,
+            string contentFolderName, SyncType syncType, List<Sync> syncList)
+        {
             foreach (var package in config.Packages)
             {
                 if (package.Include == false)
                 {
                     continue;
                 }
-                var packageBasePath = Path.Combine(sourceBasePath, package.Path, "content");
+
+                var packageBasePath = Path.Combine(sourceBasePath, package.Path, contentFolderName);
                 var packageTargets = Directory.GetDirectories(packageBasePath);
                 foreach (var sourcePath in packageTargets)
                 {
@@ -94,26 +125,28 @@ namespace AmigaOsBuilder
                         var packageSubPath = RemoveRoot(sourcePath, packageEntry);
                         var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
                         //Console.WriteLine($"{packageEntry} => {fileOutputPath}");
-                        var packageEntryFileInfo = new FileInfo(packageEntry);
                         var sync = new Sync
                         {
                             SourcePath = packageEntry,
                             TargetPath = fileOutputPath,
-                            SyncType = SyncType.SourceToTarget
+                            SyncType = syncType,
+                            FileType = GetFileType(packageEntry)
                         };
-                        sync.FileType = (packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory ? FileType.Directory : FileType.File;
+                        
                         syncList.Add(sync);
                     }
                 }
             }
+        }
 
-            Console.WriteLine("Building sync list done!");
-            Console.WriteLine();
+        private static FileType GetFileType(string packageEntry)
+        {
+            var packageEntryFileInfo = new FileInfo(packageEntry);
+            var fileType = (packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory
+                ? FileType.Directory
+                : FileType.File;
 
-            Console.WriteLine();
-            Console.WriteLine("Synchronizing in progress ...");
-            Console.WriteLine("Synchronizing done!");
-            Console.WriteLine();
+            return fileType;
         }
 
         private static string TargetAliasToOutputPath(string targetAlias)
@@ -183,17 +216,27 @@ namespace AmigaOsBuilder
             {
                 case SyncType.SourceToTarget:
                 {
-                    return $@"{SyncType}: {SourcePath} => {TargetPath}";
-                } 
+                    return $@"{SyncType} ({FileType}): {SourcePath} => {TargetPath}";
+                }
+                case SyncType.TargetToSource:
+                {
+                    return $@"{SyncType} ({FileType}): {SourcePath} <= {TargetPath}";
+                }
+                case SyncType.DeleteTarget:
+                {
+                    return $@"{SyncType} ({FileType}): {TargetPath}";
+                }
             }
-            return $"";
+            return $"i am error (unknown SyncType)";
         }
     }
 
     public enum SyncType
     {
         Unknown = 0,
-        SourceToTarget
+        SourceToTarget,
+        TargetToSource,
+        DeleteTarget
     }
 
     public enum FileType
