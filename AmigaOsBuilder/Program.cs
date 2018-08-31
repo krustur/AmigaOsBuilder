@@ -10,7 +10,7 @@ namespace AmigaOsBuilder
     class Program
     {
         // @formatter:off
-        private static IDictionary<string, string> _aliasToOutputMap = new Dictionary<string, string>
+        private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string>
         {
             { @"__systemdrive__",        @"System" },
             { @"__c__",                  @"System\C" },
@@ -18,6 +18,32 @@ namespace AmigaOsBuilder
             { @"__devs__",               @"System\Devs" },
             { @"__utils__",              @"System\A-Utils" },
             { @"__guides__",             @"System\A-Guides" },
+        };
+        // @formatter:on
+
+        // @formatter:off
+        private static readonly Config TestConfig = new Config
+        {
+            Packages =
+                new List<Package>
+                {
+                    new Package
+                    {
+                        Include = true,
+                        Name = "Workbench 3.1 (Clean Install)",
+                        Path = "Workbench (clean install)_3.1",
+                        Category = "OS",
+                        Description = "Workbench 3.1 operation system (clean Install)"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Name = "Lha 2.15",
+                        Path = "Lha_2.15",
+                        Category = "Util",
+                        Description = "Amiga LhA 2.15"
+                    },
+                }
         };
         // @formatter:on
 
@@ -38,8 +64,14 @@ namespace AmigaOsBuilder
             Console.WriteLine();
             Console.WriteLine("Building sync list progress ...");
 
+            var syncList = new List<Sync>();
+
             foreach (var package in config.Packages)
             {
+                if (package.Include == false)
+                {
+                    continue;
+                }
                 var packageBasePath = Path.Combine(sourceBasePath, package.Path, "content");
                 var packageTargets = Directory.GetDirectories(packageBasePath);
                 foreach (var sourcePath in packageTargets)
@@ -61,16 +93,16 @@ namespace AmigaOsBuilder
                         //var filePath = Path.Combine(sourcePath, packageFileSystemEntry);
                         var packageSubPath = RemoveRoot(sourcePath, packageEntry);
                         var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
-                        Console.WriteLine($"{packageEntry} => {fileOutputPath}");
+                        //Console.WriteLine($"{packageEntry} => {fileOutputPath}");
                         var packageEntryFileInfo = new FileInfo(packageEntry);
-                        if ((packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                        var sync = new Sync
                         {
-                            // Add dir sync
-                        }
-                        else
-                        {
-                            // Add file sync
-                        }
+                            SourcePath = packageEntry,
+                            TargetPath = fileOutputPath,
+                            SyncType = SyncType.SourceToTarget
+                        };
+                        sync.FileType = (packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory ? FileType.Directory : FileType.File;
+                        syncList.Add(sync);
                     }
                 }
             }
@@ -82,17 +114,13 @@ namespace AmigaOsBuilder
             Console.WriteLine("Synchronizing in progress ...");
             Console.WriteLine("Synchronizing done!");
             Console.WriteLine();
-
-
-
-
         }
 
         private static string TargetAliasToOutputPath(string targetAlias)
         {
-            foreach (var mapKey in _aliasToOutputMap.Keys)
+            foreach (var mapKey in AliasToOutputMap.Keys)
             {
-                targetAlias = targetAlias.Replace(mapKey, _aliasToOutputMap[mapKey]);
+                targetAlias = targetAlias.Replace(mapKey, AliasToOutputMap[mapKey]);
             }
 
             if (targetAlias.Contains("__"))
@@ -105,29 +133,7 @@ namespace AmigaOsBuilder
 
         private static Config GetConfig()
         {
-            var config = new Config
-            {
-                Packages =
-                    new List<Package>
-                    {
-                        new Package
-                        {
-                            Include = true,
-                            Name = "Workbench 3.1 (Clean Install)",
-                            Path = "Workbench (clean install)_3.1",
-                            Category = "OS",
-                            Description = "Workbench 3.1 operation system (clean Install)"
-                        },
-                        new Package
-                        {
-                            Include = true,
-                            Name = "Lha 2.15",
-                            Path = "Lha_2.15",
-                            Category = "Util",
-                            Description = "Amiga LhA 2.15"
-                        },
-                    }
-            };
+            var config = TestConfig;
 
             //var configFilePath = Path.Combine(location, configFileName);
             //// Deserialize
@@ -161,6 +167,40 @@ namespace AmigaOsBuilder
 
             return target;
         }
+    }
+
+    public class Sync
+    {
+        public SyncType SyncType { get; set; }
+        public FileType FileType { get; set; }
+        public string SourcePath { get; set; }
+        public string TargetPath { get; set; }
+
+        public override string ToString()
+        {
+            //Console.WriteLine($"{packageEntry} => {fileOutputPath}");
+            switch (SyncType)
+            {
+                case SyncType.SourceToTarget:
+                {
+                    return $@"{SyncType}: {SourcePath} => {TargetPath}";
+                } 
+            }
+            return $"";
+        }
+    }
+
+    public enum SyncType
+    {
+        Unknown = 0,
+        SourceToTarget
+    }
+
+    public enum FileType
+    {
+        Unknown = 0,
+        Directory,
+        File
     }
 
     public class Config
