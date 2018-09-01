@@ -29,7 +29,7 @@ namespace AmigaOsBuilder
                 {
                     new Package
                     {
-                        Include = false,
+                        Include = true,
                         Name = "Workbench 3.1 (Clean Install)",
                         Path = "Workbench (clean install)_3.1",
                         Category = "OS",
@@ -61,8 +61,10 @@ namespace AmigaOsBuilder
         {
             var config = GetConfig();
 
+            CreateOutputAliasDirectories(outputBasePath);
+
             Console.WriteLine();
-            Console.WriteLine("Building sync list progress ...");
+            Console.WriteLine("Building sync list ...");
 
             var syncList = new List<Sync>();
 
@@ -72,7 +74,8 @@ namespace AmigaOsBuilder
             var outputEntries = Directory.GetFileSystemEntries(outputBasePath, "*", SearchOption.AllDirectories);
             foreach (var outputEntry in outputEntries)
             {
-                if (syncList.Any(x => outputEntry.ToLowerInvariant() == x.TargetPath.ToLowerInvariant()) == false)
+                //if (syncList.Any(x => outputEntry.ToLowerInvariant() == x.TargetPath.ToLowerInvariant()) == false)
+                if (syncList.Any(x => x.TargetPath.ToLowerInvariant().StartsWith(outputEntry.ToLowerInvariant())) == false)
                 {
                     syncList.Add(new Sync
                     {
@@ -81,15 +84,112 @@ namespace AmigaOsBuilder
                         TargetPath = outputEntry
                     });
                 }
-                
             }
+
+            
 
             Console.WriteLine("Building sync list done!");
             Console.WriteLine();
 
             Console.WriteLine();
-            Console.WriteLine("Synchronizing in progress ...");
+            Console.WriteLine("Synchronizing ...");
+            foreach (var sync in syncList)
+            {
+                switch (sync.SyncType)
+                {
+                    case SyncType.SourceToTarget:
+                        if (sync.FileType == FileType.Directory)
+                        {
+                            if (Directory.Exists(sync.TargetPath))
+                            {
+                                Console.WriteLine($@"Target Directory (already exists): [{sync.TargetPath}]");
+                            }
+                            else
+                            {
+                                Console.WriteLine($@"Create Target Directory: [{sync.TargetPath}]");
+                                Directory.CreateDirectory(sync.TargetPath);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($@"Copy Source to Target: [{sync.SourcePath}] => [{sync.TargetPath}]");
+                            File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
+                        }
+
+                        break;
+                    case SyncType.TargetToSource:
+                        if (sync.FileType == FileType.Directory)
+                        {
+                            if (Directory.Exists(sync.SourcePath))
+                            {
+                                Console.WriteLine($@"Source Directory (already exists): [{sync.SourcePath}]");
+                            }
+                            else
+                            {
+                                Console.WriteLine($@"Create Source Directory: [{sync.SourcePath}]");
+                                Directory.CreateDirectory(sync.SourcePath);
+                            }
+                        }
+                        else
+                        {
+                            if (File.Exists(sync.TargetPath))
+                            {
+                                Console.WriteLine($@"Copy Target to Source: [{sync.SourcePath}] <= [{sync.TargetPath}]");
+                                File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
+                            }
+                            else
+                            {
+                                Console.WriteLine($@"Copy Target to Source (target is missing!): [{sync.SourcePath}] <= [{sync.TargetPath}]");
+                            }
+                        }
+
+                        break;
+                    case SyncType.DeleteTarget:
+                        if (sync.FileType == FileType.Directory)
+                        {
+                            if (Directory.Exists(sync.TargetPath))
+                            {
+                                Console.WriteLine($@"Delete: [{sync.TargetPath}]");
+                                Directory.Delete(sync.TargetPath, recursive: true);
+                            }
+                            else
+                            {
+                                Console.WriteLine($@"Delete (already deleted): [{sync.TargetPath}]");
+                            }
+                        }
+                        else
+                        {
+                            if (File.Exists(sync.TargetPath))
+                            {
+                                Console.WriteLine($@"Delete: [{sync.TargetPath}]");
+                                File.Delete(sync.TargetPath);
+                            }
+                            else
+                            {
+                                Console.WriteLine($@"Delete (already deleted): [{sync.TargetPath}]");
+                            }
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
             Console.WriteLine("Synchronizing done!");
+            Console.WriteLine();
+        }
+
+        private static void CreateOutputAliasDirectories(string outputBasePath)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Creating output alias directories ...");
+            foreach (var map in AliasToOutputMap)
+            {
+                var outputAliasPath = Path.Combine(outputBasePath, map.Value);
+                Console.WriteLine($@"[{map.Key}] = [{outputAliasPath}]");
+                Directory.CreateDirectory(outputAliasPath);
+            }
+
+            Console.WriteLine("Create output alias directories done!");
             Console.WriteLine();
         }
 
@@ -104,6 +204,11 @@ namespace AmigaOsBuilder
                 }
 
                 var packageBasePath = Path.Combine(sourceBasePath, package.Path, contentFolderName);
+                if (Directory.Exists(packageBasePath) == false)
+                {
+                    continue;
+                }
+
                 var packageTargets = Directory.GetDirectories(packageBasePath);
                 foreach (var sourcePath in packageTargets)
                 {
