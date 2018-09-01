@@ -3,10 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace AmigaOsBuilder
 {
+    //TODO: Warn for existing Sources that is missing in Config
+
     class Program
     {
         // @formatter:off
@@ -18,6 +21,7 @@ namespace AmigaOsBuilder
             { @"__devs__",               @"System\Devs" },
             { @"__utils__",              @"System\A-Utils" },
             { @"__guides__",             @"System\A-Guides" },
+            { @"__system__",             @"System\A-System" },
         };
         // @formatter:on
 
@@ -33,7 +37,26 @@ namespace AmigaOsBuilder
                         Name = "Workbench 3.1 (Clean Install)",
                         Path = "Workbench (clean install)_3.1",
                         Category = "OS",
-                        Description = "Workbench 3.1 operation system (clean Install)"
+                        Description = "Workbench 3.1 operation system (clean Install)",
+                        Url = ""
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Name = "A-Directories",
+                        Path = "A-Directories",
+                        Category = "KrustWB",
+                        Description = "A-Directories including icons",
+                        Url = ""
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Name = "SetPatch 43.6b",
+                        Path = "SetPatch_43.6b",
+                        Category = "System",
+                        Description = "SetPatch 43.6b",
+                        Url = "http://m68k.aminet.net/package/util/boot/SetPatch_43.6b"
                     },
                     new Package
                     {
@@ -41,7 +64,17 @@ namespace AmigaOsBuilder
                         Name = "Lha 2.15",
                         Path = "Lha_2.15",
                         Category = "Util",
-                        Description = "Amiga LhA 2.15"
+                        Description = "Amiga LhA 2.15",
+                        Url = "http://aminet.net/package/util/arc/lha_68k"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Name = "KingCON 1.3",
+                        Path = "KingCON_1.3",
+                        Category = "Util",
+                        Description = "KingCON 1.3",
+                        Url = "http://aminet.net/package/util/shell/KingCON_1.3"
                     },
                 }
         };
@@ -55,11 +88,13 @@ namespace AmigaOsBuilder
             var configFile = @"config.json";
 
             BuildIt(location, sourceBasePath, outputBasePath, configFile);
+            Console.WriteLine("Press any key!");
+            Console.ReadKey();
         }
 
         private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName)
         {
-            var config = GetConfig();
+            var config = GetConfig(location, configFileName);
 
             CreateOutputAliasDirectories(outputBasePath);
 
@@ -269,17 +304,19 @@ namespace AmigaOsBuilder
             return targetAlias;          
         }
 
-        private static Config GetConfig()
+        private static Config GetConfig(string location, string configFileName)
         {
             var config = TestConfig;
-
+            
             //var configFilePath = Path.Combine(location, configFileName);
+            
+            //// Serialize
+            //var configString = JsonConvert.SerializeObject(config, Formatting.Indented);
+            //File.WriteAllText(configFilePath, configString, Encoding.UTF8);
+
             //// Deserialize
             //var configString = File.ReadAllText(configFilePath);
-            //arne = JsonConvert.DeserializeObject<Config>(configString);
-            //// Serialize
-            //var configString = JsonConvert.SerializeObject(arne);
-            //<IList<Package>>();
+            //config = JsonConvert.DeserializeObject<Config>(configString);
 
             return config;
         }
@@ -363,5 +400,6 @@ namespace AmigaOsBuilder
         public string Path { get; set; }
         public string Category { get; set; }
         public string Description { get; set; }
+        public string Url { get; set; }
     }
 }
