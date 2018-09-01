@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace AmigaOsBuilder
@@ -18,6 +19,7 @@ namespace AmigaOsBuilder
             { @"__systemdrive__",        @"System" },
             { @"__c__",                  @"System\C" },
             { @"__s__",                  @"System\S" },
+            { @"__l__",                  @"System\L" },
             { @"__devs__",               @"System\Devs" },
             { @"__utils__",              @"System\A-Utils" },
             { @"__guides__",             @"System\A-Guides" },
@@ -38,6 +40,15 @@ namespace AmigaOsBuilder
                         Path = "Workbench (clean install)_3.1",
                         Category = "OS",
                         Description = "Workbench 3.1 operation system (clean Install)",
+                        Url = ""
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Name = "Startup-Sequence",
+                        Path = "Startup-Sequence",
+                        Category = "KrustWB",
+                        Description = "KrustWB startup-sequence and user-startup files",
                         Url = ""
                     },
                     new Package
@@ -82,17 +93,23 @@ namespace AmigaOsBuilder
 
         static void Main(string[] args)
         {
-            var location = @"E:\Amiga\KrustWB3";
-            var sourceBasePath = @"E:\Amiga\KrustWB3\Source";
-            var outputBasePath = @"E:\Amiga\KrustWB3\Output";
-            var configFile = @"config.json";
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddCommandLine(args)
+                .Build();
 
-            BuildIt(location, sourceBasePath, outputBasePath, configFile);
-            Console.WriteLine("Press any key!");
-            Console.ReadKey();
+            var location = configuration["Location"];
+            var sourceBasePath = configuration["SourceBasePath"];
+            var outputBasePath = configuration["OutputBasePath"];
+            var configFile = configuration["ConfigFile"];
+            var reverse = Boolean.Parse(configuration["Reverse"]);
+
+            BuildIt(location, sourceBasePath, outputBasePath, configFile, reverse);
+            //Console.WriteLine("Press any key!");
+            //Console.ReadKey();
         }
 
-        private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName)
+        private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName, bool reverse)
         {
             var config = GetConfig(location, configFileName);
 
@@ -100,28 +117,21 @@ namespace AmigaOsBuilder
 
             Console.WriteLine();
             Console.WriteLine("Building sync list ...");
+            Console.WriteLine($"Reverse [{reverse}]");
 
             var syncList = new List<Sync>();
 
-            AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
-            AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
-
-            var outputEntries = Directory.GetFileSystemEntries(outputBasePath, "*", SearchOption.AllDirectories);
-            foreach (var outputEntry in outputEntries)
+            if (reverse == false)
             {
-                //if (syncList.Any(x => outputEntry.ToLowerInvariant() == x.TargetPath.ToLowerInvariant()) == false)
-                if (syncList.Any(x => x.TargetPath.ToLowerInvariant().StartsWith(outputEntry.ToLowerInvariant())) == false)
-                {
-                    syncList.Add(new Sync
-                    {
-                        SyncType = SyncType.DeleteTarget,
-                        FileType = GetFileType(outputEntry),
-                        TargetPath = outputEntry
-                    });
-                }
+                AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
+                AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.SourceToTarget, syncList);
+                AddDeleteToSyncList(outputBasePath, syncList);
+            }
+            else
+            {
+                AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
             }
 
-            
 
             Console.WriteLine("Building sync list done!");
             Console.WriteLine();
@@ -211,6 +221,24 @@ namespace AmigaOsBuilder
             }
             Console.WriteLine("Synchronizing done!");
             Console.WriteLine();
+        }
+
+        private static void AddDeleteToSyncList(string outputBasePath, List<Sync> syncList)
+        {
+            var outputEntries = Directory.GetFileSystemEntries(outputBasePath, "*", SearchOption.AllDirectories);
+            foreach (var outputEntry in outputEntries)
+            {
+                //if (syncList.Any(x => outputEntry.ToLowerInvariant() == x.TargetPath.ToLowerInvariant()) == false)
+                if (syncList.Any(x => x.TargetPath.ToLowerInvariant().StartsWith(outputEntry.ToLowerInvariant())) == false)
+                {
+                    syncList.Add(new Sync
+                    {
+                        SyncType = SyncType.DeleteTarget,
+                        FileType = GetFileType(outputEntry),
+                        TargetPath = outputEntry
+                    });
+                }
+            }
         }
 
         private static void CreateOutputAliasDirectories(string outputBasePath)
