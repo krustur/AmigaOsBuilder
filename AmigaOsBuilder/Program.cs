@@ -21,10 +21,10 @@ namespace AmigaOsBuilder
             { @"__s__",                  @"System\S" },
             { @"__l__",                  @"System\L" },
             { @"__devs__",               @"System\Devs" },
+            { @"__prefs__",              @"System\Prefs" },
             { @"__utils__",              @"System\A-Utils" },
             { @"__guides__",             @"System\A-Guides" },
             { @"__system__",             @"System\A-System" },
-            { @"__prefs__",              @"System\Prefs" },
         };
         // @formatter:on
 
@@ -164,91 +164,113 @@ namespace AmigaOsBuilder
             Console.WriteLine("Building sync list done!");
             Console.WriteLine();
 
+            Synchronize(syncList);
+        }
+
+        private static void Synchronize(List<Sync> syncList)
+        {
             Console.WriteLine();
             Console.WriteLine("Synchronizing ...");
             foreach (var sync in syncList)
             {
-                switch (sync.SyncType)
+                switch (sync.FileType)
                 {
-                    case SyncType.SourceToTarget:
-                        if (sync.FileType == FileType.Directory)
-                        {
-                            if (Directory.Exists(sync.TargetPath))
-                            {
-                                Console.WriteLine($@"Target Directory (already exists): [{sync.TargetPath}]");
-                            }
-                            else
-                            {
-                                Console.WriteLine($@"Create Target Directory: [{sync.TargetPath}]");
-                                Directory.CreateDirectory(sync.TargetPath);
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine($@"Copy Source to Target: [{sync.SourcePath}] => [{sync.TargetPath}]");
-                            File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
-                        }
-
+                    case FileType.File:
+                        SynchronizeFile(sync);
                         break;
-                    case SyncType.TargetToSource:
-                        if (sync.FileType == FileType.Directory)
-                        {
-                            if (Directory.Exists(sync.SourcePath))
-                            {
-                                Console.WriteLine($@"Source Directory (already exists): [{sync.SourcePath}]");
-                            }
-                            else
-                            {
-                                Console.WriteLine($@"Create Source Directory: [{sync.SourcePath}]");
-                                Directory.CreateDirectory(sync.SourcePath);
-                            }
-                        }
-                        else
-                        {
-                            if (File.Exists(sync.TargetPath))
-                            {
-                                Console.WriteLine($@"Copy Target to Source: [{sync.SourcePath}] <= [{sync.TargetPath}]");
-                                File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
-                            }
-                            else
-                            {
-                                Console.WriteLine($@"Copy Target to Source (target is missing!): [{sync.SourcePath}] <= [{sync.TargetPath}]");
-                            }
-                        }
-
-                        break;
-                    case SyncType.DeleteTarget:
-                        if (sync.FileType == FileType.Directory)
-                        {
-                            if (Directory.Exists(sync.TargetPath))
-                            {
-                                Console.WriteLine($@"Delete: [{sync.TargetPath}]");
-                                Directory.Delete(sync.TargetPath, recursive: true);
-                            }
-                            else
-                            {
-                                Console.WriteLine($@"Delete (already deleted): [{sync.TargetPath}]");
-                            }
-                        }
-                        else
-                        {
-                            if (File.Exists(sync.TargetPath))
-                            {
-                                Console.WriteLine($@"Delete: [{sync.TargetPath}]");
-                                File.Delete(sync.TargetPath);
-                            }
-                            else
-                            {
-                                Console.WriteLine($@"Delete (already deleted): [{sync.TargetPath}]");
-                            }
-                        }
+                    case FileType.Directory:
+                        SynchronizeDirectory(sync);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
             Console.WriteLine("Synchronizing done!");
             Console.WriteLine();
+        }
+
+        private static void SynchronizeFile(Sync sync)
+        {
+            switch (sync.SyncType)
+            {
+                case SyncType.SourceToTarget:
+                    Console.WriteLine($@"Copy Source to Target: [{sync.SourcePath}] => [{sync.TargetPath}]");
+                    File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
+                    break;
+                case SyncType.TargetToSource:
+                    if (File.Exists(sync.TargetPath))
+                    {
+                        Console.WriteLine($@"Copy Target to Source: [{sync.SourcePath}] <= [{sync.TargetPath}]");
+                        File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
+                    }
+                    else
+                    {
+                        Console.WriteLine($@"Copy Target to Source (target is missing!): [{sync.SourcePath}] <= [{sync.TargetPath}]");
+                    }
+
+                    break;
+                case SyncType.DeleteTarget:
+                    if (File.Exists(sync.TargetPath))
+                    {
+                        Console.WriteLine($@"Delete: [{sync.TargetPath}]");
+                        File.Delete(sync.TargetPath);
+                    }
+                    //else
+                        //{
+                        //    Console.WriteLine($@"Delete (already deleted): [{sync.TargetPath}]");
+                        //}
+                    break;
+                case SyncType.Unknown:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void SynchronizeDirectory(Sync sync)
+        {
+            switch (sync.SyncType)
+            {
+                case SyncType.SourceToTarget:
+                    if (Directory.Exists(sync.TargetPath))
+                    {
+                        //Console.WriteLine($@"Target Directory (already exists): [{sync.TargetPath}]");
+                    }
+                    else
+                    {
+                        Console.WriteLine($@"Create Target Directory: [{sync.TargetPath}]");
+                        Directory.CreateDirectory(sync.TargetPath);
+                    }
+
+                    break;
+                case SyncType.TargetToSource:
+                    if (Directory.Exists(sync.SourcePath))
+                    {
+                        //Console.WriteLine($@"Source Directory (already exists): [{sync.SourcePath}]");
+                    }
+                    else
+                    {
+                        Console.WriteLine($@"Create Source Directory: [{sync.SourcePath}]");
+                        Directory.CreateDirectory(sync.SourcePath);
+                    }
+
+                    break;
+                case SyncType.DeleteTarget:
+                    if (Directory.Exists(sync.TargetPath))
+                    {
+                        Console.WriteLine($@"Delete: [{sync.TargetPath}]");
+                        Directory.Delete(sync.TargetPath, recursive: true);
+                    }
+                    //else
+                    //{
+                    //    Console.WriteLine($@"Delete (already deleted): [{sync.TargetPath}]");
+                    //}
+
+                    break;
+                case SyncType.Unknown:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private static void AddDeleteToSyncList(string outputBasePath, List<Sync> syncList)
