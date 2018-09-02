@@ -24,6 +24,7 @@ namespace AmigaOsBuilder
             { @"__utils__",              @"System\A-Utils" },
             { @"__guides__",             @"System\A-Guides" },
             { @"__system__",             @"System\A-System" },
+            { @"__prefs__",              @"System\Prefs" },
         };
         // @formatter:on
 
@@ -49,6 +50,33 @@ namespace AmigaOsBuilder
                         Path = "Startup-Sequence",
                         Category = "KrustWB",
                         Description = "KrustWB startup-sequence and user-startup files",
+                        Url = ""
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Name = "Backdrop",
+                        Path = "Backdrop",
+                        Category = "KrustWB",
+                        Description = "KrustWB .backdrop file. OS setting file that keeps track of \"Leave Out\".",
+                        Url = ""
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Name = "Env-Archive",
+                        Path = "Env-Archive",
+                        Category = "KrustWB",
+                        Description = "KrustWB system settings files kept in Prefs/Env-Archive",
+                        Url = ""
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Name = "Monitors",
+                        Path = "Monitors",
+                        Category = "KrustWB",
+                        Description = "KrustWB monitors Devs/Monitors",
                         Url = ""
                     },
                     new Package
