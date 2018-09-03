@@ -13,6 +13,13 @@ namespace AmigaOsBuilder
 
     class Program
     {
+        public enum SyncMode
+        {
+            Unknown = 0,
+            Forward,
+            Reverse,
+            Synchronize
+        }
         // @formatter:off
         private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string>
         {
@@ -34,6 +41,7 @@ namespace AmigaOsBuilder
             Packages =
                 new List<Package>
                 {
+                    #region OS
                     new Package
                     {
                         Include = true,
@@ -43,6 +51,8 @@ namespace AmigaOsBuilder
                         Description = "Workbench 3.1 operation system (clean Install)",
                         Url = ""
                     },
+                    #endregion
+                    #region KrustWB
                     new Package
                     {
                         Include = true,
@@ -88,6 +98,8 @@ namespace AmigaOsBuilder
                         Description = "A-Directories including icons",
                         Url = ""
                     },
+                    #endregion
+                    #region System
                     new Package
                     {
                         Include = true,
@@ -97,6 +109,8 @@ namespace AmigaOsBuilder
                         Description = "SetPatch 43.6b",
                         Url = "http://m68k.aminet.net/package/util/boot/SetPatch_43.6b"
                     },
+                    #endregion
+                    #region Util
                     new Package
                     {
                         Include = true,
@@ -115,6 +129,7 @@ namespace AmigaOsBuilder
                         Description = "KingCON 1.3",
                         Url = "http://aminet.net/package/util/shell/KingCON_1.3"
                     },
+                    #endregion
                 }
         };
         // @formatter:on
@@ -130,20 +145,20 @@ namespace AmigaOsBuilder
             var sourceBasePath = configuration["SourceBasePath"];
             var outputBasePath = configuration["OutputBasePath"];
             var configFile = configuration["ConfigFile"];
-            var reverse = Boolean.Parse(configuration["Reverse"]);
+            var syncMode = Enum.Parse<SyncMode>(configuration["SyncMode"]);
 
-            BuildIt(location, sourceBasePath, outputBasePath, configFile, reverse);
+            BuildIt(location, sourceBasePath, outputBasePath, configFile, syncMode);
             //Console.WriteLine("Press any key!");
             //Console.ReadKey();
         }
 
-        private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName, bool reverse)
+        private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName, SyncMode syncMode)
         {
             var config = GetConfig(location, configFileName);
 
             CreateOutputAliasDirectories(outputBasePath);
 
-            var syncList = BuildSyncList(sourceBasePath, outputBasePath, reverse, config);
+            var syncList = BuildSyncList(sourceBasePath, outputBasePath, syncMode, config);
 
             Synchronize(syncList);
         }
@@ -163,23 +178,32 @@ namespace AmigaOsBuilder
             Console.WriteLine();
         }
 
-        private static List<Sync> BuildSyncList(string sourceBasePath, string outputBasePath, bool reverse, Config config)
+        private static List<Sync> BuildSyncList(string sourceBasePath, string outputBasePath, SyncMode syncMode, Config config)
         {
             Console.WriteLine();
             Console.WriteLine("Building sync list ...");
-            Console.WriteLine($"Reverse [{reverse}]");
+            Console.WriteLine($"SyncMode  [{syncMode}]");
 
             var syncList = new List<Sync>();
 
-            if (reverse == false)
+            switch (syncMode)
             {
-                AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
-                AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.SourceToTarget, syncList);
-                AddDeleteToSyncList(outputBasePath, syncList);
-            }
-            else
-            {
-                AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
+                case SyncMode.Forward:
+                {
+                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
+                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.SourceToTarget, syncList);
+                    AddDeleteToSyncList(outputBasePath, syncList);
+                    break;
+                }
+                case SyncMode.Reverse:
+                {
+                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
+                    break;
+                }
+                case SyncMode.Synchronize:
+                {
+                    break;
+                }
             }
 
 
