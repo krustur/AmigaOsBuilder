@@ -143,6 +143,28 @@ namespace AmigaOsBuilder
 
             CreateOutputAliasDirectories(outputBasePath);
 
+            var syncList = BuildSyncList(sourceBasePath, outputBasePath, reverse, config);
+
+            Synchronize(syncList);
+        }
+
+        private static void CreateOutputAliasDirectories(string outputBasePath)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Creating output alias directories ...");
+            foreach (var map in AliasToOutputMap)
+            {
+                var outputAliasPath = Path.Combine(outputBasePath, map.Value);
+                Console.WriteLine($@"[{map.Key}] = [{outputAliasPath}]");
+                Directory.CreateDirectory(outputAliasPath);
+            }
+
+            Console.WriteLine("Create output alias directories done!");
+            Console.WriteLine();
+        }
+
+        private static List<Sync> BuildSyncList(string sourceBasePath, string outputBasePath, bool reverse, Config config)
+        {
             Console.WriteLine();
             Console.WriteLine("Building sync list ...");
             Console.WriteLine($"Reverse [{reverse}]");
@@ -163,8 +185,109 @@ namespace AmigaOsBuilder
 
             Console.WriteLine("Building sync list done!");
             Console.WriteLine();
+            return syncList;
+        }
 
-            Synchronize(syncList);
+        private static void AddContentToSyncList(string sourceBasePath, string outputBasePath, Config config,
+            string contentFolderName, SyncType syncType, List<Sync> syncList)
+        {
+            foreach (var package in config.Packages)
+            {
+                if (package.Include == false)
+                {
+                    continue;
+                }
+
+                var packageBasePath = Path.Combine(sourceBasePath, package.Path, contentFolderName);
+                if (Directory.Exists(packageBasePath) == false)
+                {
+                    continue;
+                }
+
+                var packageTargets = Directory.GetDirectories(packageBasePath);
+                foreach (var sourcePath in packageTargets)
+                {
+                    //var sourcePath = packageTarget.FullName;
+                    var dirInfo = new DirectoryInfo(sourcePath);
+                    var targetAlias = dirInfo.Name;
+
+                    //#Write-Output -Verbose $sourcePath
+                    //#Write-Output -Verbose $targetAlias
+                    var packageOutputPath = TargetAliasToOutputPath(targetAlias);
+                    packageOutputPath = Path.Combine(outputBasePath, packageOutputPath);
+                    //#Write-Output -Verbose $outputPath
+                    //#Write-Output -Verbose "$sourcePath => $outputPath"
+
+                    var packageEntries = Directory.GetFileSystemEntries(sourcePath, "*", SearchOption.AllDirectories);
+                    foreach (var packageEntry in packageEntries)
+                    {
+                        var packageEntryFileName = Path.GetFileName(packageEntry);
+                        if (ShouldContentReverseAll(packageEntryFileName))
+                        {
+                            var contentReversePackageEntryPath = Path.GetDirectoryName(packageEntry);
+                            var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
+                            var contentReverseFileOutputPath = Path.Combine(packageOutputPath, contentReversePackageSubPath);
+                            var innerContentReversePackageEntries = Directory.GetFileSystemEntries(contentReverseFileOutputPath, "*", SearchOption.AllDirectories);
+                            foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
+                            {
+                                var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
+                                var innerContentReverseSourcePath = Path.Combine(sourcePath, innerContentReversePackageSubPath);
+
+                                var innerSync = new Sync
+                                {
+                                    SourcePath = innerContentReverseSourcePath,
+                                    TargetPath = innerContentReversePackageEntry,
+                                    SyncType = syncType,
+                                    FileType = GetFileType(syncType, innerContentReversePackageEntry)
+                                };
+
+                                syncList.Add(innerSync);
+                            }
+                        }
+
+                        var packageSubPath = RemoveRoot(sourcePath, packageEntry);
+                        var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
+                        //Console.WriteLine($"{packageEntry} => {fileOutputPath}");
+                        var sync = new Sync
+                        {
+                            SourcePath = packageEntry,
+                            TargetPath = fileOutputPath,
+                            SyncType = syncType,
+                            FileType = GetFileType(syncType, packageEntry)
+                        };
+
+                        syncList.Add(sync);
+                    }
+                }
+            }
+        }
+
+        private static bool ShouldContentReverseAll(string packageEntryFileName)
+        {
+            if (packageEntryFileName.ToLowerInvariant() == "content_reverse_all")
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void AddDeleteToSyncList(string outputBasePath, List<Sync> syncList)
+        {
+            var outputEntries = Directory.GetFileSystemEntries(outputBasePath, "*", SearchOption.AllDirectories);
+            foreach (var outputEntry in outputEntries)
+            {
+                //if (syncList.Any(x => outputEntry.ToLowerInvariant() == x.TargetPath.ToLowerInvariant()) == false)
+                if (syncList.Any(x => x.TargetPath.ToLowerInvariant().StartsWith(outputEntry.ToLowerInvariant())) == false)
+                {
+                    syncList.Add(new Sync
+                    {
+                        SyncType = SyncType.DeleteTarget,
+                        FileType = GetFileType(SyncType.DeleteTarget, outputEntry),
+                        TargetPath = outputEntry
+                    });
+                }
+            }
         }
 
         private static void Synchronize(List<Sync> syncList)
@@ -180,6 +303,9 @@ namespace AmigaOsBuilder
                         break;
                     case FileType.Directory:
                         SynchronizeDirectory(sync);
+                        break;
+                    case FileType.DirectoryRecursive:
+                        SynchronizeDirectoryRecursive(sync);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -273,96 +399,36 @@ namespace AmigaOsBuilder
             }
         }
 
-        private static void AddDeleteToSyncList(string outputBasePath, List<Sync> syncList)
+        private static void SynchronizeDirectoryRecursive(Sync sync)
         {
-            var outputEntries = Directory.GetFileSystemEntries(outputBasePath, "*", SearchOption.AllDirectories);
-            foreach (var outputEntry in outputEntries)
+            switch (sync.SyncType)
             {
-                //if (syncList.Any(x => outputEntry.ToLowerInvariant() == x.TargetPath.ToLowerInvariant()) == false)
-                if (syncList.Any(x => x.TargetPath.ToLowerInvariant().StartsWith(outputEntry.ToLowerInvariant())) == false)
-                {
-                    syncList.Add(new Sync
-                    {
-                        SyncType = SyncType.DeleteTarget,
-                        FileType = GetFileType(outputEntry),
-                        TargetPath = outputEntry
-                    });
-                }
+                   
+                case SyncType.TargetToSource:
+                    var recurseEntries = Directory.GetFileSystemEntries(sync.TargetPath, "*", SearchOption.AllDirectories);
+                    //if (Directory.Exists(sync.SourcePath))
+                    //{
+                    //    //Console.WriteLine($@"Source Directory (already exists): [{sync.SourcePath}]");
+                    //}
+                    //else
+                    //{
+                    //    Console.WriteLine($@"Create Source Directory: [{sync.SourcePath}]");
+                    //    Directory.CreateDirectory(sync.SourcePath);
+                    //}
+
+                    break;
+                case SyncType.SourceToTarget:
+                case SyncType.DeleteTarget:
+                case SyncType.Unknown:
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
-        private static void CreateOutputAliasDirectories(string outputBasePath)
-        {
-            Console.WriteLine();
-            Console.WriteLine("Creating output alias directories ...");
-            foreach (var map in AliasToOutputMap)
-            {
-                var outputAliasPath = Path.Combine(outputBasePath, map.Value);
-                Console.WriteLine($@"[{map.Key}] = [{outputAliasPath}]");
-                Directory.CreateDirectory(outputAliasPath);
-            }
-
-            Console.WriteLine("Create output alias directories done!");
-            Console.WriteLine();
-        }
-
-        private static void AddContentToSyncList(string sourceBasePath, string outputBasePath, Config config,
-            string contentFolderName, SyncType syncType, List<Sync> syncList)
-        {
-            foreach (var package in config.Packages)
-            {
-                if (package.Include == false)
-                {
-                    continue;
-                }
-
-                var packageBasePath = Path.Combine(sourceBasePath, package.Path, contentFolderName);
-                if (Directory.Exists(packageBasePath) == false)
-                {
-                    continue;
-                }
-
-                var packageTargets = Directory.GetDirectories(packageBasePath);
-                foreach (var sourcePath in packageTargets)
-                {
-                    //var sourcePath = packageTarget.FullName;
-                    var dirInfo = new DirectoryInfo(sourcePath);
-                    var targetAlias = dirInfo.Name;
-
-                    //#Write-Output -Verbose $sourcePath
-                    //#Write-Output -Verbose $targetAlias
-                    var packageOutputPath = TargetAliasToOutputPath(targetAlias);
-                    packageOutputPath = Path.Combine(outputBasePath, packageOutputPath);
-                    //#Write-Output -Verbose $outputPath
-                    //#Write-Output -Verbose "$sourcePath => $outputPath"
-
-                    var packageEntries = Directory.GetFileSystemEntries(sourcePath, "*", SearchOption.AllDirectories);
-                    foreach (var packageEntry in packageEntries)
-                    {
-                        //var filePath = Path.Combine(sourcePath, packageFileSystemEntry);
-                        var packageSubPath = RemoveRoot(sourcePath, packageEntry);
-                        var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
-                        //Console.WriteLine($"{packageEntry} => {fileOutputPath}");
-                        var sync = new Sync
-                        {
-                            SourcePath = packageEntry,
-                            TargetPath = fileOutputPath,
-                            SyncType = syncType,
-                            FileType = GetFileType(packageEntry)
-                        };
-                        
-                        syncList.Add(sync);
-                    }
-                }
-            }
-        }
-
-        private static FileType GetFileType(string packageEntry)
+        private static FileType GetFileType(SyncType syncType, string packageEntry)
         {
             var packageEntryFileInfo = new FileInfo(packageEntry);
-            var fileType = (packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory
-                ? FileType.Directory
-                : FileType.File;
+            var fileType = (packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory ? FileType.Directory : FileType.File;
 
             return fileType;
         }
@@ -462,8 +528,9 @@ namespace AmigaOsBuilder
     public enum FileType
     {
         Unknown = 0,
+        File,
         Directory,
-        File
+        DirectoryRecursive
     }
 
     public class Config
