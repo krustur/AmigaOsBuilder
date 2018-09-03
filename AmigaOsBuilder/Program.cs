@@ -160,7 +160,14 @@ namespace AmigaOsBuilder
 
             var syncList = BuildSyncList(sourceBasePath, outputBasePath, syncMode, config);
 
-            Synchronize(syncList);
+            if (syncMode != SyncMode.Synchronize)
+            {
+                Synchronize(syncList);
+            }
+            else
+            {
+                SynchronizeV2(syncList);
+            }
         }
 
         private static void CreateOutputAliasDirectories(string outputBasePath)
@@ -202,13 +209,17 @@ namespace AmigaOsBuilder
                 }
                 case SyncMode.Synchronize:
                 {
+                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
+                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.SourceToTarget, syncList);
+                    AddDeleteToSyncList(outputBasePath, syncList);
+                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
                     break;
                 }
             }
 
-
             Console.WriteLine("Building sync list done!");
             Console.WriteLine();
+
             return syncList;
         }
 
@@ -314,10 +325,84 @@ namespace AmigaOsBuilder
             }
         }
 
-        private static void Synchronize(List<Sync> syncList)
+        private static void SynchronizeV2(IList<Sync> syncList)
         {
             Console.WriteLine();
             Console.WriteLine("Synchronizing ...");
+
+            /*
+            var distinctSyncList = syncList
+                .GroupBy(x => new {x.FileType, x.SyncType, x.TargetPath, x.SourcePath})
+                .Select(x => x.First())
+                .ToList();
+            //var xxx = from s in distinctSyncList
+            //          group s by s.TargetPath into sg
+            //    select new
+            //    {
+            //        TargetPath = sg.Key,
+            //        Count = sg.Count(),
+            //    };
+            //var yyy = distinctSyncList
+            //    .GroupBy(x => x.TargetPath)
+            //    .Select(x => x.First())
+            //    .ToList();
+            var zzz = distinctSyncList
+                .GroupBy(c => c.TargetPath)
+                .Where(grp => grp.Count() > 1)
+                .Select(grp => grp.Key)
+                .ToList();
+            var cnt = 0;
+            foreach (var z in zzz)
+            {
+
+                //var one = zzz[1];
+                var xxx = distinctSyncList
+                    .Where(x => x.TargetPath == z)
+                    .ToList();
+                cnt += xxx.Count;
+            }
+            */
+            var targetPaths = syncList
+                .Select(x => x.TargetPath)
+                .Distinct()
+                .ToList();
+
+            // Source Paths check if pure paranoia! Shouldn't be needed.
+            var sourcePaths = syncList
+                .Select(x => x.SourcePath)
+                .Distinct()
+                .ToList();
+
+            foreach (var targetPath in targetPaths)
+            {
+                var syncListForTarget = syncList
+                    .Where(x => x.TargetPath == targetPath)
+                    .ToList();
+                if (syncListForTarget.Count(x => x.FileType == FileType.Directory) > 0 &&
+                    syncListForTarget.Count(x => x.FileType == FileType.File) > 0)
+                {
+                    throw new Exception("syncListForTarget contains both FileType.Directory and FileType.File!");
+                }
+
+                var fileType = syncListForTarget.First().FileType;
+
+                var syncListForTargetSourcePaths = syncListForTarget
+                    .Select(x => x.SourcePath)
+                    .ToList();
+                sourcePaths.RemoveAll(x => syncListForTargetSourcePaths.Contains(x));
+
+
+            }
+
+            // Source Paths check if pure paranoia! Shouldn't be needed.
+            if (sourcePaths.Count > 0)
+            {
+                throw new Exception("SourcePaths was not synchronized!!");
+            }
+        }
+
+        private static void Synchronize(IList<Sync> syncList)
+        { 
             foreach (var sync in syncList)
             {
                 switch (sync.FileType)
