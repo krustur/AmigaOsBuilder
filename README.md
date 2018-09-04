@@ -7,20 +7,21 @@ Built as a .NET Core Command Line tool, so it should work on Apple and Linux.
 
 Currently most stuff is configured by code, but should be moved to external json files. I might build some ui to make the json files easier to manage in the future.
 
-*Note: Coding skills required!*
+*Note: Coding- and Amiga OS- skills required!*
 
 ## Why ??
-If you follow the steps in 'How to use it' below, you'll end up with a simple 'MyAmigaOs' that consists of 3 'packages':
+If you follow the steps in 'How to use it' below, you'll end up with a simple 'MyAmigaOs' that consists of 4 'packages':
 1. Workbench 3.1 (clean install)
-2. Lha 2.15
-3. Backdrop-Settings
+1. Lha 2.15
+1. Backdrop-Settings
+1. Env-Archive
 
 Imagine when you have alot more packages, and you want to remove one of them. With this tool it'll be as easy as change a boolean from true to false. If the packages ain't separated it'll be a nightmare to remove them, especially if they've spread their files all over your hard drives.
 
-_*Warning: When you run the tool all files that aren't part of your package will be deleted! This tool is only supposed to build your 'System'-drive - keep your work files somewhere else! :)*_
+_*Warning: When you run the tool all files that aren't part of your package will be deleted! This tool is supposed to build your 'System'-drive only - keep your work files somewhere else! :)*_
 
 ## How to use it
-This is a quick example of how to compose a basic Workbench 3.1 with one extra package (I'll use Lha) and some reverse content (explained below).
+This is a quick example of how to compose a basic Workbench 3.1 with one extra Util package (Lha) and some reverse content package for Workbench Env-Archive and .backdrop file.
 
 ### Preparation
 1. Make some work folder (e.g. C:\MyAmigaOs)
@@ -86,10 +87,21 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
 1. The log will tell you that the Lha executable is copied to your MyAmigaOs's C-folder!
 1. Ensure that it work by opening a Shell in your Workbench and run lha
 
-### Reverse content
+### Let's add Backdrop-Settings
+1. The tool can also handle 'reverse content' wich means that files changed inside your OS (emulator) will be synced back to your package. This is used for system- and program settings.
+1. Make a sub folder in Source, named 'Backdrop-Settings'
+1. Make a sub folder to this called 'content_reverse'
+    -The reverse part indicates that the content will Sync both ways
+1. Make a sub folder to this called '\_\_systemdrive\_\_'
+1. In your workbench, create a '.backdrop' file by selecting 'Leave out' for Shell
+1. Copy the '.backdrop' file from the 'Output\System' folder to the newly created '\_\_systemdrive\_\_' folder
+1. Everything is already up to date (because you copied the correct file already)
+1. But, as you've created this 'reverse content' package now, whenever you select 'Leave out' for more applications of folders, you can simple run the tool to sync those settings 'back' to MyAmigaOs.
 
-
-
-
-### todo in readme
-
+### And Env-Archive
+1. Make a sub folder in Source, named 'Env-Archive'
+1. Make a sub folder to this called 'content_reverse'
+1. Make a sub folder to this called '\_\_prefs\_\_'
+1. Make a sub folder to this called 'Env-Archive'
+1. Inside this folder, create an empty file called 'content_reverse_all' without extensions
+1. Now when you run the tool, all files from 'Prefs\\Env-Archive' will be synced back to MyAmigaOs. Try it out by changing some system settings like Screen Resoultion or Input keyboard language.
