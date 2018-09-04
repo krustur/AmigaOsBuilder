@@ -22,9 +22,9 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
 
 ### Vanilla Workbench 3.1
 1. Make a sub folder in Source, named 'Workbench\_3.1'
-1. Make one more sub folder in this called content
-1. Make one more sub folder in this called \_\_systemdrive\_\_
-1. You should probably have a folder with the full path 'C:\MyAmigaOs\Source\Workbench_3.1\content\\_\_systemdrive\_\_'
+1. Make one more sub folder in this called 'content''
+1. Make one more sub folder in this called '\_\_systemdrive\_\_'
+1. You should have a folder with the full path 'C:\MyAmigaOs\Source\Workbench\_3.1\content\\_\_systemdrive\_\_'
 1. Make a clean install of Workbench 3.1 somewhere, and copy the contents of this folder into the folder above
     -You have now created a simple base package for Workbench 3.1
 
@@ -48,8 +48,26 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
 1. This will cause all of the files from the 'C:\MyAmigaOs\Source\Workbench_3.1\content\\_\_systemdrive\_\_'  folder to be copied into the 'C:\MyAmigaOs\Output\System' folder
     -Note that the \_\_systemdrive\_\_ has been changed to System. There's a bunch of aliases that you can use that will map to specific output folders. For the full list, check out `private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string> { ... }` in the code.
 
-### Output folder aliases
-
+### Let's add Lha
+1. Make a sub folder in Source, named 'Lha\_2.15'
+1. Download 'lha_68k.lha' from http://aminet.net/package/util/arc/lha_68k
+1. Place it your 'Lha\_2.15' folder and unpack the archive into an folder called 'unarchived'
+    -This is not necessary, but I think it's good practice to keep the downloaded archive and all of the unarchived files within the Source package folder
+1. Make one more sub folder in your 'Lha\_2.15' folder called 'content'
+1. Make one more sub folder in this called \_\_c\_\_
+1. You should have a folder with the full path 'C:\MyAmigaOs\Source\Lha\_3.1\content\\_\_c\_\_'
+1. Copy the desired lha executable from your 'unarchived' folder into the newly created '\_\_c\_\_' folder. Rename the file to 'lha'
+1. Add a Lha package to the code, like this
+    ```csharp
+    new Package
+    {
+        Include = true,
+        Path = "Lha\_2.15",
+        Category = "Util",
+        Description = "Lha command line (un)archiving",
+		Url = "http://aminet.net/package/util/arc/lha_68k",
+    },
+    ```
 
 ### First test
 1. To test this, configure an Amiga emulator to use the Outpu\System folder as a hard drive
