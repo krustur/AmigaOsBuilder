@@ -43,6 +43,7 @@ new Package
     Description = "Workbench 3.1 operation system (clean Install)",
 },
 ```
+1. To ensure you're ony receiving useful logging, ensure that `.MinimumLevel.Debug()` when initializing Serilog is commented out/removed
 1. Run this code (in Visual Studio or from command line)
 
 
