@@ -3,7 +3,7 @@
 ## About
 Used by myself to compose my version of Amiga OS.
 
-Built as a .NET Core Command Line tool, so it might work on Apple and Linux.
+Built as a .NET Core Command Line tool, so it should work on Apple and Linux.
 
 Currently most stuff is configured by code, but should be moved to external json files. I might build some ui to make the json files easier to manage in the future.
 
@@ -11,13 +11,13 @@ Currently most stuff is configured by code, but should be moved to external json
 
 ## Why ??
 If you follow the steps in 'How to use it' below, you'll end up with a simple 'MyAmigaOs' that consists of 3 'packages':
-1. Workbench 3.1
+1. Workbench 3.1 (clean install)
 2. Lha 2.15
 3. Backdrop-Settings
 
 Imagine when you have alot more packages, and you want to remove one of them. With this tool it'll be as easy as change a boolean from true to false. If the packages ain't separated it'll be a nightmare to remove them, especially if they've spread their files all over your hard drives.
 
-_*Warning: When you run the tool all files that aren't part of your package will be deleted! This tool is only supposed to build your System-drive - keep your work somewhere else!*_
+_*Warning: When you run the tool all files that aren't part of your package will be deleted! This tool is only supposed to build your 'System'-drive - keep your work files somewhere else! :)*_
 
 ## How to use it
 This is a quick example of how to compose a basic Workbench 3.1 with one extra package (I'll use Lha) and some reverse content (explained below).
