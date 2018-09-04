@@ -11,7 +11,7 @@ Currently most stuff is configured by code, but should be moved to external json
 1. Make some work folder (e.g. C:\MyAmigaOs)
 2. Make two sub folders: Source and Output
 3. For easy testing, configure an Amiga emulator to use the Output folder as a hard drive
-  - If you start your emulator now it should say something like "No disk present in device DH0"
+    - If you start your emulator now it should say something like "No disk present in device DH0"
 4. Change application settings to match your created folders.
   - Location and ConfigName is not in use
 5. 
