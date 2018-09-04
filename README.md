@@ -38,15 +38,15 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
     new Package
     {
         Include = true,
-        Path = "Workbench_3.1",
+        Path = "Workbench\_3.1",
         Category = "OS",
         Description = "Workbench 3.1 operation system (clean Install)",
     },
     ```
 1. To ensure you're ony receiving useful logging, ensure that `.MinimumLevel.Debug()` when initializing Serilog is commented out/removed
 1. Run this code (in Visual Studio or from command line)
-1. This will cause all of the files from the 'C:\MyAmigaOs\Source\Workbench_3.1\content\__systemdrive__'  folder to be copied into the 'C:\MyAmigaOs\Output\System' folder
-    -Note that the __systemdrive__ has been changed to System. There's a bunch of aliases that you can use that will map to specific output folders. For the full list, check out `private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string> { ... }` in the code.
+1. This will cause all of the files from the 'C:\MyAmigaOs\Source\Workbench_3.1\content\\_\_systemdrive\_\_'  folder to be copied into the 'C:\MyAmigaOs\Output\System' folder
+    -Note that the \_\_systemdrive\_\_ has been changed to System. There's a bunch of aliases that you can use that will map to specific output folders. For the full list, check out `private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string> { ... }` in the code.
 
 ### Output folder aliases
 
