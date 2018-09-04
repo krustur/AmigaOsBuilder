@@ -25,15 +25,22 @@ namespace AmigaOsBuilder
         // @formatter:off
         private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string>
         {
+            // System drive
             { @"__systemdrive__",        @"System" },
+
+            // Amiga OS folders
             { @"__c__",                  @"System\C" },
-            { @"__s__",                  @"System\S" },
-            { @"__l__",                  @"System\L" },
             { @"__devs__",               @"System\Devs" },
+            { @"__l__",                  @"System\L" },
+            { @"__libs__",               @"System\Libs" },
             { @"__prefs__",              @"System\Prefs" },
-            { @"__autils__",              @"System\A-Utils" },
-            { @"__aguides__",             @"System\A-Guides" },
-            { @"__asystem__",             @"System\A-System" },
+            { @"__s__",                  @"System\S" },
+            { @"__system__",             @"System\System" },
+
+            // KrustWB folders
+            { @"__autils__",             @"System\A-Utils" },
+            { @"__aguides__",            @"System\A-Guides" },
+            { @"__asystem__",            @"System\A-System" },
         };
         // @formatter:on
 
@@ -47,7 +54,6 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        //Name = "Workbench 3.1 (Clean Install)",
                         Path = "Workbench (clean install)_3.1",
                         Category = "OS",
                         Description = "Workbench 3.1 operation system (clean Install)",
@@ -105,7 +111,6 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        //Name = "SetPatch 43.6b",
                         Path = "SetPatch_43.6b",
                         Category = "System",
                         Description = "Makes ROM patches in system software",
@@ -114,18 +119,32 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        //Name = "SetPatch 43.6b",
                         Path = "NoClick_1.1",
                         Category = "System",
                         Description = "Disables the clicking of the floppy drives.",
                         Url = "http://aminet.net/package/disk/misc/NoClick"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Installer_44.10",
+                        Category = "System",
+                        Description = "Installer software",
+                        //Url = ""
+                    },
+                    new Package
+                    {
+                        Include = false,
+                        Path = "InstallerNG_1.5 pre",
+                        Category = "System",
+                        Description = "Installer software",
+                        Url = "http://aminet.net/package/util/sys/InstallerNG"
                     },
                     #endregion
                     #region A-Util
                     new Package
                     {
                         Include = true,
-                        //Name = "Lha 2.15",
                         Path = "Lha_2.15",
                         Category = "Util",
                         Description = "Lha command line (un)archiving",
@@ -134,7 +153,6 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        //Name = "KingCON 1.3",
                         Path = "KingCON_1.3",
                         Category = "Util",
                         Description = @"A console-handler that optionally replaces the standard console devices. Adds some useful features, such as Filename-completion",
@@ -194,6 +212,7 @@ namespace AmigaOsBuilder
         private static void CreateOutputAliasDirectories(string outputBasePath)
         {
             _logger.Information("Creating output alias directories ...");
+            Directory.CreateDirectory(outputBasePath);
             foreach (var map in AliasToOutputMap)
             {
                 var outputAliasPath = Path.Combine(outputBasePath, map.Value);
@@ -279,36 +298,41 @@ namespace AmigaOsBuilder
                             var contentReversePackageEntryPath = Path.GetDirectoryName(packageEntry);
                             var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
                             var contentReverseFileOutputPath = Path.Combine(packageOutputPath, contentReversePackageSubPath);
-                            var innerContentReversePackageEntries = Directory.GetFileSystemEntries(contentReverseFileOutputPath, "*", SearchOption.AllDirectories);
-                            foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
+                            if (Directory.Exists(contentReverseFileOutputPath))
                             {
-                                var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
-                                var innerContentReverseSourcePath = Path.Combine(sourcePath, innerContentReversePackageSubPath);
-
-                                var innerSync = new Sync
+                                var innerContentReversePackageEntries = Directory.GetFileSystemEntries(contentReverseFileOutputPath, "*", SearchOption.AllDirectories);
+                                foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
                                 {
-                                    SourcePath = innerContentReverseSourcePath,
-                                    TargetPath = innerContentReversePackageEntry,
-                                    SyncType = syncType,
-                                    FileType = GetFileType(syncType, innerContentReversePackageEntry)
-                                };
+                                    var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
+                                    var innerContentReverseSourcePath = Path.Combine(sourcePath, innerContentReversePackageSubPath);
 
-                                syncList.Add(innerSync);
+                                    var innerSync = new Sync
+                                    {
+                                        SourcePath = innerContentReverseSourcePath,
+                                        TargetPath = innerContentReversePackageEntry,
+                                        SyncType = syncType,
+                                        FileType = GetFileType(syncType, innerContentReversePackageEntry)
+                                    };
+
+                                    syncList.Add(innerSync);
+                                }
                             }
                         }
-
-                        var packageSubPath = RemoveRoot(sourcePath, packageEntry);
-                        var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
-                        //_logger.Information($"{packageEntry} => {fileOutputPath}");
-                        var sync = new Sync
+                        else
                         {
-                            SourcePath = packageEntry,
-                            TargetPath = fileOutputPath,
-                            SyncType = syncType,
-                            FileType = GetFileType(syncType, packageEntry)
-                        };
+                            var packageSubPath = RemoveRoot(sourcePath, packageEntry);
+                            var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
+                            //_logger.Information($"{packageEntry} => {fileOutputPath}");
+                            var sync = new Sync
+                            {
+                                SourcePath = packageEntry,
+                                TargetPath = fileOutputPath,
+                                SyncType = syncType,
+                                FileType = GetFileType(syncType, packageEntry)
+                            };
 
-                        syncList.Add(sync);
+                            syncList.Add(sync);
+                        }
                     }
                 }
             }
@@ -456,32 +480,39 @@ namespace AmigaOsBuilder
                 }
                 case SyncType.TargetToSource:
                 {
-                    if (File.Exists(sync.TargetPath))
+                    var fileDiff = GetFileDiff(sync);
                     {
-                        var fileDiff = GetFileDiff(sync);
-                        if (fileDiff == FileDiff.Equal)
+                        switch (fileDiff)
                         {
-                            _logger.Debug(@"Copy Target to Source (files are equal!): [{SourcePath}] <= [{TargetPath}]", sync.SourcePath, sync.TargetPath);
-                        }
-                        else
-                        {
-                            if (fileDiff == FileDiff.DiffSourceMissing || fileDiff == FileDiff.DiffTargetNewer)
+                            case FileDiff.Equal:
+                            {
+                                _logger.Debug(@"Copy Target to Source (files are equal!): [{SourcePath}] <= [{TargetPath}]", sync.SourcePath, sync.TargetPath);
+                                break;
+                            }
+                            case FileDiff.DiffSourceMissing:
+                            case FileDiff.DiffTargetNewer:
                             {
                                 _logger.Information(@"Copy Target to Source: [{SourcePath}] <= [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                                File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
+                                break;
                             }
-                            else
+                            case FileDiff.DiffTargetMissing:
+                            {
+                                _logger.Information(@"Copy Target to Source (invserse): [{SourcePath}] <= [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                                File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
+                                break;
+                            }
+                            case FileDiff.DiffContent:
+                            case FileDiff.DiffSourceNewer:
+                            default:
                             {
                                 _logger.Warning(@"Copy Target to Source: [{SourcePath}] <= [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                                File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
+                                break;
                             }
-
-                            File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
                         }
-                    }
-                    else
-                    {
-                        _logger.Debug(@"Copy Target to Source (target is missing!): [{SourcePath}] <= [{TargetPath}]", sync.SourcePath, sync.TargetPath);
-                    }
 
+                    }
                     break;
                 }
                 case SyncType.DeleteTarget:
@@ -561,6 +592,12 @@ namespace AmigaOsBuilder
                     {
                         _logger.Information(@"Create Source Directory: [{SourcePath}]", sync.SourcePath);
                         Directory.CreateDirectory(sync.SourcePath);
+                    }
+
+                    if (Directory.Exists(sync.TargetPath) == false)
+                    { 
+                        _logger.Information(@"Create Target Directory: [{TargetPath}]", sync.TargetPath);
+                        Directory.CreateDirectory(sync.TargetPath);
                     }
 
                     break;
