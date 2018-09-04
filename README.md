@@ -3,11 +3,21 @@
 ## About
 Used by myself to compose my version of Amiga OS.
 
-Built using as a .NET Core Command Line tool, so it might work on Apple and Linux.
+Built as a .NET Core Command Line tool, so it might work on Apple and Linux.
 
 Currently most stuff is configured by code, but should be moved to external json files. I might build some ui to make the json files easier to manage in the future.
 
-*Coding skills required!*
+*Note: Coding skills required!*
+
+## Why ??
+If you follow the steps in 'How to use it' below, you'll end up with a simple 'MyAmigaOs' that consists of 3 'packages':
+1. Workbench 3.1
+2. Lha 2.15
+3. Backdrop-Settings
+
+Imagine when you have alot more packages, and you want to remove one of them. With this tool it'll be as easy as change a boolean from true to false. If the packages ain't separated it'll be a nightmare to remove them, especially if they've spread their files all over your hard drives.
+
+_*Warning: When you run the tool all files that aren't part of your package will be deleted! This tool is only supposed to build your System-drive - keep your work somewhere else!*_
 
 ## How to use it
 This is a quick example of how to compose a basic Workbench 3.1 with one extra package (I'll use Lha) and some reverse content (explained below).
@@ -48,6 +58,10 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
 1. This will cause all of the files from the 'C:\MyAmigaOs\Source\Workbench_3.1\content\\_\_systemdrive\_\_'  folder to be copied into the 'C:\MyAmigaOs\Output\System' folder
     -Note that the \_\_systemdrive\_\_ has been changed to System. There's a bunch of aliases that you can use that will map to specific output folders. For the full list, check out `private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string> { ... }` in the code.
 
+### First test
+1. To test this, configure an Amiga emulator to use the Output\\System folder as a hard drive
+1. When you start your emulator it should load your vanilla install of Workbench 3.1
+
 ### Let's add Lha
 1. Make a sub folder in Source, named 'Lha\_2.15'
 1. Download 'lha_68k.lha' from http://aminet.net/package/util/arc/lha_68k
@@ -68,12 +82,14 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
 		Url = "http://aminet.net/package/util/arc/lha_68k",
     },
     ```
+1. Run the code again
+1. The log will tell you that the Lha executable is copied to your MyAmigaOs's C-folder!
+1. Ensure that it work by opening a Shell in your Workbench and run lha
 
-### First test
-1. To test this, configure an Amiga emulator to use the Outpu\System folder as a hard drive
-1. When you start your emulator it should load your vanilla install of Workbench 3.1
+### Reverse content
+
+
+
 
 ### todo in readme
-debug logging off
-priority
-content_reverse
+
