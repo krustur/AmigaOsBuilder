@@ -21,10 +21,10 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
     - Other modes will be removed
 
 ### Vanilla Workbench 3.1
-1. Make a sub folder in Source, named 'Workbench_3.1'
+1. Make a sub folder in Source, named 'Workbench\_3.1'
 1. Make one more sub folder in this called content
-1. Make one more sub folder in this called __systemdrive__
-1. You should probably have a folder with the full path 'C:\MyAmigaOs\Source\Workbench_3.1\content\__systemdrive__'
+1. Make one more sub folder in this called \_\_systemdrive\_\_
+1. You should probably have a folder with the full path 'C:\MyAmigaOs\Source\Workbench_3.1\content\\_\_systemdrive\_\_'
 1. Make a clean install of Workbench 3.1 somewhere, and copy the contents of this folder into the folder above
     -You have now created a simple base package for Workbench 3.1
 
