@@ -31,9 +31,9 @@ namespace AmigaOsBuilder
             { @"__l__",                  @"System\L" },
             { @"__devs__",               @"System\Devs" },
             { @"__prefs__",              @"System\Prefs" },
-            { @"__utils__",              @"System\A-Utils" },
-            { @"__guides__",             @"System\A-Guides" },
-            { @"__system__",             @"System\A-System" },
+            { @"__autils__",              @"System\A-Utils" },
+            { @"__aguides__",             @"System\A-Guides" },
+            { @"__asystem__",             @"System\A-System" },
         };
         // @formatter:on
 
@@ -47,88 +47,97 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        Name = "Workbench 3.1 (Clean Install)",
+                        //Name = "Workbench 3.1 (Clean Install)",
                         Path = "Workbench (clean install)_3.1",
                         Category = "OS",
                         Description = "Workbench 3.1 operation system (clean Install)",
-                        Url = ""
+                        //Url = ""
                     },
                     #endregion
                     #region KrustWB
                     new Package
                     {
                         Include = true,
-                        Name = "Startup-Sequence",
+                        //Name = "Startup-Sequence",
                         Path = "Startup-Sequence",
                         Category = "KrustWB",
                         Description = "KrustWB startup-sequence and user-startup files",
-                        Url = ""
+                        //Url = ""
                     },
                     new Package
                     {
                         Include = true,
-                        Name = "Backdrop",
+                        //Name = "Backdrop",
                         Path = "Backdrop",
                         Category = "KrustWB",
                         Description = "KrustWB .backdrop file. OS setting file that keeps track of \"Leave Out\".",
-                        Url = ""
+                        //Url = ""
                     },
                     new Package
                     {
                         Include = true,
-                        Name = "Env-Archive",
+                        //Name = "Env-Archive",
                         Path = "Env-Archive",
                         Category = "KrustWB",
                         Description = "KrustWB system settings files kept in Prefs/Env-Archive",
-                        Url = ""
+                        //Url = ""
                     },
                     new Package
                     {
                         Include = true,
-                        Name = "Monitors",
+                        //Name = "Monitors",
                         Path = "Monitors",
                         Category = "KrustWB",
                         Description = "KrustWB monitors Devs/Monitors",
-                        Url = ""
+                        //Url = ""
                     },
                     new Package
                     {
                         Include = true,
-                        Name = "A-Directories",
+                        //Name = "A-Directories",
                         Path = "A-Directories",
                         Category = "KrustWB",
                         Description = "A-Directories including icons",
-                        Url = ""
+                        //Url = ""
                     },
                     #endregion
-                    #region System
+                    #region A-System
                     new Package
                     {
                         Include = true,
-                        Name = "SetPatch 43.6b",
+                        //Name = "SetPatch 43.6b",
                         Path = "SetPatch_43.6b",
                         Category = "System",
-                        Description = "SetPatch 43.6b",
+                        Description = "Makes ROM patches in system software",
                         Url = "http://m68k.aminet.net/package/util/boot/SetPatch_43.6b"
                     },
-                    #endregion
-                    #region Util
                     new Package
                     {
                         Include = true,
-                        Name = "Lha 2.15",
+                        //Name = "SetPatch 43.6b",
+                        Path = "NoClick_1.1",
+                        Category = "System",
+                        Description = "Disables the clicking of the floppy drives.",
+                        Url = "http://aminet.net/package/disk/misc/NoClick"
+                    },
+                    #endregion
+                    #region A-Util
+                    new Package
+                    {
+                        Include = true,
+                        //Name = "Lha 2.15",
                         Path = "Lha_2.15",
                         Category = "Util",
-                        Description = "Amiga LhA 2.15",
+                        Description = "Lha command line (un)archiving",
                         Url = "http://aminet.net/package/util/arc/lha_68k"
                     },
                     new Package
                     {
                         Include = true,
-                        Name = "KingCON 1.3",
+                        //Name = "KingCON 1.3",
                         Path = "KingCON_1.3",
                         Category = "Util",
-                        Description = "KingCON 1.3",
+                        Description = @"A console-handler that optionally replaces the standard console devices. Adds some useful features, such as Filename-completion",
                         Url = "http://aminet.net/package/util/shell/KingCON_1.3"
                     },
                     #endregion
@@ -146,6 +155,9 @@ namespace AmigaOsBuilder
                 .Build();
 
             _logger = new LoggerConfiguration()
+                //.Destructure.ByTransforming<Sync>(
+                    //r => new { r.SyncType, r.SourcePath, r.TargetPath, r.FileType})
+                //.MinimumLevel.Debug()
                 .WriteTo.Console()
                 .WriteTo.File("AmigaOsBuilder_log.txt")
                 .CreateLogger();
@@ -157,8 +169,8 @@ namespace AmigaOsBuilder
             var syncMode = Enum.Parse<SyncMode>(configuration["SyncMode"]);
 
             BuildIt(location, sourceBasePath, outputBasePath, configFile, syncMode);
-            _logger.Information("Press any key!");
-            Console.ReadKey();
+            _logger.Information("Press enter!");
+            Console.ReadLine();
         }
 
         private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName, SyncMode syncMode)
@@ -333,39 +345,7 @@ namespace AmigaOsBuilder
         private static void SynchronizeV2(IList<Sync> syncList)
         {
             _logger.Information("Synchronizing ...");
-
-            /*
-            var distinctSyncList = syncList
-                .GroupBy(x => new {x.FileType, x.SyncType, x.TargetPath, x.SourcePath})
-                .Select(x => x.First())
-                .ToList();
-            //var xxx = from s in distinctSyncList
-            //          group s by s.TargetPath into sg
-            //    select new
-            //    {
-            //        TargetPath = sg.Key,
-            //        Count = sg.Count(),
-            //    };
-            //var yyy = distinctSyncList
-            //    .GroupBy(x => x.TargetPath)
-            //    .Select(x => x.First())
-            //    .ToList();
-            var zzz = distinctSyncList
-                .GroupBy(c => c.TargetPath)
-                .Where(grp => grp.Count() > 1)
-                .Select(grp => grp.Key)
-                .ToList();
-            var cnt = 0;
-            foreach (var z in zzz)
-            {
-
-                //var one = zzz[1];
-                var xxx = distinctSyncList
-                    .Where(x => x.TargetPath == z)
-                    .ToList();
-                cnt += xxx.Count;
-            }
-            */
+           
             var targetPaths = syncList
                 .Select(x => x.TargetPath)
                 .Distinct()
@@ -380,7 +360,6 @@ namespace AmigaOsBuilder
 
             foreach (var targetPath in targetPaths)
             {
-
                 var syncListForTarget = syncList
                     .Where(x => x.TargetPath == targetPath)
                     .ToList();
@@ -390,20 +369,31 @@ namespace AmigaOsBuilder
                     throw new Exception("syncListForTarget contains both FileType.Directory and FileType.File!");
                 }
 
-                var fileType = syncListForTarget.First().FileType;
-                _logger.Information("{TargetPath} [{FileType}]", targetPath, fileType);
-
-                foreach (var sync in syncListForTarget)
+                var syncCount = syncListForTarget.Count;
+                var syncSkipList = syncListForTarget.GetRange(0, syncCount - 1);
+                foreach (var sync in syncSkipList)
                 {
-                    _logger.Information(": {SourcePath} [{SyncType}]", sync.SourcePath, sync.SyncType);
-
+                    _logger.Debug("Sync (skipped) {Sync}", sync);
                 }
+
+                var actualSync = syncListForTarget.Last();
+                _logger.Debug("Sync {Sync})", actualSync);
+                switch (actualSync.FileType)
+                {
+                    case FileType.File:
+                        SynchronizeFile(actualSync);
+                        break;
+                    case FileType.Directory:
+                        SynchronizeDirectory(actualSync);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
                 var syncListForTargetSourcePaths = syncListForTarget
                     .Select(x => x.SourcePath)
                     .ToList();
                 sourcePaths.RemoveAll(x => syncListForTargetSourcePaths.Contains(x));
-
-
             }
 
             // Source Paths check if pure paranoia! Shouldn't be needed.
@@ -411,10 +401,14 @@ namespace AmigaOsBuilder
             {
                 throw new Exception("SourcePaths was not synchronized!!");
             }
+
+            _logger.Information("Synchronizing done!");
         }
 
         private static void Synchronize(IList<Sync> syncList)
         { 
+            _logger.Information("Synchronizing ...");
+
             foreach (var sync in syncList)
             {
                 switch (sync.FileType)
@@ -424,9 +418,6 @@ namespace AmigaOsBuilder
                         break;
                     case FileType.Directory:
                         SynchronizeDirectory(sync);
-                        break;
-                    case FileType.DirectoryRecursive:
-                        SynchronizeDirectoryRecursive(sync);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -441,36 +432,108 @@ namespace AmigaOsBuilder
             switch (sync.SyncType)
             {
                 case SyncType.SourceToTarget:
-                    _logger.Information($@"Copy Source to Target: [{sync.SourcePath}] => [{sync.TargetPath}]");
-                    File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
-                    break;
-                case SyncType.TargetToSource:
-                    if (File.Exists(sync.TargetPath))
+                {
+                    var fileDiff = GetFileDiff(sync);
+                    if (fileDiff == FileDiff.Equal)
                     {
-                        _logger.Information($@"Copy Target to Source: [{sync.SourcePath}] <= [{sync.TargetPath}]");
-                        File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
+                        _logger.Debug(@"Copy Source to Target (files are equal!): [{SourcePath}] => [{TargetPath}]", sync.SourcePath, sync.TargetPath);
                     }
                     else
                     {
-                        _logger.Information($@"Copy Target to Source (target is missing!): [{sync.SourcePath}] <= [{sync.TargetPath}]");
+                        if (fileDiff == FileDiff.DiffTargetMissing || fileDiff == FileDiff.DiffSourceNewer)
+                        {
+                            _logger.Information(@"Copy Source to Target: [{SourcePath}] => [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                        }
+                        else
+                        {
+                            _logger.Warning(@"Copy Source to Target: [{SourcePath}] => [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                        }
+
+                        File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
                     }
 
                     break;
-                case SyncType.DeleteTarget:
+                }
+                case SyncType.TargetToSource:
+                {
                     if (File.Exists(sync.TargetPath))
                     {
-                        _logger.Information($@"Delete: [{sync.TargetPath}]");
+                        var fileDiff = GetFileDiff(sync);
+                        if (fileDiff == FileDiff.Equal)
+                        {
+                            _logger.Debug(@"Copy Target to Source (files are equal!): [{SourcePath}] <= [{TargetPath}]", sync.SourcePath, sync.TargetPath);
+                        }
+                        else
+                        {
+                            if (fileDiff == FileDiff.DiffSourceMissing || fileDiff == FileDiff.DiffTargetNewer)
+                            {
+                                _logger.Information(@"Copy Target to Source: [{SourcePath}] <= [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                            }
+                            else
+                            {
+                                _logger.Warning(@"Copy Target to Source: [{SourcePath}] <= [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                            }
+
+                            File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
+                        }
+                    }
+                    else
+                    {
+                        _logger.Debug(@"Copy Target to Source (target is missing!): [{SourcePath}] <= [{TargetPath}]", sync.SourcePath, sync.TargetPath);
+                    }
+
+                    break;
+                }
+                case SyncType.DeleteTarget:
+                {
+                    if (File.Exists(sync.TargetPath))
+                    {
+                        _logger.Information(@"Delete Target: [{TargetPath}]", sync.TargetPath);
                         File.Delete(sync.TargetPath);
                     }
-                    //else
-                        //{
-                        //    _logger.Information($@"Delete (already deleted): [{sync.TargetPath}]");
-                        //}
+                    else
+                    {
+                        _logger.Debug(@"Delete Target (nothing to delete!): [{TargetPath}]", sync.TargetPath);
+                    }
                     break;
+                }
                 case SyncType.Unknown:
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private static FileDiff GetFileDiff(Sync sync)
+        {
+            var sourceInfo = new FileInfo(sync.SourcePath);
+            var targetInfo = new FileInfo(sync.TargetPath);
+
+            if (sourceInfo.Exists == true && targetInfo.Exists == false)
+            {
+                return FileDiff.DiffTargetMissing;
+            }
+
+            if (sourceInfo.Exists == false && targetInfo.Exists == true)
+            {
+                return FileDiff.DiffSourceMissing;
+            }
+
+            if (FileComparer.FilesContentsAreEqual(sourceInfo, targetInfo))
+            {
+                return FileDiff.Equal;
+            }
+
+            if (sourceInfo.LastWriteTimeUtc < targetInfo.LastWriteTimeUtc)
+            {
+                return FileDiff.DiffTargetNewer;
+            }
+
+            if (targetInfo.LastWriteTimeUtc < sourceInfo.LastWriteTimeUtc)
+            {
+                return FileDiff.DiffSourceNewer;
+            }
+
+            return FileDiff.DiffContent;
         }
 
         private static void SynchronizeDirectory(Sync sync)
@@ -480,11 +543,11 @@ namespace AmigaOsBuilder
                 case SyncType.SourceToTarget:
                     if (Directory.Exists(sync.TargetPath))
                     {
-                        //_logger.Information($@"Target Directory (already exists): [{sync.TargetPath}]");
+                        _logger.Debug(@"Create Target Directory (already exists): [{TargetPath}]", sync.TargetPath);
                     }
                     else
                     {
-                        _logger.Information($@"Create Target Directory: [{sync.TargetPath}]");
+                        _logger.Information(@"Create Target Directory: [{TargetPath}]", sync.TargetPath);
                         Directory.CreateDirectory(sync.TargetPath);
                     }
 
@@ -492,11 +555,11 @@ namespace AmigaOsBuilder
                 case SyncType.TargetToSource:
                     if (Directory.Exists(sync.SourcePath))
                     {
-                        //_logger.Information($@"Source Directory (already exists): [{sync.SourcePath}]");
+                        _logger.Debug(@"Create Source Directory (already exists): [{SourcePath}]", sync.SourcePath);
                     }
                     else
                     {
-                        _logger.Information($@"Create Source Directory: [{sync.SourcePath}]");
+                        _logger.Information(@"Create Source Directory: [{SourcePath}]", sync.SourcePath);
                         Directory.CreateDirectory(sync.SourcePath);
                     }
 
@@ -504,41 +567,15 @@ namespace AmigaOsBuilder
                 case SyncType.DeleteTarget:
                     if (Directory.Exists(sync.TargetPath))
                     {
-                        _logger.Information($@"Delete: [{sync.TargetPath}]");
+                        _logger.Information(@"Delete Target Directory: [{TargetPath}]", sync.TargetPath);
                         Directory.Delete(sync.TargetPath, recursive: true);
                     }
-                    //else
-                    //{
-                    //    _logger.Information($@"Delete (already deleted): [{sync.TargetPath}]");
-                    //}
+                    else
+                    {
+                        _logger.Debug(@"Delete Target Directory (already deleted): [{TargetPath}]", sync.TargetPath);
+                    }
 
                     break;
-                case SyncType.Unknown:
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        private static void SynchronizeDirectoryRecursive(Sync sync)
-        {
-            switch (sync.SyncType)
-            {
-                   
-                case SyncType.TargetToSource:
-                    var recurseEntries = Directory.GetFileSystemEntries(sync.TargetPath, "*", SearchOption.AllDirectories);
-                    //if (Directory.Exists(sync.SourcePath))
-                    //{
-                    //    //_logger.Information($@"Source Directory (already exists): [{sync.SourcePath}]");
-                    //}
-                    //else
-                    //{
-                    //    _logger.Information($@"Create Source Directory: [{sync.SourcePath}]");
-                    //    Directory.CreateDirectory(sync.SourcePath);
-                    //}
-
-                    break;
-                case SyncType.SourceToTarget:
-                case SyncType.DeleteTarget:
                 case SyncType.Unknown:
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -608,6 +645,17 @@ namespace AmigaOsBuilder
         }
     }
 
+    internal enum FileDiff
+    {
+        Unknown = 0,
+        Equal,
+        DiffTargetMissing,
+        DiffSourceMissing,
+        DiffTargetNewer,
+        DiffSourceNewer,
+        DiffContent,
+    }
+
     public class Sync
     {
         public SyncType SyncType { get; set; }
@@ -617,21 +665,20 @@ namespace AmigaOsBuilder
 
         public override string ToString()
         {
-            //_logger.Information($"{packageEntry} => {fileOutputPath}");
             switch (SyncType)
             {
                 case SyncType.SourceToTarget:
-                {
-                    return $@"{SyncType} ({FileType}): {SourcePath} => {TargetPath}";
-                }
+                    {
+                        return $@"{SyncType} ({FileType}): {SourcePath} => {TargetPath}";
+                    }
                 case SyncType.TargetToSource:
-                {
-                    return $@"{SyncType} ({FileType}): {SourcePath} <= {TargetPath}";
-                }
+                    {
+                        return $@"{SyncType} ({FileType}): {SourcePath} <= {TargetPath}";
+                    }
                 case SyncType.DeleteTarget:
-                {
-                    return $@"{SyncType} ({FileType}): {TargetPath}";
-                }
+                    {
+                        return $@"{SyncType} ({FileType}): {TargetPath}";
+                    }
             }
             return $"i am error (unknown SyncType)";
         }
@@ -650,7 +697,6 @@ namespace AmigaOsBuilder
         Unknown = 0,
         File,
         Directory,
-        DirectoryRecursive
     }
 
     public class Config
@@ -661,7 +707,6 @@ namespace AmigaOsBuilder
     public class Package
     {
         public bool Include { get; set; }
-        public string Name { get; set; }
         public string Path { get; set; }
         public string Category { get; set; }
         public string Description { get; set; }
