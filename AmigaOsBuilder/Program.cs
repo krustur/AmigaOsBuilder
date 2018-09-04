@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Serilog;
+using Serilog.Core;
 
 namespace AmigaOsBuilder
 {
@@ -132,6 +134,8 @@ namespace AmigaOsBuilder
                     #endregion
                 }
         };
+
+        private static Logger _logger;
         // @formatter:on
 
         static void Main(string[] args)
@@ -141,6 +145,11 @@ namespace AmigaOsBuilder
                 .AddCommandLine(args)
                 .Build();
 
+            _logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.File("AmigaOsBuilder_log.txt")
+                .CreateLogger();
+
             var location = configuration["Location"];
             var sourceBasePath = configuration["SourceBasePath"];
             var outputBasePath = configuration["OutputBasePath"];
@@ -148,8 +157,8 @@ namespace AmigaOsBuilder
             var syncMode = Enum.Parse<SyncMode>(configuration["SyncMode"]);
 
             BuildIt(location, sourceBasePath, outputBasePath, configFile, syncMode);
-            //Console.WriteLine("Press any key!");
-            //Console.ReadKey();
+            _logger.Information("Press any key!");
+            Console.ReadKey();
         }
 
         private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName, SyncMode syncMode)
@@ -172,24 +181,21 @@ namespace AmigaOsBuilder
 
         private static void CreateOutputAliasDirectories(string outputBasePath)
         {
-            Console.WriteLine();
-            Console.WriteLine("Creating output alias directories ...");
+            _logger.Information("Creating output alias directories ...");
             foreach (var map in AliasToOutputMap)
             {
                 var outputAliasPath = Path.Combine(outputBasePath, map.Value);
-                Console.WriteLine($@"[{map.Key}] = [{outputAliasPath}]");
+                _logger.Information($@"[{map.Key}] = [{outputAliasPath}]");
                 Directory.CreateDirectory(outputAliasPath);
             }
 
-            Console.WriteLine("Create output alias directories done!");
-            Console.WriteLine();
+            _logger.Information("Create output alias directories done!");
         }
 
         private static List<Sync> BuildSyncList(string sourceBasePath, string outputBasePath, SyncMode syncMode, Config config)
         {
-            Console.WriteLine();
-            Console.WriteLine("Building sync list ...");
-            Console.WriteLine($"SyncMode  [{syncMode}]");
+            _logger.Information("Building sync list ...");
+            _logger.Information($"SyncMode  [{syncMode}]");
 
             var syncList = new List<Sync>();
 
@@ -210,15 +216,14 @@ namespace AmigaOsBuilder
                 case SyncMode.Synchronize:
                 {
                     AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
-                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.SourceToTarget, syncList);
+                    //AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.SourceToTarget, syncList);
                     AddDeleteToSyncList(outputBasePath, syncList);
                     AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
                     break;
                 }
             }
 
-            Console.WriteLine("Building sync list done!");
-            Console.WriteLine();
+            _logger.Information("Building sync list done!");
 
             return syncList;
         }
@@ -282,7 +287,7 @@ namespace AmigaOsBuilder
 
                         var packageSubPath = RemoveRoot(sourcePath, packageEntry);
                         var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
-                        //Console.WriteLine($"{packageEntry} => {fileOutputPath}");
+                        //_logger.Information($"{packageEntry} => {fileOutputPath}");
                         var sync = new Sync
                         {
                             SourcePath = packageEntry,
@@ -327,8 +332,7 @@ namespace AmigaOsBuilder
 
         private static void SynchronizeV2(IList<Sync> syncList)
         {
-            Console.WriteLine();
-            Console.WriteLine("Synchronizing ...");
+            _logger.Information("Synchronizing ...");
 
             /*
             var distinctSyncList = syncList
@@ -365,6 +369,7 @@ namespace AmigaOsBuilder
             var targetPaths = syncList
                 .Select(x => x.TargetPath)
                 .Distinct()
+                .OrderBy(x => x)
                 .ToList();
 
             // Source Paths check if pure paranoia! Shouldn't be needed.
@@ -375,6 +380,7 @@ namespace AmigaOsBuilder
 
             foreach (var targetPath in targetPaths)
             {
+
                 var syncListForTarget = syncList
                     .Where(x => x.TargetPath == targetPath)
                     .ToList();
@@ -385,7 +391,13 @@ namespace AmigaOsBuilder
                 }
 
                 var fileType = syncListForTarget.First().FileType;
+                _logger.Information("{TargetPath} [{FileType}]", targetPath, fileType);
 
+                foreach (var sync in syncListForTarget)
+                {
+                    _logger.Information(": {SourcePath} [{SyncType}]", sync.SourcePath, sync.SyncType);
+
+                }
                 var syncListForTargetSourcePaths = syncListForTarget
                     .Select(x => x.SourcePath)
                     .ToList();
@@ -421,8 +433,7 @@ namespace AmigaOsBuilder
                 }
             }
 
-            Console.WriteLine("Synchronizing done!");
-            Console.WriteLine();
+            _logger.Information("Synchronizing done!");
         }
 
         private static void SynchronizeFile(Sync sync)
@@ -430,30 +441,30 @@ namespace AmigaOsBuilder
             switch (sync.SyncType)
             {
                 case SyncType.SourceToTarget:
-                    Console.WriteLine($@"Copy Source to Target: [{sync.SourcePath}] => [{sync.TargetPath}]");
+                    _logger.Information($@"Copy Source to Target: [{sync.SourcePath}] => [{sync.TargetPath}]");
                     File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
                     break;
                 case SyncType.TargetToSource:
                     if (File.Exists(sync.TargetPath))
                     {
-                        Console.WriteLine($@"Copy Target to Source: [{sync.SourcePath}] <= [{sync.TargetPath}]");
+                        _logger.Information($@"Copy Target to Source: [{sync.SourcePath}] <= [{sync.TargetPath}]");
                         File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
                     }
                     else
                     {
-                        Console.WriteLine($@"Copy Target to Source (target is missing!): [{sync.SourcePath}] <= [{sync.TargetPath}]");
+                        _logger.Information($@"Copy Target to Source (target is missing!): [{sync.SourcePath}] <= [{sync.TargetPath}]");
                     }
 
                     break;
                 case SyncType.DeleteTarget:
                     if (File.Exists(sync.TargetPath))
                     {
-                        Console.WriteLine($@"Delete: [{sync.TargetPath}]");
+                        _logger.Information($@"Delete: [{sync.TargetPath}]");
                         File.Delete(sync.TargetPath);
                     }
                     //else
                         //{
-                        //    Console.WriteLine($@"Delete (already deleted): [{sync.TargetPath}]");
+                        //    _logger.Information($@"Delete (already deleted): [{sync.TargetPath}]");
                         //}
                     break;
                 case SyncType.Unknown:
@@ -469,11 +480,11 @@ namespace AmigaOsBuilder
                 case SyncType.SourceToTarget:
                     if (Directory.Exists(sync.TargetPath))
                     {
-                        //Console.WriteLine($@"Target Directory (already exists): [{sync.TargetPath}]");
+                        //_logger.Information($@"Target Directory (already exists): [{sync.TargetPath}]");
                     }
                     else
                     {
-                        Console.WriteLine($@"Create Target Directory: [{sync.TargetPath}]");
+                        _logger.Information($@"Create Target Directory: [{sync.TargetPath}]");
                         Directory.CreateDirectory(sync.TargetPath);
                     }
 
@@ -481,11 +492,11 @@ namespace AmigaOsBuilder
                 case SyncType.TargetToSource:
                     if (Directory.Exists(sync.SourcePath))
                     {
-                        //Console.WriteLine($@"Source Directory (already exists): [{sync.SourcePath}]");
+                        //_logger.Information($@"Source Directory (already exists): [{sync.SourcePath}]");
                     }
                     else
                     {
-                        Console.WriteLine($@"Create Source Directory: [{sync.SourcePath}]");
+                        _logger.Information($@"Create Source Directory: [{sync.SourcePath}]");
                         Directory.CreateDirectory(sync.SourcePath);
                     }
 
@@ -493,12 +504,12 @@ namespace AmigaOsBuilder
                 case SyncType.DeleteTarget:
                     if (Directory.Exists(sync.TargetPath))
                     {
-                        Console.WriteLine($@"Delete: [{sync.TargetPath}]");
+                        _logger.Information($@"Delete: [{sync.TargetPath}]");
                         Directory.Delete(sync.TargetPath, recursive: true);
                     }
                     //else
                     //{
-                    //    Console.WriteLine($@"Delete (already deleted): [{sync.TargetPath}]");
+                    //    _logger.Information($@"Delete (already deleted): [{sync.TargetPath}]");
                     //}
 
                     break;
@@ -517,11 +528,11 @@ namespace AmigaOsBuilder
                     var recurseEntries = Directory.GetFileSystemEntries(sync.TargetPath, "*", SearchOption.AllDirectories);
                     //if (Directory.Exists(sync.SourcePath))
                     //{
-                    //    //Console.WriteLine($@"Source Directory (already exists): [{sync.SourcePath}]");
+                    //    //_logger.Information($@"Source Directory (already exists): [{sync.SourcePath}]");
                     //}
                     //else
                     //{
-                    //    Console.WriteLine($@"Create Source Directory: [{sync.SourcePath}]");
+                    //    _logger.Information($@"Create Source Directory: [{sync.SourcePath}]");
                     //    Directory.CreateDirectory(sync.SourcePath);
                     //}
 
@@ -606,7 +617,7 @@ namespace AmigaOsBuilder
 
         public override string ToString()
         {
-            //Console.WriteLine($"{packageEntry} => {fileOutputPath}");
+            //_logger.Information($"{packageEntry} => {fileOutputPath}");
             switch (SyncType)
             {
                 case SyncType.SourceToTarget:
