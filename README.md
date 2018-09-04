@@ -34,6 +34,7 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
 1. Remove all the current Packages
 1. Add your own package, like this
     -This part should probably be located in a json file outside of the code. However I found it easier to have it in code for now, as its easier to spot build errors in VS
+
 ```csharp
 new Package
 {
