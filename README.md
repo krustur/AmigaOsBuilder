@@ -33,6 +33,7 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra p
 1. Locate `private static readonly Config TestConfig = new Config { ... }` block
 1. Remove all the current Packages
 1. Add your own package, like this
+    -This part should probably be located in a json file outside of the code. However I found it easier to have it in code for now, as its easier to spot build errors in VS
 ```csharp
 new Package
 {
@@ -42,7 +43,6 @@ new Package
     Description = "Workbench 3.1 operation system (clean Install)",
 },
 ```
-    -(this is the part that should probably be located in a json file outside of the code. However I found it easier to have it in code for now, as its easier to spot build errors in VS)
 1. Run this code (in Visual Studio or from command line)
 
 
