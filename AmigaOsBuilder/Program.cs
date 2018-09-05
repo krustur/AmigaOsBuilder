@@ -32,10 +32,13 @@ namespace AmigaOsBuilder
             { @"__c__",                  @"System\C" },
             { @"__devs__",               @"System\Devs" },
             { @"__l__",                  @"System\L" },
+            { @"__locale__",             @"System\Locale" },
             { @"__libs__",               @"System\Libs" },
             { @"__prefs__",              @"System\Prefs" },
             { @"__s__",                  @"System\S" },
+            { @"__storage__",            @"System\Storage" },
             { @"__system__",             @"System\System" },
+            { @"__wbstartup__",          @"System\WBStartup" },
 
             // KrustWB folders
             { @"__autils__",             @"System\A-Utils" },
@@ -106,6 +109,14 @@ namespace AmigaOsBuilder
                         Description = "A-Directories including icons",
                         //Url = ""
                     },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "KrustWBInstall",
+                        Category = "KrustWB",
+                        Description = "Scripts to pack and install KrustWB",
+                        //Url = ""
+                    },
                     #endregion
                     #region A-System
                     new Package
@@ -140,6 +151,114 @@ namespace AmigaOsBuilder
                         Description = "Installer software",
                         Url = "http://aminet.net/package/util/sys/InstallerNG"
                     },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "CardPatch_1.2",
+                        Category = "System",
+                        Description = "When a PC Card is plugged in the PCMCIA slot and cnet.device is not run then Amiga system slows."
+                                      + " CardPatch patches this \"slow bug\" and other bugs in card.resource. The CardResetCard() function"
+                                      + " is patched and each \"new\" card is reseted after it is inserted in the PCMCIA slot.",
+                        Url = "http://aminet.net/package/util/boot/CardPatch"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "CardReset_3.0",
+                        Category = "System",
+                        Description = "CardReset forces a high level on pin 58 of the Amiga PCMCIA slot (reset signal)",
+                        Url = "http://aminet.net/package/util/boot/CardReset"
+                    },
+                    new Package
+                    {
+                        Include = false,
+                        Path = "InstallerNG_1.5 pre",
+                        Category = "System",
+                        Description = "Installer software",
+                        Url = "http://aminet.net/package/util/sys/InstallerNG"
+                    },
+                    new Package
+                    {
+                        Include = false,
+                        Path = "Borderblank",
+                        Category = "System",
+                        Description = "This simply blanks the border",
+                        Url = "http://aminet.net/package/util/boot/bordblnk"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Borderblank_FromClassicWb",
+                        Category = "System",
+                        Description = "This simply blanks the border",
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "LoadModule_45.15",
+                        Category = "System",
+                        Description = "LoadModule installs \"resident modules\" in a reset-proof way.",
+                        Url = "http://aminet.net/package/util/boot/LoadModule"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "SCSI_43.45p",
+                        Category = "System",
+                        Description = "Patched scsi.device to enable use of 128 GB or bigger IDE devices",
+                        Url = "http://aminet.net/package/driver/media/SCSI4345p"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Fat95_3.18",
+                        Category = "System",
+                        Description = "a DOS handler to mount and use Win95/98 volumes just as if they were AMIGA volumes.",
+                        Url = "http://aminet.net/package/disk/misc/fat95"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Cfd_1.33",
+                        Category = "System",
+                        Description = "Read and write files from CompactFlash cards",
+                        Url = "http://aminet.net/package/driver/media/CFD133"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "AmigaOS ROM Update from OS3.9 BB2",
+                        Category = "System",
+                        Description = "44.57 AmigaOS ROM Update from OS3.9 BB2",
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "AssignWedge_1.5",
+                        Category = "System",
+                        //Description = "",
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Roadshow demo_1.13",
+                        Category = "System",
+                        Description = "Amiga TCP/IP stack (demo version)",
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "3c589_1.5",
+                        Category = "System",
+                        Description = "SANA-II network driver for 3Com Etherlink III PC Cards (PCMCIA cards)",
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Cnetdevice_1.9",
+                        Category = "System",
+                        Description = "PCMCIA (aka PC Card) ethernet card SANA2 driver for Amiga 600 and Amiga 1200 computers",
+                    },
                     #endregion
                     #region A-Util
                     new Package
@@ -158,6 +277,14 @@ namespace AmigaOsBuilder
                         Description = @"A console-handler that optionally replaces the standard console devices. Adds some useful features, such as Filename-completion",
                         Url = "http://aminet.net/package/util/shell/KingCON_1.3"
                     },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Sha256_1.1",
+                        Category = "Util",
+                        Description = @"A command line utility to calculate the SHA-256 hashes of a list of files",
+                        Url = "http://aminet.net/package/util/cli/sha256"
+                    },
                     #endregion
                 }
         };
@@ -167,27 +294,37 @@ namespace AmigaOsBuilder
 
         static void Main(string[] args)
         {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddCommandLine(args)
-                .Build();
+            try
+            {
+                var configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                    .AddCommandLine(args)
+                    .Build();
 
-            _logger = new LoggerConfiguration()
-                //.Destructure.ByTransforming<Sync>(
+                _logger = new LoggerConfiguration()
+                    //.Destructure.ByTransforming<Sync>(
                     //r => new { r.SyncType, r.SourcePath, r.TargetPath, r.FileType})
-                //.MinimumLevel.Debug()
-                .WriteTo.Console()
-                .WriteTo.File("AmigaOsBuilder_log.txt")
-                .CreateLogger();
+                    //.MinimumLevel.Debug()
+                    .WriteTo.Console()
+                    .WriteTo.File("AmigaOsBuilder_log.txt")
+                    .CreateLogger();
 
-            var location = configuration["Location"];
-            var sourceBasePath = configuration["SourceBasePath"];
-            var outputBasePath = configuration["OutputBasePath"];
-            var configFile = configuration["ConfigFile"];
-            var syncMode = Enum.Parse<SyncMode>(configuration["SyncMode"]);
+                var location = configuration["Location"];
+                var sourceBasePath = configuration["SourceBasePath"];
+                var outputBasePath = configuration["OutputBasePath"];
+                var configFile = configuration["ConfigFile"];
+                var syncMode = Enum.Parse<SyncMode>(configuration["SyncMode"]);
 
-            BuildIt(location, sourceBasePath, outputBasePath, configFile, syncMode);
-            _logger.Information("Press enter!");
+                BuildIt(location, sourceBasePath, outputBasePath, configFile, syncMode);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("");
+                Console.WriteLine(e);
+            }
+
+            Console.WriteLine("");
+            Console.WriteLine("Press enter!");
             Console.ReadLine();
         }
 
@@ -269,13 +406,19 @@ namespace AmigaOsBuilder
                     continue;
                 }
 
-                var packageBasePath = Path.Combine(sourceBasePath, package.Path, contentFolderName);
+                var packageBasePath = Path.Combine(sourceBasePath, package.Path);
                 if (Directory.Exists(packageBasePath) == false)
+                {
+                    throw new Exception($"Package [{package.Path}] base path [{packageBasePath}] is missing, check your configuration.");
+                }
+
+                var packageContentBasePath = Path.Combine(sourceBasePath, package.Path, contentFolderName);
+                if (Directory.Exists(packageContentBasePath) == false)
                 {
                     continue;
                 }
 
-                var packageTargets = Directory.GetDirectories(packageBasePath);
+                var packageTargets = Directory.GetDirectories(packageContentBasePath);
                 foreach (var sourcePath in packageTargets)
                 {
                     //var sourcePath = packageTarget.FullName;

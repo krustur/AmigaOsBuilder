@@ -80,12 +80,13 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra U
         Path = "Lha\_2.15",
         Category = "Util",
         Description = "Lha command line (un)archiving",
-		Url = "http://aminet.net/package/util/arc/lha_68k",
+        Url = "http://aminet.net/package/util/arc/lha_68k",
     },
     ```
 1. Run the code again
 1. The log will tell you that the Lha executable is copied to your MyAmigaOs's C-folder!
 1. Ensure that it work by opening a Shell in your Workbench and run lha
+    - Note that reboot of Amiga shouldn't be required
 
 ### Let's add Backdrop-Settings
 1. The tool can also handle 'reverse content' wich means that files changed inside your OS (emulator) will be synced back to your package. This is used for system- and program settings.
@@ -95,7 +96,7 @@ This is a quick example of how to compose a basic Workbench 3.1 with one extra U
 1. Make a sub folder to this called '\_\_systemdrive\_\_'
 1. In your workbench, create a '.backdrop' file by selecting 'Leave out' for Shell
 1. Copy the '.backdrop' file from the 'Output\System' folder to the newly created '\_\_systemdrive\_\_' folder
-1. Everything is already up to date (because you copied the correct file already)
+1. Everything is already up to date (because you copied the correct file manually already)
 1. But, as you've created this 'reverse content' package now, whenever you select 'Leave out' for more applications of folders, you can simple run the tool to sync those settings 'back' to MyAmigaOs.
 
 ### And Env-Archive
