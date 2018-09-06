@@ -172,14 +172,6 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = false,
-                        Path = "InstallerNG_1.5 pre",
-                        Category = "System",
-                        Description = "Installer software",
-                        Url = "http://aminet.net/package/util/sys/InstallerNG"
-                    },
-                    new Package
-                    {
-                        Include = false,
                         Path = "Borderblank",
                         Category = "System",
                         Description = "This simply blanks the border",
@@ -284,6 +276,30 @@ namespace AmigaOsBuilder
                         Category = "Util",
                         Description = @"A command line utility to calculate the SHA-256 hashes of a list of files",
                         Url = "http://aminet.net/package/util/cli/sha256"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "spatch_6.51 rel 4",
+                        Category = "Util",
+                        Description = @"Clone of SAS Binary File Patcher",
+                        Url = "http://aminet.net/package/dev/misc/spatch"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "SysInfo_4.0",
+                        Category = "Util",
+                        Description = @"Util for getting information about the system, like OS and library versions, hardware revisions and stuff",
+                        Url = "https://sysinfo.d0.se/"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "SnoopDos_3.8",
+                        Category = "Util",
+                        Description = @"System and application monitor",
+                        Url = "http://aminet.net/package/util/moni/SnoopDos"
                     },
                     #endregion
                 }
