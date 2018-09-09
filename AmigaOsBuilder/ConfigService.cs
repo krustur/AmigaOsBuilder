@@ -279,6 +279,38 @@ namespace AmigaOsBuilder
                         Description = @"ToolsDaemon allows you to run programs simply by selecting a menu item from the menu strip of Workbench",
                         Url = "http://aminet.net/package/util/sys/info"
                     },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Dr_2.0",
+                        Category = "System",
+                        Description = @"Dir replacement",
+                        Url = "http://paulkienitz.net/amiga/"
+                    },
+                    new Package
+                    {
+                        Include = false,
+                        Path = "EvenMore_0.91",
+                        Category = "System",
+                        Description = @"Text viewer",
+                        Url = "http://www.evenmore.co.uk/"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "MuchMore_4.6",
+                        Category = "System",
+                        Description = @"Text viewer",
+                        Url = "http://aminet.net/package/text/show/muchmore46"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "TextView_1.25",
+                        Category = "System",
+                        Description = @"Text viewer",
+                        Url = "http://aminet.net/package/text/show/TextView125"
+                    },
                     #endregion
                     #region Libraries
                     new Package
