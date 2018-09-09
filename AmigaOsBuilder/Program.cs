@@ -39,9 +39,7 @@ namespace AmigaOsBuilder
                     .Build();
 
                 _logger = new LoggerConfiguration()
-                    //.Destructure.ByTransforming<Sync>(
-                    //r => new { r.SyncType, r.SourcePath, r.TargetPath, r.FileType})
-                    .MinimumLevel.Debug()
+                    //.MinimumLevel.Debug()
                     .WriteTo.Console()
                     .WriteTo.File("AmigaOsBuilder_log.txt")
                     .CreateLogger();
@@ -239,21 +237,21 @@ namespace AmigaOsBuilder
             _logger.Information("Synchronizing ...");
            
             var targetPaths = syncList
-                .Select(x => x.TargetPath)
+                .Select(x => x.TargetPath.ToLowerInvariant())
                 .Distinct()
                 .OrderBy(x => x)
                 .ToList();
 
             // Source Paths check if pure paranoia! Shouldn't be needed.
             var sourcePaths = syncList
-                .Select(x => x.SourcePath)
+                .Select(x => x.SourcePath?.ToLowerInvariant())
                 .Distinct()
                 .ToList();
 
             foreach (var targetPath in targetPaths)
             {
                 var syncListForTarget = syncList
-                    .Where(x => x.TargetPath == targetPath)
+                    .Where(x => x.TargetPath.ToLowerInvariant() == targetPath)
                     .ToList();
                 if (syncListForTarget.Count(x => x.FileType == FileType.Directory) > 0 &&
                     syncListForTarget.Count(x => x.FileType == FileType.File) > 0)
@@ -283,7 +281,7 @@ namespace AmigaOsBuilder
                 }
 
                 var syncListForTargetSourcePaths = syncListForTarget
-                    .Select(x => x.SourcePath)
+                    .Select(x => x.SourcePath?.ToLowerInvariant())
                     .ToList();
                 sourcePaths.RemoveAll(x => syncListForTargetSourcePaths.Contains(x));
             }
