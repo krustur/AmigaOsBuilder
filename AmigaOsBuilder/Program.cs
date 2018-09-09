@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,291 +23,11 @@ namespace AmigaOsBuilder
             Reverse,
             Synchronize
         }
-        // @formatter:off
-        private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string>
-        {
-            // System drive
-            { @"__systemdrive__",        @"System" },
 
-            // Amiga OS folders
-            { @"__c__",                  @"System\C" },
-            { @"__devs__",               @"System\Devs" },
-            { @"__l__",                  @"System\L" },
-            { @"__locale__",             @"System\Locale" },
-            { @"__libs__",               @"System\Libs" },
-            { @"__prefs__",              @"System\Prefs" },
-            { @"__s__",                  @"System\S" },
-            { @"__storage__",            @"System\Storage" },
-            { @"__system__",             @"System\System" },
-            { @"__wbstartup__",          @"System\WBStartup" },
 
-            // KrustWB folders
-            { @"__autils__",             @"System\A-Utils" },
-            { @"__aguides__",            @"System\A-Guides" },
-            { @"__asystem__",            @"System\A-System" },
-        };
-        // @formatter:on
 
-        // @formatter:off
-        private static readonly Config TestConfig = new Config
-        {
-            Packages =
-                new List<Package>
-                {
-                    #region OS
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Workbench (clean install)_3.1",
-                        Category = "OS",
-                        Description = "Workbench 3.1 operation system (clean Install)",
-                        //Url = ""
-                    },
-                    #endregion
-                    #region KrustWB
-                    new Package
-                    {
-                        Include = true,
-                        //Name = "Startup-Sequence",
-                        Path = "Startup-Sequence",
-                        Category = "KrustWB",
-                        Description = "KrustWB startup-sequence and user-startup files",
-                        //Url = ""
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        //Name = "Backdrop",
-                        Path = "Backdrop",
-                        Category = "KrustWB",
-                        Description = "KrustWB .backdrop file. OS setting file that keeps track of \"Leave Out\".",
-                        //Url = ""
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        //Name = "Env-Archive",
-                        Path = "Env-Archive",
-                        Category = "KrustWB",
-                        Description = "KrustWB system settings files kept in Prefs/Env-Archive",
-                        //Url = ""
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        //Name = "Monitors",
-                        Path = "Monitors",
-                        Category = "KrustWB",
-                        Description = "KrustWB monitors Devs/Monitors",
-                        //Url = ""
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        //Name = "A-Directories",
-                        Path = "A-Directories",
-                        Category = "KrustWB",
-                        Description = "A-Directories including icons",
-                        //Url = ""
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "KrustWBInstall",
-                        Category = "KrustWB",
-                        Description = "Scripts to pack and install KrustWB",
-                        //Url = ""
-                    },
-                    #endregion
-                    #region A-System
-                    new Package
-                    {
-                        Include = true,
-                        Path = "SetPatch_43.6b",
-                        Category = "System",
-                        Description = "Makes ROM patches in system software",
-                        Url = "http://m68k.aminet.net/package/util/boot/SetPatch_43.6b"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "NoClick_1.1",
-                        Category = "System",
-                        Description = "Disables the clicking of the floppy drives.",
-                        Url = "http://aminet.net/package/disk/misc/NoClick"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Installer_44.10",
-                        Category = "System",
-                        Description = "Installer software",
-                        //Url = ""
-                    },
-                    new Package
-                    {
-                        Include = false,
-                        Path = "InstallerNG_1.5 pre",
-                        Category = "System",
-                        Description = "Installer software",
-                        Url = "http://aminet.net/package/util/sys/InstallerNG"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "CardPatch_1.2",
-                        Category = "System",
-                        Description = "When a PC Card is plugged in the PCMCIA slot and cnet.device is not run then Amiga system slows."
-                                      + " CardPatch patches this \"slow bug\" and other bugs in card.resource. The CardResetCard() function"
-                                      + " is patched and each \"new\" card is reseted after it is inserted in the PCMCIA slot.",
-                        Url = "http://aminet.net/package/util/boot/CardPatch"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "CardReset_3.0",
-                        Category = "System",
-                        Description = "CardReset forces a high level on pin 58 of the Amiga PCMCIA slot (reset signal)",
-                        Url = "http://aminet.net/package/util/boot/CardReset"
-                    },
-                    new Package
-                    {
-                        Include = false,
-                        Path = "Borderblank",
-                        Category = "System",
-                        Description = "This simply blanks the border",
-                        Url = "http://aminet.net/package/util/boot/bordblnk"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Borderblank_FromClassicWb",
-                        Category = "System",
-                        Description = "This simply blanks the border",
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "LoadModule_45.15",
-                        Category = "System",
-                        Description = "LoadModule installs \"resident modules\" in a reset-proof way.",
-                        Url = "http://aminet.net/package/util/boot/LoadModule"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "SCSI_43.45p",
-                        Category = "System",
-                        Description = "Patched scsi.device to enable use of 128 GB or bigger IDE devices",
-                        Url = "http://aminet.net/package/driver/media/SCSI4345p"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Fat95_3.18",
-                        Category = "System",
-                        Description = "a DOS handler to mount and use Win95/98 volumes just as if they were AMIGA volumes.",
-                        Url = "http://aminet.net/package/disk/misc/fat95"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Cfd_1.33",
-                        Category = "System",
-                        Description = "Read and write files from CompactFlash cards",
-                        Url = "http://aminet.net/package/driver/media/CFD133"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "AmigaOS ROM Update from OS3.9 BB2",
-                        Category = "System",
-                        Description = "44.57 AmigaOS ROM Update from OS3.9 BB2",
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "AssignWedge_1.5",
-                        Category = "System",
-                        //Description = "",
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Roadshow demo_1.13",
-                        Category = "System",
-                        Description = "Amiga TCP/IP stack (demo version)",
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "3c589_1.5",
-                        Category = "System",
-                        Description = "SANA-II network driver for 3Com Etherlink III PC Cards (PCMCIA cards)",
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Cnetdevice_1.9",
-                        Category = "System",
-                        Description = "PCMCIA (aka PC Card) ethernet card SANA2 driver for Amiga 600 and Amiga 1200 computers",
-                    },
-                    #endregion
-                    #region A-Util
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Lha_2.15",
-                        Category = "Util",
-                        Description = "Lha command line (un)archiving",
-                        Url = "http://aminet.net/package/util/arc/lha_68k"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "KingCON_1.3",
-                        Category = "Util",
-                        Description = @"A console-handler that optionally replaces the standard console devices. Adds some useful features, such as Filename-completion",
-                        Url = "http://aminet.net/package/util/shell/KingCON_1.3"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "Sha256_1.1",
-                        Category = "Util",
-                        Description = @"A command line utility to calculate the SHA-256 hashes of a list of files",
-                        Url = "http://aminet.net/package/util/cli/sha256"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "spatch_6.51 rel 4",
-                        Category = "Util",
-                        Description = @"Clone of SAS Binary File Patcher",
-                        Url = "http://aminet.net/package/dev/misc/spatch"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "SysInfo_4.0",
-                        Category = "Util",
-                        Description = @"Util for getting information about the system, like OS and library versions, hardware revisions and stuff",
-                        Url = "https://sysinfo.d0.se/"
-                    },
-                    new Package
-                    {
-                        Include = true,
-                        Path = "SnoopDos_3.8",
-                        Category = "Util",
-                        Description = @"System and application monitor",
-                        Url = "http://aminet.net/package/util/moni/SnoopDos"
-                    },
-                    #endregion
-                }
-        };
 
         private static Logger _logger;
-        // @formatter:on
 
         static void Main(string[] args)
         {
@@ -320,7 +41,7 @@ namespace AmigaOsBuilder
                 _logger = new LoggerConfiguration()
                     //.Destructure.ByTransforming<Sync>(
                     //r => new { r.SyncType, r.SourcePath, r.TargetPath, r.FileType})
-                    //.MinimumLevel.Debug()
+                    .MinimumLevel.Debug()
                     .WriteTo.Console()
                     .WriteTo.File("AmigaOsBuilder_log.txt")
                     .CreateLogger();
@@ -346,9 +67,9 @@ namespace AmigaOsBuilder
 
         private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName, SyncMode syncMode)
         {
-            var config = GetConfig(location, configFileName);
+            var config = ConfigService.GetConfig(location, configFileName);
 
-            CreateOutputAliasDirectories(outputBasePath);
+            AliasService.CreateOutputAliasDirectories(_logger, outputBasePath);
 
             var syncList = BuildSyncList(sourceBasePath, outputBasePath, syncMode, config);
 
@@ -362,19 +83,7 @@ namespace AmigaOsBuilder
             }
         }
 
-        private static void CreateOutputAliasDirectories(string outputBasePath)
-        {
-            _logger.Information("Creating output alias directories ...");
-            Directory.CreateDirectory(outputBasePath);
-            foreach (var map in AliasToOutputMap)
-            {
-                var outputAliasPath = Path.Combine(outputBasePath, map.Value);
-                _logger.Information($@"[{map.Key}] = [{outputAliasPath}]");
-                Directory.CreateDirectory(outputAliasPath);
-            }
-
-            _logger.Information("Create output alias directories done!");
-        }
+        
 
         private static List<Sync> BuildSyncList(string sourceBasePath, string outputBasePath, SyncMode syncMode, Config config)
         {
@@ -443,7 +152,7 @@ namespace AmigaOsBuilder
 
                     //#Write-Output -Verbose $sourcePath
                     //#Write-Output -Verbose $targetAlias
-                    var packageOutputPath = TargetAliasToOutputPath(targetAlias);
+                    var packageOutputPath = AliasService.TargetAliasToOutputPath(targetAlias);
                     packageOutputPath = Path.Combine(outputBasePath, packageOutputPath);
                     //#Write-Output -Verbose $outputPath
                     //#Write-Output -Verbose "$sourcePath => $outputPath"
@@ -619,17 +328,20 @@ namespace AmigaOsBuilder
                     var fileDiff = GetFileDiff(sync);
                     if (fileDiff == FileDiff.Equal)
                     {
-                        _logger.Debug(@"Copy Source to Target (files are equal!): [{SourcePath}] => [{TargetPath}]", sync.SourcePath, sync.TargetPath);
+                        _logger.Debug(@"{SyncLogType}: [{TargetPath}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath);
+                        _logger.Debug(@"{SyncLogType} : (files are equal!) [{SourcePath}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, sync.TargetPath);
                     }
                     else
                     {
                         if (fileDiff == FileDiff.DiffTargetMissing || fileDiff == FileDiff.DiffSourceNewer)
                         {
-                            _logger.Information(@"Copy Source to Target: [{SourcePath}] => [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                            _logger.Information(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath, fileDiff);
+                            _logger.Debug(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, fileDiff);
                         }
                         else
                         {
-                            _logger.Warning(@"Copy Source to Target: [{SourcePath}] => [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                            _logger.Warning(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath, fileDiff);
+                            _logger.Debug(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, fileDiff);
                         }
 
                         File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
@@ -645,19 +357,22 @@ namespace AmigaOsBuilder
                         {
                             case FileDiff.Equal:
                             {
-                                _logger.Debug(@"Copy Target to Source (files are equal!): [{SourcePath}] <= [{TargetPath}]", sync.SourcePath, sync.TargetPath);
+                                _logger.Debug(@"{SyncLogType}: [{SourcePath}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath);
+                                _logger.Debug(@"{SyncLogType}: (files are equal!) [{TargetPath}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath);
                                 break;
                             }
                             case FileDiff.DiffSourceMissing:
                             case FileDiff.DiffTargetNewer:
                             {
-                                _logger.Information(@"Copy Target to Source: [{SourcePath}] <= [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                                _logger.Information(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
+                                _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
                                 File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
                                 break;
                             }
                             case FileDiff.DiffTargetMissing:
                             {
-                                _logger.Information(@"Copy Target to Source (invserse): [{SourcePath}] <= [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                                _logger.Information(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
+                                _logger.Debug(@"{SyncLogType}: (invserse) [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
                                 File.Copy(sync.SourcePath, sync.TargetPath, overwrite: true);
                                 break;
                             }
@@ -665,7 +380,8 @@ namespace AmigaOsBuilder
                             case FileDiff.DiffSourceNewer:
                             default:
                             {
-                                _logger.Warning(@"Copy Target to Source: [{SourcePath}] <= [{TargetPath}] [{FileDiff}]", sync.SourcePath, sync.TargetPath, fileDiff);
+                                _logger.Warning(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
+                                _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
                                 File.Copy(sync.TargetPath, sync.SourcePath, overwrite: true);
                                 break;
                             }
@@ -678,12 +394,12 @@ namespace AmigaOsBuilder
                 {
                     if (File.Exists(sync.TargetPath))
                     {
-                        _logger.Information(@"Delete Target: [{TargetPath}]", sync.TargetPath);
+                        _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.DeleteTarget.GetDescription(), sync.TargetPath);
                         File.Delete(sync.TargetPath);
                     }
                     else
                     {
-                        _logger.Debug(@"Delete Target (nothing to delete!): [{TargetPath}]", sync.TargetPath);
+                        _logger.Debug(@"{SyncLogType}: (nothing to delete!) [{TargetPath}]", SyncLogType.DeleteTarget.GetDescription(), sync.TargetPath);
                     }
                     break;
                 }
@@ -733,11 +449,11 @@ namespace AmigaOsBuilder
                 case SyncType.SourceToTarget:
                     if (Directory.Exists(sync.TargetPath))
                     {
-                        _logger.Debug(@"Create Target Directory (already exists): [{TargetPath}]", sync.TargetPath);
+                        _logger.Debug(@"{SyncLogType}: (already exists) [{TargetPath}]", SyncLogType.CreateTargetDirectory.GetDescription(), sync.TargetPath);
                     }
                     else
                     {
-                        _logger.Information(@"Create Target Directory: [{TargetPath}]", sync.TargetPath);
+                        _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.CreateTargetDirectory.GetDescription(), sync.TargetPath);
                         Directory.CreateDirectory(sync.TargetPath);
                     }
 
@@ -745,17 +461,17 @@ namespace AmigaOsBuilder
                 case SyncType.TargetToSource:
                     if (Directory.Exists(sync.SourcePath))
                     {
-                        _logger.Debug(@"Create Source Directory (already exists): [{SourcePath}]", sync.SourcePath);
+                        _logger.Debug(@"{SyncLogType}: (already exists) [{SourcePath}]", SyncLogType.CreateSourceDirectory.GetDescription(), sync.SourcePath);
                     }
                     else
                     {
-                        _logger.Information(@"Create Source Directory: [{SourcePath}]", sync.SourcePath);
+                        _logger.Information(@"{SyncLogType}: [{SourcePath}]", SyncLogType.CreateSourceDirectory.GetDescription(), sync.SourcePath);
                         Directory.CreateDirectory(sync.SourcePath);
                     }
 
                     if (Directory.Exists(sync.TargetPath) == false)
                     { 
-                        _logger.Information(@"Create Target Directory: [{TargetPath}]", sync.TargetPath);
+                        _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.CreateTargetDirectory.GetDescription(), sync.TargetPath);
                         Directory.CreateDirectory(sync.TargetPath);
                     }
 
@@ -763,12 +479,12 @@ namespace AmigaOsBuilder
                 case SyncType.DeleteTarget:
                     if (Directory.Exists(sync.TargetPath))
                     {
-                        _logger.Information(@"Delete Target Directory: [{TargetPath}]", sync.TargetPath);
+                        _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.DeleteTargetDirectory.GetDescription(), sync.TargetPath);
                         Directory.Delete(sync.TargetPath, recursive: true);
                     }
                     else
                     {
-                        _logger.Debug(@"Delete Target Directory (already deleted): [{TargetPath}]", sync.TargetPath);
+                        _logger.Debug(@"{SyncLogType}: (already deleted) [{TargetPath}]", SyncLogType.DeleteTargetDirectory.GetDescription(), sync.TargetPath);
                     }
 
                     break;
@@ -784,38 +500,6 @@ namespace AmigaOsBuilder
             var fileType = (packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory ? FileType.Directory : FileType.File;
 
             return fileType;
-        }
-
-        private static string TargetAliasToOutputPath(string targetAlias)
-        {
-            foreach (var mapKey in AliasToOutputMap.Keys)
-            {
-                targetAlias = targetAlias.Replace(mapKey, AliasToOutputMap[mapKey]);
-            }
-
-            if (targetAlias.Contains("__"))
-            {
-                throw new Exception($"Couldn't map target alias {targetAlias}!");
-            }
-
-            return targetAlias;          
-        }
-
-        private static Config GetConfig(string location, string configFileName)
-        {
-            var config = TestConfig;
-            
-            //var configFilePath = Path.Combine(location, configFileName);
-            
-            //// Serialize
-            //var configString = JsonConvert.SerializeObject(config, Formatting.Indented);
-            //File.WriteAllText(configFilePath, configString, Encoding.UTF8);
-
-            //// Deserialize
-            //var configString = File.ReadAllText(configFilePath);
-            //config = JsonConvert.DeserializeObject<Config>(configString);
-
-            return config;
         }
 
         public static string RemoveRoot(string root, string target)
@@ -839,6 +523,27 @@ namespace AmigaOsBuilder
 
             return target;
         }
+    }
+
+    internal enum SyncLogType
+    {
+        Unknown = 0,
+        [Description("Copy To Target ..")]
+        CopyToTarget,
+        [Description("..... from Source")]
+        CopyFromSource,
+        [Description("Copy to Source ..")]
+        CopyToSource,
+        [Description("..... from Target")]
+        CopyFromTarget,
+        [Description("Delete Target ...")]    
+        DeleteTarget,
+        [Description("Create Target Dir")]
+        CreateTargetDirectory,
+        [Description("Create Source Dir")]
+        CreateSourceDirectory,
+        [Description("Delete Target Dir")]
+        DeleteTargetDirectory
     }
 
     internal enum FileDiff
@@ -909,3 +614,4 @@ namespace AmigaOsBuilder
         public string Url { get; set; }
     }
 }
+
