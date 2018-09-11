@@ -207,17 +207,31 @@ namespace AmigaOsBuilder
             }
         }
 
+        private static string _progressLastTitle = string.Empty;
+        private static int _progressLastWidth = 0;
+
         private static void ProgressBar(string title, int i, int packagesCount)
         {
+            if (_progressLastTitle != title)
+            {
+                _progressLastTitle = title;
+                _progressLastWidth = 0;
+
+            }
             var barWidth = 50;
             var progressWidth = (i * barWidth) / (packagesCount-1);
 
-            var barText = string.Format("{0}: [{1}{2}]\r",
-                title,
-                new string('#', progressWidth),
-                new string('-', barWidth - progressWidth));
+            if (progressWidth > _progressLastWidth)
+            {
+                _progressLastWidth = progressWidth;
 
-            Console.Write(barText);
+                var barText = string.Format("{0}: [{1}{2}]\r",
+                    title,
+                    new string('#', progressWidth),
+                    new string('-', barWidth - progressWidth));
+
+                Console.Write(barText);
+            }
         }
 
         private static void ClearProgressBar()
