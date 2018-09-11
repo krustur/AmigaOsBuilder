@@ -12,6 +12,7 @@ namespace AmigaOsBuilder
         {
             // System drive
             { @"__systemdrive__",        @"System" },
+            { @"__workdrive__",          @"Work" },
 
             // Amiga OS folders
             { @"__c__",                  @"System\C" },
@@ -27,11 +28,12 @@ namespace AmigaOsBuilder
             { @"__wbstartup__",          @"System\WBStartup" },
 
             // KrustWB folders
-            { @"__agames__",             @"System\A-Games" },
-            { @"__aguides__",            @"System\A-Guides" },
             { @"__aprograms__",          @"System\A-Programs" },
             { @"__asystem__",            @"System\A-System" },
-            { @"__awhdpackages__",       @"System\A-WHDPackages" },
+            { @"__aguides__",            @"Work\A-Guides" },
+            { @"__awhdgames__",          @"Work\A-WHDGames" },
+
+            { @"__sdk__",                @"Work\SDK" },
         };
         // @formatter:on
 

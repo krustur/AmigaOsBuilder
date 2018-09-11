@@ -25,14 +25,14 @@ namespace AmigaOsBuilder
                         Include = true,
                         Path = "WorkbenchMultiView",
                         Category = "OS",
-                        Description = "Copy from Amiga OS Utilities folder. Also replaces Amigaguide.",
+                        Description = "Copy from Amiga OS Utilities folder. Also replaces AmigaGuide.",
                     },
                     new Package
                     {
                         Include = true,
                         Path = "WorkbenchBackups",
                         Category = "OS",
-                        Description = "Backups of Workbench files that will be replaced by other packaes (e.g. c:info to c:info_original)",
+                        Description = "Backups of Workbench files that will be replaced by other packages (e.g. c:info to c:info_original)",
                     },
                     #endregion
                     #region KrustWB
@@ -311,6 +311,22 @@ namespace AmigaOsBuilder
                         Description = @"Text viewer",
                         Url = "http://aminet.net/package/text/show/TextView125"
                     },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "PatchRAM_1.11",
+                        Category = "System",
+                        Description = @"Patches the RAM disk to show the real size occupied",
+                        Url = "http://aminet.net/package/util/sys/PatchRAM"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "MUI_3.9-2015R1",
+                        Category = "Library",
+                        Description = @"Magical User Interface",
+                        Url = "https://muidev.de/downloads"
+                    },
                     #endregion
                     #region Libraries
                     new Package
@@ -328,6 +344,70 @@ namespace AmigaOsBuilder
                         Category = "Library",
                         Description = @"ReqTools library",
                         Url = "http://aminet.net/package/util/libs/ReqToolsLib"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "MakeIcon_1.5",
+                        Category = "Library",
+                        Description = @"Create Icons",
+                        Url = "http://aminet.net/package/util/cli/MakeIcon1_5"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "JanoEditor_1.01d",
+                        Category = "Library",
+                        Description = @"Text editor",
+                        Url = "http://aminet.net/package/text/edit/JanoEditor"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "guigfxnofpu_20.0",
+                        Category = "Library",
+                        Description = @"Application layer for pixel graphics (no fpu version)",
+                        Url = "http://aminet.net/package/dev/misc/guigfxlib_nofpu"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "MCCGuigfx_19.2",
+                        Category = "Library",
+                        Description = @"Guigfx Custom Class for Magic User Interface",
+                        Url = "http://aminet.net/package/dev/mui/MCC_Guigfx"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "MCCTextEditor_15.50",
+                        Category = "Library",
+                        Description = @"TextEditor Custom Class for Magic User Interface",
+                        Url = "http://aminet.net/package/dev/mui/MCC_TextEditor-15.50"
+                    },
+                    new Package
+                    {
+                        Include = false,
+                        Path = "renderlib_40.8",
+                        Category = "Library",
+                        Description = @"shared library that serves an image processing kernel (re-implementation of render.library in ANSI C)",
+                        Url = "http://aminet.net/package/dev/misc/renderlib"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "renderlib_31",
+                        Category = "Library",
+                        Description = @"shared library that serves an image processing kernel (re-implementation of render.library in ANSI C)",
+                        Url = "http://aminet.net/package/dev/misc/renderlib31"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "TransADF_4.0.46",
+                        Category = "Library",
+                        Description = @"Makes Compressed ADFs",
+                        Url = "http://aminet.net/package/disk/misc/TransADF"
                     },
                     #endregion
                     #region A-Programs
@@ -386,24 +466,58 @@ namespace AmigaOsBuilder
                         Category = "Program",
                         Description = @"Sorts Workbench icons",
                         Url = "http://aminet.net/package/util/wb/SortIconsOld"
-                    },
-                    #endregion
-                    #region A-Games                   
+                    },              
                     new Package
                     {
                         Include = true,
                         Path = "WHDLoad usr_18.3",
+                        Category = "Programs",
+                        Description = @"WHDLoad",
+                        Url = "http://whdload.de/"
+                    },              
+                    new Package
+                    {
+                        Include = true,
+                        Path = "iGame_1.5",
+                        Category = "Programs",
+                        Description = @"Frontend to launching WHDLoad games",
+                        Url = "http://aminet.net/package/util/misc/iGame"
+                    },
+                    #endregion
+                    #region A-Games     
+                    new Package
+                    {
+                        Include = true,
+                        Path = "WHDGames",
                         Category = "Games",
-                        Description = @"System and application monitor",
+                        Description = @"WHDGames",
                         Url = "http://aminet.net/package/util/moni/SnoopDos"
+                    },
+                    #endregion
+                    #region Dev
+                    new Package
+                    {
+                        Include = true,
+                        Path = "NDK_3.9",
+                        Category = "Dev",
+                        Description = @"Amiga OS 3.9 NDK (Native Development Kit)",
+                        Url = "http://www.haage-partner.de/download/AmigaOS/NDK39.lha"
                     },
                     new Package
                     {
                         Include = true,
-                        Path = "WHDPackages",
-                        Category = "Games",
-                        Description = @"System and application monitor",
-                        Url = "http://aminet.net/package/util/moni/SnoopDos"
+                        Path = "vbcc-bin-amigaos68k_0.906",
+                        Category = "Dev",
+                        Description = @"Highly optimizing portable and retargetable ISO C compiler. It supports ISO C according to ISO/IEC 9899:1989 and a subset of the new standard ISO/IEC 9899:1999 (C99).",
+                        Url = "http://sun.hasenbraten.de/vbcc/"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "vbcc-target-m68k-amigaos_0.906",
+                        Category = "Dev",
+                        Description = @"VBCC Compiler target AmigaOS 2.x/3.x M680x0.",
+                        Url = "http://sun.hasenbraten.de/vbcc/"
                     },
                     #endregion
                 }

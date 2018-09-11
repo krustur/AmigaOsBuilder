@@ -107,12 +107,13 @@ namespace AmigaOsBuilder
                 case SyncMode.Synchronize:
                 {
                     AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
-                    //AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.SourceToTarget, syncList);
                     AddDeleteToSyncList(outputBasePath, syncList);
                     AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
                     break;
                 }
             }
+
+            ClearProgressBar();
 
             _logger.Information("Building sync list done!");
 
@@ -122,8 +123,10 @@ namespace AmigaOsBuilder
         private static void AddContentToSyncList(string sourceBasePath, string outputBasePath, Config config,
             string contentFolderName, SyncType syncType, List<Sync> syncList)
         {
+            int packageCnt = 0;
             foreach (var package in config.Packages)
             {
+                ProgressBar("AddContentToSyncList ", packageCnt++, config.Packages.Count);
                 if (package.Include == false)
                 {
                     continue;
@@ -204,6 +207,28 @@ namespace AmigaOsBuilder
             }
         }
 
+        private static void ProgressBar(string title, int i, int packagesCount)
+        {
+            var barWidth = 50;
+            var progressWidth = (i * barWidth) / (packagesCount-1);
+
+            var barText = string.Format("\r{0}: [{1}{2}]",
+                title,
+                new string('#', progressWidth),
+                new string('-', barWidth - progressWidth));
+
+            Console.Write(barText);
+        }
+
+        private static void ClearProgressBar()
+        {
+
+            var barText = string.Format("\r{0}\r",
+                new string(' ', 80));
+
+            Console.Write(barText);
+        }
+
         private static bool ShouldContentReverseAll(string packageEntryFileName)
         {
             if (packageEntryFileName.ToLowerInvariant() == "content_reverse_all")
@@ -217,10 +242,17 @@ namespace AmigaOsBuilder
         private static void AddDeleteToSyncList(string outputBasePath, List<Sync> syncList)
         {
             var outputEntries = Directory.GetFileSystemEntries(outputBasePath, "*", SearchOption.AllDirectories);
+            var syncListKeys = syncList
+                .Select(x => x.TargetPath.ToLowerInvariant())
+                .Distinct()
+                .ToList();
+            var packageCnt = 0;
             foreach (var outputEntry in outputEntries)
             {
-                //if (syncList.Any(x => outputEntry.ToLowerInvariant() == x.TargetPath.ToLowerInvariant()) == false)
-                if (syncList.Any(x => x.TargetPath.ToLowerInvariant().StartsWith(outputEntry.ToLowerInvariant())) == false)
+                ProgressBar("AddDeleteToSyncList  ", packageCnt++, outputEntries.Length);
+                var outputEntryLower = outputEntry.ToLowerInvariant();
+                //if (syncList.Any(x => x.TargetPath.ToLowerInvariant().StartsWith(outputEntryLower)) == false)
+                if (syncListKeys.Any(x => x.StartsWith(outputEntryLower)) == false)
                 {
                     syncList.Add(new Sync
                     {
@@ -228,6 +260,7 @@ namespace AmigaOsBuilder
                         FileType = GetFileType(SyncType.DeleteTarget, outputEntry),
                         TargetPath = outputEntry
                     });
+                    syncListKeys.Add(outputEntryLower);
                 }
             }
         }
