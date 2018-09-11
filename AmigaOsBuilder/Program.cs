@@ -212,7 +212,7 @@ namespace AmigaOsBuilder
             var barWidth = 50;
             var progressWidth = (i * barWidth) / (packagesCount-1);
 
-            var barText = string.Format("\r{0}: [{1}{2}]",
+            var barText = string.Format("{0}: [{1}{2}]\r",
                 title,
                 new string('#', progressWidth),
                 new string('-', barWidth - progressWidth));
@@ -223,7 +223,7 @@ namespace AmigaOsBuilder
         private static void ClearProgressBar()
         {
 
-            var barText = string.Format("\r{0}\r",
+            var barText = string.Format("{0}\r",
                 new string(' ', 80));
 
             Console.Write(barText);
@@ -281,8 +281,11 @@ namespace AmigaOsBuilder
                 .Distinct()
                 .ToList();
 
+            var packageCnt = 0;
             foreach (var targetPath in targetPaths)
             {
+                ProgressBar("SynchronizeV2", packageCnt++, targetPaths.Count);
+
                 var syncListForTarget = syncList
                     .Where(x => x.TargetPath.ToLowerInvariant() == targetPath)
                     .ToList();
@@ -318,6 +321,8 @@ namespace AmigaOsBuilder
                     .ToList();
                 sourcePaths.RemoveAll(x => syncListForTargetSourcePaths.Contains(x));
             }
+
+            ClearProgressBar();
 
             // Source Paths check if pure paranoia! Shouldn't be needed.
             if (sourcePaths.Count > 0)
