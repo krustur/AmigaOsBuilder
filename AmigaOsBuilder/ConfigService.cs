@@ -409,6 +409,14 @@ namespace AmigaOsBuilder
                         Description = @"Makes Compressed ADFs",
                         Url = "http://aminet.net/package/disk/misc/TransADF"
                     },
+                    new Package
+                    {
+                        Include = false,
+                        Path = "MCP_1.48",
+                        Category = "Library",
+                        Description = @"Master Control Program. Collect all usual patches for AmigaOS at a time when the development of AmigaOS seemed to have stopped",
+                        Url = "http://mcp.a1k.org/indexe.html"
+                    },
                     #endregion
                     #region A-Programs
                     new Package
@@ -487,7 +495,7 @@ namespace AmigaOsBuilder
                     #region A-Games     
                     new Package
                     {
-                        Include = true,
+                        Include = false,
                         Path = "WHDGames",
                         Category = "Games",
                         Description = @"WHDGames",
@@ -518,6 +526,30 @@ namespace AmigaOsBuilder
                         Category = "Dev",
                         Description = @"VBCC Compiler target AmigaOS 2.x/3.x M680x0.",
                         Url = "http://sun.hasenbraten.de/vbcc/"
+                    },
+                    new Package
+                    {
+                        Include = false,
+                        Path = "AsmOne_1.25",
+                        Category = "Dev",
+                        Description = @"(seems like 1.29 actually) 68k/PPC Assembler Development Environment for the Amiga",
+                        Url = "From My old Amiga"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "AsmOne_1.29",
+                        Category = "Dev",
+                        Description = @"68k/PPC Assembler Development Environment for the Amiga",
+                        Url = "From old floppies"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "AsmOne_1.48",
+                        Category = "Dev",
+                        Description = @"68k/PPC Assembler Development Environment for the Amiga",
+                        Url = "http://aminet.net/package/dev/asm/ASM-One"
                     },
                     #endregion
                 }

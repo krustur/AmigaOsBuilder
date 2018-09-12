@@ -30,6 +30,7 @@ namespace AmigaOsBuilder
             // KrustWB folders
             { @"__aprograms__",          @"System\A-Programs" },
             { @"__asystem__",            @"System\A-System" },
+            { @"__adev__",               @"System\A-Dev" },
             { @"__aguides__",            @"Work\A-Guides" },
             { @"__awhdgames__",          @"Work\A-WHDGames" },
 
