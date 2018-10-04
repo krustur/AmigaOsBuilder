@@ -16,18 +16,11 @@ namespace AmigaOsBuilder
 
     class Program
     {
-        public enum SyncMode
-        {
-            Unknown = 0,
-            Forward,
-            Reverse,
-            Synchronize
-        }
-
-
-
-
         private static Logger _logger;
+        private static string _progressLastTitle = string.Empty;
+        private static int _progressLastWidth = 0;
+        private static readonly StringBuilder UserStartupBuilder = new StringBuilder(32727);
+        private static readonly StringBuilder ReadmeBuilder = new StringBuilder(32727);
 
         static void Main(string[] args)
         {
@@ -48,9 +41,8 @@ namespace AmigaOsBuilder
                 var sourceBasePath = configuration["SourceBasePath"];
                 var outputBasePath = configuration["OutputBasePath"];
                 var configFile = configuration["ConfigFile"];
-                var syncMode = Enum.Parse<SyncMode>(configuration["SyncMode"]);
 
-                BuildIt(location, sourceBasePath, outputBasePath, configFile, syncMode);
+                BuildIt(location, sourceBasePath, outputBasePath, configFile);
             }
             catch (Exception e)
             {
@@ -63,56 +55,34 @@ namespace AmigaOsBuilder
             Console.ReadLine();
         }
 
-        private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName, SyncMode syncMode)
+        private static void BuildIt(string location, string sourceBasePath, string outputBasePath, string configFileName)
         {
             var config = ConfigService.GetConfig(location, configFileName);
 
             AliasService.CreateOutputAliasDirectories(_logger, outputBasePath);
 
-            var syncList = BuildSyncList(sourceBasePath, outputBasePath, syncMode, config);
+            var syncList = BuildSyncList(sourceBasePath, outputBasePath, config);
 
-            if (syncMode != SyncMode.Synchronize)
-            {
-                Synchronize(syncList);
-            }
-            else
-            {
-                SynchronizeV2(syncList);
-            }
+            
+            SynchronizeV2(syncList);
+
+            SynchronizeTextFile(UserStartupBuilder.ToString(), outputBasePath, "__s__", "user-startup");
+            SynchronizeTextFile(ReadmeBuilder.ToString(), outputBasePath, "__systemdrive__", "readme_krustwb3.txt");
+
         }
 
-        
 
-        private static List<Sync> BuildSyncList(string sourceBasePath, string outputBasePath, SyncMode syncMode, Config config)
+
+        private static List<Sync> BuildSyncList(string sourceBasePath, string outputBasePath, Config config)
         {
             _logger.Information("Building sync list ...");
-            _logger.Information($"SyncMode  [{syncMode}]");
 
             var syncList = new List<Sync>();
 
-            switch (syncMode)
-            {
-                case SyncMode.Forward:
-                {
-                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
-                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.SourceToTarget, syncList);
-                    AddDeleteToSyncList(outputBasePath, syncList);
-                    break;
-                }
-                case SyncMode.Reverse:
-                {
-                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
-                    break;
-                }
-                case SyncMode.Synchronize:
-                {
-                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList);
-                    AddDeleteToSyncList(outputBasePath, syncList);
-                    AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList);
-                    break;
-                }
-            }
-
+            AddContentToSyncList(sourceBasePath, outputBasePath, config, "content", SyncType.SourceToTarget, syncList, appendToReadme: true);
+            AddDeleteToSyncList(outputBasePath, syncList);
+            AddContentToSyncList(sourceBasePath, outputBasePath, config, "content_reverse", SyncType.TargetToSource, syncList, appendToReadme: false);
+            
             ClearProgressBar();
 
             _logger.Information("Building sync list done!");
@@ -121,7 +91,7 @@ namespace AmigaOsBuilder
         }
 
         private static void AddContentToSyncList(string sourceBasePath, string outputBasePath, Config config,
-            string contentFolderName, SyncType syncType, List<Sync> syncList)
+            string contentFolderName, SyncType syncType, List<Sync> syncList, bool appendToReadme)
         {
             int packageCnt = 0;
             foreach (var package in config.Packages)
@@ -130,6 +100,16 @@ namespace AmigaOsBuilder
                 if (package.Include == false)
                 {
                     continue;
+                }
+
+                if (appendToReadme)
+                {
+                    ReadmeBuilder.AppendLine($"{package.Path}");
+                    ReadmeBuilder.AppendLine($"{new string('=', package.Path.Length)}");
+                    ReadmeBuilder.AppendLine($"Category: [{package.Category}]");
+                    ReadmeBuilder.AppendLine($"Source {package.Source}");
+                    ReadmeBuilder.AppendLine($"{package.Description}");
+                    ReadmeBuilder.AppendLine($"");
                 }
 
                 var packageBasePath = Path.Combine(sourceBasePath, package.Path);
@@ -204,11 +184,27 @@ namespace AmigaOsBuilder
                         }
                     }
                 }
+                var packageFiles = Directory.GetFiles(packageContentBasePath);
+                foreach (var packageFile in packageFiles)
+                {
+                    var packageFileName = Path.GetFileName(packageFile).ToLowerInvariant();
+                    switch (packageFileName)
+                    {
+                        case "user-startup":
+                        {
+                            var userStartupContent = File.ReadAllText(packageFile);
+                            UserStartupBuilder.Append(userStartupContent);
+                            break;
+                        }
+                        default:
+                        {
+                            throw new Exception($"Package file [{packageFileName}] is not supported!");
+                        }
+                    }
+                }
             }
         }
 
-        private static string _progressLastTitle = string.Empty;
-        private static int _progressLastWidth = 0;
 
         private static void ProgressBar(string title, int i, int packagesCount)
         {
@@ -344,29 +340,26 @@ namespace AmigaOsBuilder
                 throw new Exception("SourcePaths was not synchronized!!");
             }
 
+
             _logger.Information("Synchronizing done!");
         }
 
-        private static void Synchronize(IList<Sync> syncList)
-        { 
-            _logger.Information("Synchronizing ...");
+        private static void SynchronizeTextFile(string content, string outputBasePath, string outputSubPath, string fileName)
+        {
+            var outputPath = Path.Combine(outputBasePath, AliasService.TargetAliasToOutputPath(outputSubPath), fileName);
 
-            foreach (var sync in syncList)
+            var oldContent = File.Exists(outputPath) ? File.ReadAllText(outputPath) : string.Empty;
+
+            content = content.Replace("\r\n", "\n");
+            //if (content != oldContent)
+            if (content.Equals(oldContent, StringComparison.Ordinal) == false)
             {
-                switch (sync.FileType)
-                {
-                    case FileType.File:
-                        SynchronizeFile(sync);
-                        break;
-                    case FileType.Directory:
-                        SynchronizeDirectory(sync);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                _logger.Information(@"Updating text file: [{TargetPath}]", outputPath);
+                _logger.Information("<<<< Begin content >>>>");
+                _logger.Information(content);
+                _logger.Information("<<<< End content >>>>");
+                File.WriteAllText(outputPath, content);
             }
-
-            _logger.Information("Synchronizing done!");
         }
 
         private static void SynchronizeFile(Sync sync)
@@ -640,7 +633,8 @@ namespace AmigaOsBuilder
         Unknown = 0,
         SourceToTarget,
         TargetToSource,
-        DeleteTarget
+        DeleteTarget,
+        AppendToTarget
     }
 
     public enum FileType
@@ -661,7 +655,7 @@ namespace AmigaOsBuilder
         public string Path { get; set; }
         public string Category { get; set; }
         public string Description { get; set; }
-        public string Url { get; set; }
+        public string Source { get; set; }
     }
 }
 

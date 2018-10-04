@@ -18,7 +18,7 @@ namespace AmigaOsBuilder
                         Path = "Workbench (clean install)_3.1",
                         Category = "OS",
                         Description = "Workbench 3.1 operation system (clean Install)",
-                        //Url = ""
+                        //Source = ""
                     },
                     new Package
                     {
@@ -43,7 +43,7 @@ namespace AmigaOsBuilder
                         Path = "Startup-Sequence",
                         Category = "KrustWB",
                         Description = "KrustWB startup-sequence and user-startup files",
-                        //Url = ""
+                        //Source = ""
                     },
                     new Package
                     {
@@ -52,7 +52,7 @@ namespace AmigaOsBuilder
                         Path = "Backdrop",
                         Category = "KrustWB",
                         Description = "KrustWB .backdrop file. OS setting file that keeps track of \"Leave Out\".",
-                        //Url = ""
+                        //Source = ""
                     },
                     new Package
                     {
@@ -61,7 +61,7 @@ namespace AmigaOsBuilder
                         Path = "Env-Archive",
                         Category = "KrustWB",
                         Description = "KrustWB system settings files kept in Prefs/Env-Archive",
-                        //Url = ""
+                        //Source = ""
                     },
                     new Package
                     {
@@ -70,7 +70,7 @@ namespace AmigaOsBuilder
                         Path = "Monitors",
                         Category = "KrustWB",
                         Description = "KrustWB monitors Devs/Monitors",
-                        //Url = ""
+                        //Source = ""
                     },
                     new Package
                     {
@@ -79,7 +79,7 @@ namespace AmigaOsBuilder
                         Path = "A-Directories",
                         Category = "KrustWB",
                         Description = "A-Directories including icons",
-                        //Url = ""
+                        //Source = ""
                     },
                     new Package
                     {
@@ -87,7 +87,7 @@ namespace AmigaOsBuilder
                         Path = "KrustWBInstall",
                         Category = "KrustWB",
                         Description = "Scripts to pack and install KrustWB",
-                        //Url = ""
+                        //Source = ""
                     },
                     #endregion
                     #region A-System
@@ -97,7 +97,7 @@ namespace AmigaOsBuilder
                         Path = "SetPatch_43.6b",
                         Category = "System",
                         Description = "Makes ROM patches in system software",
-                        Url = "http://m68k.aminet.net/package/util/boot/SetPatch_43.6b"
+                        Source = "http://m68k.aminet.net/package/util/boot/SetPatch_43.6b"
                     },
                     new Package
                     {
@@ -105,7 +105,7 @@ namespace AmigaOsBuilder
                         Path = "NoClick_1.1",
                         Category = "System",
                         Description = "Disables the clicking of the floppy drives.",
-                        Url = "http://aminet.net/package/disk/misc/NoClick"
+                        Source = "http://aminet.net/package/disk/misc/NoClick"
                     },
                     new Package
                     {
@@ -113,7 +113,7 @@ namespace AmigaOsBuilder
                         Path = "Installer_44.10",
                         Category = "System",
                         Description = "Installer software",
-                        //Url = ""
+                        //Source = ""
                     },
                     new Package
                     {
@@ -121,7 +121,7 @@ namespace AmigaOsBuilder
                         Path = "InstallerNG_1.5 pre",
                         Category = "System",
                         Description = "Installer software",
-                        Url = "http://aminet.net/package/util/sys/InstallerNG"
+                        Source = "http://aminet.net/package/util/sys/InstallerNG"
                     },
                     new Package
                     {
@@ -131,7 +131,7 @@ namespace AmigaOsBuilder
                         Description = "When a PC Card is plugged in the PCMCIA slot and cnet.device is not run then Amiga system slows."
                                       + " CardPatch patches this \"slow bug\" and other bugs in card.resource. The CardResetCard() function"
                                       + " is patched and each \"new\" card is reseted after it is inserted in the PCMCIA slot.",
-                        Url = "http://aminet.net/package/util/boot/CardPatch"
+                        Source = "http://aminet.net/package/util/boot/CardPatch"
                     },
                     new Package
                     {
@@ -139,7 +139,7 @@ namespace AmigaOsBuilder
                         Path = "CardReset_3.0",
                         Category = "System",
                         Description = "CardReset forces a high level on pin 58 of the Amiga PCMCIA slot (reset signal)",
-                        Url = "http://aminet.net/package/util/boot/CardReset"
+                        Source = "http://aminet.net/package/util/boot/CardReset"
                     },
                     new Package
                     {
@@ -147,7 +147,7 @@ namespace AmigaOsBuilder
                         Path = "Borderblank",
                         Category = "System",
                         Description = "This simply blanks the border",
-                        Url = "http://aminet.net/package/util/boot/bordblnk"
+                        Source = "http://aminet.net/package/util/boot/bordblnk"
                     },
                     new Package
                     {
@@ -162,7 +162,7 @@ namespace AmigaOsBuilder
                         Path = "LoadModule_45.15",
                         Category = "System",
                         Description = "LoadModule installs \"resident modules\" in a reset-proof way.",
-                        Url = "http://aminet.net/package/util/boot/LoadModule"
+                        Source = "http://aminet.net/package/util/boot/LoadModule"
                     },
                     new Package
                     {
@@ -170,7 +170,7 @@ namespace AmigaOsBuilder
                         Path = "SCSI_43.45p",
                         Category = "System",
                         Description = "Patched scsi.device to enable use of 128 GB or bigger IDE devices",
-                        Url = "http://aminet.net/package/driver/media/SCSI4345p"
+                        Source = "http://aminet.net/package/driver/media/SCSI4345p"
                     },
                     new Package
                     {
@@ -178,7 +178,7 @@ namespace AmigaOsBuilder
                         Path = "Fat95_3.18",
                         Category = "System",
                         Description = "a DOS handler to mount and use Win95/98 volumes just as if they were AMIGA volumes.",
-                        Url = "http://aminet.net/package/disk/misc/fat95"
+                        Source = "http://aminet.net/package/disk/misc/fat95"
                     },
                     new Package
                     {
@@ -186,7 +186,7 @@ namespace AmigaOsBuilder
                         Path = "Cfd_1.33",
                         Category = "System",
                         Description = "Read and write files from CompactFlash cards",
-                        Url = "http://aminet.net/package/driver/media/CFD133"
+                        Source = "http://aminet.net/package/driver/media/CFD133"
                     },
                     new Package
                     {
@@ -200,7 +200,8 @@ namespace AmigaOsBuilder
                         Include = true,
                         Path = "AssignWedge_1.5",
                         Category = "System",
-                        //Description = "",
+                        Description = "Add Mount and Assign options to Amiga requester",
+                        Source = "http://aminet.net/package/util/wb/AssignWedge",
                     },
                     new Package
                     {
@@ -229,7 +230,7 @@ namespace AmigaOsBuilder
                         Path = "scrsh",
                         Category = "System",
                         Description = "Opens Shell in a screen",
-                        Url = "http://aminet.net/package/util/cli/ksc_scrsh",
+                        Source = "http://aminet.net/package/util/cli/ksc_scrsh",
                     },
                     new Package
                     {
@@ -237,7 +238,7 @@ namespace AmigaOsBuilder
                         Path = "ShellScreen_1.6",
                         Category = "System",
                         Description = "Opens Shell in a screen",
-                        Url = "http://aminet.net/package/util/shell/ShellScr",
+                        Source = "http://aminet.net/package/util/shell/ShellScr",
                     },
                     new Package
                     {
@@ -245,7 +246,7 @@ namespace AmigaOsBuilder
                         Path = "ViNCEd_3.73",
                         Category = "System",
                         Description = "Full screen shell editor",
-                        Url = "http://aminet.net/package/util/shell/ShellScr",
+                        Source = "http://aminet.net/package/util/shell/ShellScr",
                     },
                     new Package
                     {
@@ -253,7 +254,7 @@ namespace AmigaOsBuilder
                         Path = "KingCON_1.3",
                         Category = "System",
                         Description = @"A console-handler that optionally replaces the standard console devices. Adds some useful features, such as Filename-completion",
-                        Url = "http://aminet.net/package/util/shell/KingCON_1.3"
+                        Source = "http://aminet.net/package/util/shell/KingCON_1.3"
                     },
                     new Package
                     {
@@ -261,7 +262,7 @@ namespace AmigaOsBuilder
                         Path = "FreeWheel_2.2.2",
                         Category = "System",
                         Description = @"A tool to fine-tune your mouse",
-                        Url = "http://m68k.aminet.net/package/util/mouse/FreeWheel"
+                        Source = "http://m68k.aminet.net/package/util/mouse/FreeWheel"
                     },
                     new Package
                     {
@@ -269,7 +270,7 @@ namespace AmigaOsBuilder
                         Path = "ToolsDaemon_2.1a",
                         Category = "System",
                         Description = @"ToolsDaemon allows you to run programs simply by selecting a menu item from the menu strip of Workbench",
-                        Url = "http://aminet.net/package/util/boot/ToolsDaemon21a"
+                        Source = "http://aminet.net/package/util/boot/ToolsDaemon21a"
                     },
                     new Package
                     {
@@ -277,7 +278,7 @@ namespace AmigaOsBuilder
                         Path = "Info_39.18b",
                         Category = "System",
                         Description = @"ToolsDaemon allows you to run programs simply by selecting a menu item from the menu strip of Workbench",
-                        Url = "http://aminet.net/package/util/sys/info"
+                        Source = "http://aminet.net/package/util/sys/info"
                     },
                     new Package
                     {
@@ -285,7 +286,7 @@ namespace AmigaOsBuilder
                         Path = "Dr_2.0",
                         Category = "System",
                         Description = @"Dir replacement",
-                        Url = "http://paulkienitz.net/amiga/"
+                        Source = "http://paulkienitz.net/amiga/"
                     },
                     new Package
                     {
@@ -293,7 +294,7 @@ namespace AmigaOsBuilder
                         Path = "EvenMore_0.91",
                         Category = "System",
                         Description = @"Text viewer",
-                        Url = "http://www.evenmore.co.uk/"
+                        Source = "http://www.evenmore.co.uk/"
                     },
                     new Package
                     {
@@ -301,7 +302,7 @@ namespace AmigaOsBuilder
                         Path = "MuchMore_4.6",
                         Category = "System",
                         Description = @"Text viewer",
-                        Url = "http://aminet.net/package/text/show/muchmore46"
+                        Source = "http://aminet.net/package/text/show/muchmore46"
                     },
                     new Package
                     {
@@ -309,7 +310,7 @@ namespace AmigaOsBuilder
                         Path = "TextView_1.25",
                         Category = "System",
                         Description = @"Text viewer",
-                        Url = "http://aminet.net/package/text/show/TextView125"
+                        Source = "http://aminet.net/package/text/show/TextView125"
                     },
                     new Package
                     {
@@ -317,7 +318,7 @@ namespace AmigaOsBuilder
                         Path = "PatchRAM_1.11",
                         Category = "System",
                         Description = @"Patches the RAM disk to show the real size occupied",
-                        Url = "http://aminet.net/package/util/sys/PatchRAM"
+                        Source = "http://aminet.net/package/util/sys/PatchRAM"
                     },
                     new Package
                     {
@@ -325,7 +326,7 @@ namespace AmigaOsBuilder
                         Path = "MUI_3.9-2015R1",
                         Category = "Library",
                         Description = @"Magical User Interface",
-                        Url = "https://muidev.de/downloads"
+                        Source = "https://muidev.de/downloads"
                     },
                     #endregion
                     #region Libraries
@@ -335,7 +336,7 @@ namespace AmigaOsBuilder
                         Path = "ReqTools_38.1210",
                         Category = "Library",
                         Description = @"ReqTools library",
-                        Url = "http://aminet.net/package/util/boot/ToolsDaemon21a"
+                        Source = "http://aminet.net/package/util/boot/ToolsDaemon21a"
                     },
                     new Package
                     {
@@ -343,7 +344,7 @@ namespace AmigaOsBuilder
                         Path = "ReqTools_39.3",
                         Category = "Library",
                         Description = @"ReqTools library",
-                        Url = "http://aminet.net/package/util/libs/ReqToolsLib"
+                        Source = "http://aminet.net/package/util/libs/ReqToolsLib"
                     },
                     new Package
                     {
@@ -351,7 +352,7 @@ namespace AmigaOsBuilder
                         Path = "MakeIcon_1.5",
                         Category = "Library",
                         Description = @"Create Icons",
-                        Url = "http://aminet.net/package/util/cli/MakeIcon1_5"
+                        Source = "http://aminet.net/package/util/cli/MakeIcon1_5"
                     },
                     new Package
                     {
@@ -359,7 +360,7 @@ namespace AmigaOsBuilder
                         Path = "JanoEditor_1.01d",
                         Category = "Library",
                         Description = @"Text editor",
-                        Url = "http://aminet.net/package/text/edit/JanoEditor"
+                        Source = "http://aminet.net/package/text/edit/JanoEditor"
                     },
                     new Package
                     {
@@ -367,7 +368,7 @@ namespace AmigaOsBuilder
                         Path = "guigfxnofpu_20.0",
                         Category = "Library",
                         Description = @"Application layer for pixel graphics (no fpu version)",
-                        Url = "http://aminet.net/package/dev/misc/guigfxlib_nofpu"
+                        Source = "http://aminet.net/package/dev/misc/guigfxlib_nofpu"
                     },
                     new Package
                     {
@@ -375,7 +376,7 @@ namespace AmigaOsBuilder
                         Path = "MCCGuigfx_19.2",
                         Category = "Library",
                         Description = @"Guigfx Custom Class for Magic User Interface",
-                        Url = "http://aminet.net/package/dev/mui/MCC_Guigfx"
+                        Source = "http://aminet.net/package/dev/mui/MCC_Guigfx"
                     },
                     new Package
                     {
@@ -383,7 +384,7 @@ namespace AmigaOsBuilder
                         Path = "MCCTextEditor_15.50",
                         Category = "Library",
                         Description = @"TextEditor Custom Class for Magic User Interface",
-                        Url = "http://aminet.net/package/dev/mui/MCC_TextEditor-15.50"
+                        Source = "http://aminet.net/package/dev/mui/MCC_TextEditor-15.50"
                     },
                     new Package
                     {
@@ -391,7 +392,7 @@ namespace AmigaOsBuilder
                         Path = "renderlib_40.8",
                         Category = "Library",
                         Description = @"shared library that serves an image processing kernel (re-implementation of render.library in ANSI C)",
-                        Url = "http://aminet.net/package/dev/misc/renderlib"
+                        Source = "http://aminet.net/package/dev/misc/renderlib"
                     },
                     new Package
                     {
@@ -399,7 +400,7 @@ namespace AmigaOsBuilder
                         Path = "renderlib_31",
                         Category = "Library",
                         Description = @"shared library that serves an image processing kernel (re-implementation of render.library in ANSI C)",
-                        Url = "http://aminet.net/package/dev/misc/renderlib31"
+                        Source = "http://aminet.net/package/dev/misc/renderlib31"
                     },
                     new Package
                     {
@@ -407,7 +408,7 @@ namespace AmigaOsBuilder
                         Path = "TransADF_4.0.46",
                         Category = "Library",
                         Description = @"Makes Compressed ADFs",
-                        Url = "http://aminet.net/package/disk/misc/TransADF"
+                        Source = "http://aminet.net/package/disk/misc/TransADF"
                     },
                     new Package
                     {
@@ -415,7 +416,7 @@ namespace AmigaOsBuilder
                         Path = "MCP_1.48",
                         Category = "Library",
                         Description = @"Master Control Program. Collect all usual patches for AmigaOS at a time when the development of AmigaOS seemed to have stopped",
-                        Url = "http://mcp.a1k.org/indexe.html"
+                        Source = "http://mcp.a1k.org/indexe.html"
                     },
                     #endregion
                     #region A-Programs
@@ -425,7 +426,7 @@ namespace AmigaOsBuilder
                         Path = "Lha_2.15",
                         Category = "Program",
                         Description = "Lha command line (un)archiving",
-                        Url = "http://aminet.net/package/util/arc/lha_68k"
+                        Source = "http://aminet.net/package/util/arc/lha_68k"
                     },
                     new Package
                     {
@@ -433,7 +434,7 @@ namespace AmigaOsBuilder
                         Path = "Sha256_1.1",
                         Category = "Program",
                         Description = @"A command line utility to calculate the SHA-256 hashes of a list of files",
-                        Url = "http://aminet.net/package/util/cli/sha256"
+                        Source = "http://aminet.net/package/util/cli/sha256"
                     },
                     new Package
                     {
@@ -441,7 +442,7 @@ namespace AmigaOsBuilder
                         Path = "spatch_6.51 rel 4",
                         Category = "Program",
                         Description = @"Clone of SAS Binary File Patcher",
-                        Url = "http://aminet.net/package/dev/misc/spatch"
+                        Source = "http://aminet.net/package/dev/misc/spatch"
                     },
                     new Package
                     {
@@ -449,7 +450,7 @@ namespace AmigaOsBuilder
                         Path = "SysInfo_4.0",
                         Category = "Program",
                         Description = @"Util for getting information about the system, like OS and library versions, hardware revisions and stuff",
-                        Url = "https://sysinfo.d0.se/"
+                        Source = "https://sysinfo.d0.se/"
                     },
                     new Package
                     {
@@ -457,7 +458,7 @@ namespace AmigaOsBuilder
                         Path = "SnoopDos_3.8",
                         Category = "Program",
                         Description = @"System and application monitor",
-                        Url = "http://aminet.net/package/util/moni/SnoopDos"
+                        Source = "http://aminet.net/package/util/moni/SnoopDos"
                     },
                     new Package
                     {
@@ -465,7 +466,7 @@ namespace AmigaOsBuilder
                         Path = "IconZ_1.1",
                         Category = "Program",
                         Description = @"Sorts Workbench icons",
-                        Url = "http://aminet.net/package/util/wb/IconZ"
+                        Source = "http://aminet.net/package/util/wb/IconZ"
                     },
                     new Package
                     {
@@ -473,7 +474,7 @@ namespace AmigaOsBuilder
                         Path = "SortIconsOld_1.0",
                         Category = "Program",
                         Description = @"Sorts Workbench icons",
-                        Url = "http://aminet.net/package/util/wb/SortIconsOld"
+                        Source = "http://aminet.net/package/util/wb/SortIconsOld"
                     },              
                     new Package
                     {
@@ -481,7 +482,7 @@ namespace AmigaOsBuilder
                         Path = "WHDLoad usr_18.3",
                         Category = "Programs",
                         Description = @"WHDLoad",
-                        Url = "http://whdload.de/"
+                        Source = "http://whdload.de/"
                     },              
                     new Package
                     {
@@ -489,7 +490,7 @@ namespace AmigaOsBuilder
                         Path = "iGame_1.5",
                         Category = "Programs",
                         Description = @"Frontend to launching WHDLoad games",
-                        Url = "http://aminet.net/package/util/misc/iGame"
+                        Source = "http://aminet.net/package/util/misc/iGame"
                     },
                     #endregion
                     #region A-Games     
@@ -499,7 +500,7 @@ namespace AmigaOsBuilder
                         Path = "WHDGames",
                         Category = "Games",
                         Description = @"WHDGames",
-                        Url = "http://aminet.net/package/util/moni/SnoopDos"
+                        Source = "http://aminet.net/package/util/moni/SnoopDos"
                     },
                     #endregion
                     #region Dev
@@ -509,7 +510,7 @@ namespace AmigaOsBuilder
                         Path = "NDK_3.9",
                         Category = "Dev",
                         Description = @"Amiga OS 3.9 NDK (Native Development Kit)",
-                        Url = "http://www.haage-partner.de/download/AmigaOS/NDK39.lha"
+                        Source = "http://www.haage-partner.de/download/AmigaOS/NDK39.lha"
                     },
                     new Package
                     {
@@ -517,7 +518,7 @@ namespace AmigaOsBuilder
                         Path = "vbcc-bin-amigaos68k_0.906",
                         Category = "Dev",
                         Description = @"Highly optimizing portable and retargetable ISO C compiler. It supports ISO C according to ISO/IEC 9899:1989 and a subset of the new standard ISO/IEC 9899:1999 (C99).",
-                        Url = "http://sun.hasenbraten.de/vbcc/"
+                        Source = "http://sun.hasenbraten.de/vbcc/"
                     },
                     new Package
                     {
@@ -525,7 +526,7 @@ namespace AmigaOsBuilder
                         Path = "vbcc-target-m68k-amigaos_0.906",
                         Category = "Dev",
                         Description = @"VBCC Compiler target AmigaOS 2.x/3.x M680x0.",
-                        Url = "http://sun.hasenbraten.de/vbcc/"
+                        Source = "http://sun.hasenbraten.de/vbcc/"
                     },
                     new Package
                     {
@@ -533,7 +534,7 @@ namespace AmigaOsBuilder
                         Path = "AsmOne_1.25",
                         Category = "Dev",
                         Description = @"(seems like 1.29 actually) 68k/PPC Assembler Development Environment for the Amiga",
-                        Url = "From My old Amiga"
+                        Source = "From My old Amiga"
                     },
                     new Package
                     {
@@ -541,7 +542,7 @@ namespace AmigaOsBuilder
                         Path = "AsmOne_1.29",
                         Category = "Dev",
                         Description = @"68k/PPC Assembler Development Environment for the Amiga",
-                        Url = "From old floppies"
+                        Source = "From old floppies"
                     },
                     new Package
                     {
@@ -549,7 +550,7 @@ namespace AmigaOsBuilder
                         Path = "AsmOne_1.48",
                         Category = "Dev",
                         Description = @"68k/PPC Assembler Development Environment for the Amiga",
-                        Url = "http://aminet.net/package/dev/asm/ASM-One"
+                        Source = "http://aminet.net/package/dev/asm/ASM-One"
                     },
                     #endregion
                 }
