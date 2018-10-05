@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 
@@ -26,6 +24,9 @@ namespace AmigaOsBuilder
         {
             try
             {
+                //LhaTest.RunTest();
+                //return;
+
                 var configuration = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .AddCommandLine(args)
