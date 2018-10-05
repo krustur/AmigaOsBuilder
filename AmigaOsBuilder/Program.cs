@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -567,96 +566,6 @@ namespace AmigaOsBuilder
 
             return target;
         }
-    }
-
-    internal enum SyncLogType
-    {
-        Unknown = 0,
-        [Description("Copy To Target ..")]
-        CopyToTarget,
-        [Description("..... from Source")]
-        CopyFromSource,
-        [Description("Copy to Source ..")]
-        CopyToSource,
-        [Description("..... from Target")]
-        CopyFromTarget,
-        [Description("Delete Target ...")]    
-        DeleteTarget,
-        [Description("Create Target Dir")]
-        CreateTargetDirectory,
-        [Description("Create Source Dir")]
-        CreateSourceDirectory,
-        [Description("Delete Target Dir")]
-        DeleteTargetDirectory
-    }
-
-    internal enum FileDiff
-    {
-        Unknown = 0,
-        Equal,
-        DiffTargetMissing,
-        DiffSourceMissing,
-        DiffTargetNewer,
-        DiffSourceNewer,
-        DiffContent,
-    }
-
-    public class Sync
-    {
-        public SyncType SyncType { get; set; }
-        public FileType FileType { get; set; }
-        public string SourcePath { get; set; }
-        public string TargetPath { get; set; }
-
-        public override string ToString()
-        {
-            switch (SyncType)
-            {
-                case SyncType.SourceToTarget:
-                    {
-                        return $@"{SyncType} ({FileType}): {SourcePath} => {TargetPath}";
-                    }
-                case SyncType.TargetToSource:
-                    {
-                        return $@"{SyncType} ({FileType}): {SourcePath} <= {TargetPath}";
-                    }
-                case SyncType.DeleteTarget:
-                    {
-                        return $@"{SyncType} ({FileType}): {TargetPath}";
-                    }
-            }
-            return $"i am error (unknown SyncType)";
-        }
-    }
-
-    public enum SyncType
-    {
-        Unknown = 0,
-        SourceToTarget,
-        TargetToSource,
-        DeleteTarget,
-        AppendToTarget
-    }
-
-    public enum FileType
-    {
-        Unknown = 0,
-        File,
-        Directory,
-    }
-
-    public class Config
-    {
-        public IList<Package> Packages { get; set; }
-
-    }
-    public class Package
-    {
-        public bool Include { get; set; }
-        public string Path { get; set; }
-        public string Category { get; set; }
-        public string Description { get; set; }
-        public string Source { get; set; }
     }
 }
 
