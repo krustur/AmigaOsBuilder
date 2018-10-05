@@ -5,7 +5,7 @@ namespace AmigaOsBuilder
 {
     public class FileComparer
     {
-        public static bool FilesContentsAreEqual(FileInfo fileInfo1, FileInfo fileInfo2)
+        public static bool FilesContentsAreEqual(FileInfo fileInfo1, IFileInfo fileInfo2)
         {
             bool result;
 

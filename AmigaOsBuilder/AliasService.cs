@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Serilog.Core;
@@ -38,33 +39,43 @@ namespace AmigaOsBuilder
         };
         // @formatter:on
 
-        public static void CreateOutputAliasDirectories(Logger logger, string outputBasePath)
-        {
-            logger.Information("Creating output alias directories ...");
-            Directory.CreateDirectory(outputBasePath);
-            foreach (var map in AliasService.AliasToOutputMap)
-            {
-                var outputAliasPath = Path.Combine(outputBasePath, map.Value);
-                logger.Information($@"[{map.Key}] = [{outputAliasPath}]");
-                Directory.CreateDirectory(outputAliasPath);
-            }
+        //public static void CreateOutputAliasDirectories(Logger logger, string outputBasePath)
+        //{
+        //    logger.Information("Creating output alias directories ...");
+        //    Directory.CreateDirectory(outputBasePath);
+        //    foreach (var map in AliasService.AliasToOutputMap)
+        //    {
+        //        var outputAliasPath = Path.Combine(outputBasePath, map.Value);
+        //        logger.Information($@"[{map.Key}] = [{outputAliasPath}]");
+        //        Directory.CreateDirectory(outputAliasPath);
+        //    }
 
-            logger.Information("Create output alias directories done!");
-        }
+        //    logger.Information("Create output alias directories done!");
+        //}
 
-        public static string TargetAliasToOutputPath(string targetAlias)
+        public static string TargetAliasToOutputPath(string aliasedPath)
         {
             foreach (var mapKey in AliasToOutputMap.Keys)
             {
-                targetAlias = targetAlias.Replace(mapKey, AliasToOutputMap[mapKey]);
+                aliasedPath = aliasedPath.Replace(mapKey, AliasToOutputMap[mapKey]);
             }
 
-            if (targetAlias.Contains("__"))
+            if (aliasedPath.Contains("__"))
             {
-                throw new Exception($"Couldn't map target alias {targetAlias}!");
+                throw new Exception($"Couldn't map target alias {aliasedPath}!");
             }
 
-            return targetAlias;          
+            return aliasedPath;          
+        }
+
+        public static IEnumerable<string> GetAliases()
+        {
+            return AliasToOutputMap.Keys;
+        }
+
+        public static string GetAliasPath(string alias)
+        {
+            return AliasToOutputMap[alias];
         }
     }
 }
