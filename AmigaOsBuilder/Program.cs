@@ -39,7 +39,9 @@ namespace AmigaOsBuilder
                 var sourceBasePath = configuration["SourceBasePath"];
                 
                 var outputBasePath = configuration["OutputBasePath"];
-                var outputHandler = new FolderOutputHandler(_logger, outputBasePath);
+
+                //var outputHandler = new FolderOutputHandler(_logger, outputBasePath);
+                var outputHandler = OutputHandlerFactory.Create(_logger, outputBasePath);
 
                 var configFile = configuration["ConfigFile"];
 
@@ -129,7 +131,7 @@ namespace AmigaOsBuilder
                     var dirInfo = new DirectoryInfo(sourcePath);
                     var targetAlias = dirInfo.Name;
 
-                    var packageOutputPath_XXX = AliasService.TargetAliasToOutputPath(targetAlias);
+                    var packageOutputPath = AliasService.TargetAliasToOutputPath(targetAlias);
                     //packageOutputPath = Path.Combine(outputBasePath, packageOutputPath);
 
                     var packageEntries = Directory.GetFileSystemEntries(sourcePath, "*", SearchOption.AllDirectories);
@@ -140,7 +142,7 @@ namespace AmigaOsBuilder
                         {
                             var contentReversePackageEntryPath = Path.GetDirectoryName(packageEntry);
                             var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
-                            var contentReverseFileOutputPath = Path.Combine(packageOutputPath_XXX, contentReversePackageSubPath);
+                            var contentReverseFileOutputPath = Path.Combine(packageOutputPath, contentReversePackageSubPath);
                             if (outputHandler.DirectoryExists(contentReverseFileOutputPath))
                             {
                                 var innerContentReversePackageEntries = outputHandler.DirectoryGetFileSystemEntries(contentReverseFileOutputPath);
@@ -148,7 +150,7 @@ namespace AmigaOsBuilder
                                 {
                                     //var innerContentReversePackageSubPath = outputHandler.GetSubPath(innerContentReversePackageEntry);
                                     //var innerContentReversePackageSubPath = innerContentReversePackageEntry;
-                                    var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath_XXX, innerContentReversePackageEntry);
+                                    var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
                                     var innerContentReverseSourcePath = Path.Combine(sourcePath, innerContentReversePackageSubPath);
 
                                     var innerSync = new Sync
@@ -167,7 +169,7 @@ namespace AmigaOsBuilder
                         else
                         {
                             var packageSubPath = RemoveRoot(sourcePath, packageEntry);
-                            var fileOutputPath = Path.Combine(packageOutputPath_XXX, packageSubPath);
+                            var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
                             //_logger.Information($"{packageEntry} => {fileOutputPath}");
                             var sync = new Sync
                             {

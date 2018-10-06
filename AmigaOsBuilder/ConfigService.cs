@@ -388,7 +388,20 @@ namespace AmigaOsBuilder
                     },
                     new Package
                     {
+
+
+
+
+
                         Include = false,
+                        //Include = true, // NOPE!!!!
+
+
+
+
+
+
+
                         Path = "renderlib_40.8",
                         Category = "Library",
                         Description = @"shared library that serves an image processing kernel (re-implementation of render.library in ANSI C)",

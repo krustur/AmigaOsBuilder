@@ -3,196 +3,24 @@ using System.IO;
 
 namespace AmigaOsBuilder
 {
+    //public static byte ComputeAdditionChecksum(byte[] data)
+        //{
+        //    byte sum = 0;
+        //    unchecked // Let overflow occur without exceptions
+        //    {
+        //        foreach (byte b in data)
+        //        {
+        //            sum += b;
+        //        }
+        //    }
+        //    return sum;
+        //}
+
     class LhaTest
     {
-        public class Crc16
-        {
-            const ushort polynomial = 0xA001;
-            ushort[] table = new ushort[256];
-
-            public ushort ComputeChecksum(byte[] bytes)
-            {
-                ushort crc = 0;
-                for (int i = 0; i < bytes.Length; ++i)
-                {
-                    byte index = (byte)(crc ^ bytes[i]);
-                    crc = (ushort)((crc >> 8) ^ table[index]);
-                }
-                return crc;
-            }
-
-            public byte[] ComputeChecksumBytes(byte[] bytes)
-            {
-                ushort crc = ComputeChecksum(bytes);
-                return BitConverter.GetBytes(crc);
-            }
-
-            public Crc16()
-            {
-                ushort value;
-                ushort temp;
-                for (ushort i = 0; i < table.Length; ++i)
-                {
-                    value = 0;
-                    temp = i;
-                    for (byte j = 0; j < 8; ++j)
-                    {
-                        if (((value ^ temp) & 0x0001) != 0)
-                        {
-                            value = (ushort)((value >> 1) ^ polynomial);
-                        }
-                        else
-                        {
-                            value >>= 1;
-                        }
-                        temp >>= 1;
-                    }
-                    table[i] = value;
-                }
-            }
-        }
-
-        public static class Crc8
-        {
-            static byte[] table = new byte[256];
-            // x8 + x7 + x6 + x4 + x2 + 1
-            const byte poly = 0xd5;
-
-            public static byte ComputeChecksum(params byte[] bytes)
-            {
-                byte crc = 0;
-                if (bytes != null && bytes.Length > 0)
-                {
-                    foreach (byte b in bytes)
-                    {
-                        crc = table[crc ^ b];
-                    }
-                }
-                return crc;
-            }
-
-            static Crc8()
-            {
-                for (int i = 0; i < 256; ++i)
-                {
-                    int temp = i;
-                    for (int j = 0; j < 8; ++j)
-                    {
-                        if ((temp & 0x80) != 0)
-                        {
-                            temp = (temp << 1) ^ poly;
-                        }
-                        else
-                        {
-                            temp <<= 1;
-                        }
-                    }
-                    table[i] = (byte)temp;
-                }
-            }
-        }
-        ///
-        /// This enum is used to indicate what kind of checksum you will be calculating.
-        /// 
-        public enum CRC8_POLY
-        {
-            CRC8 = 0xd5,
-            CRC8_CCITT = 0x07,
-            CRC8_DALLAS_MAXIM = 0x31,
-            CRC8_SAE_J1850 = 0x1D,
-            CRC_8_WCDMA = 0x9b,
-        };
-
-        /// 
-        /// Class for calculating CRC8 checksums...
-        /// 
-        public class CRC8Calc
-        {
-            private byte[] table = new byte[256];
-
-            public byte Checksum(params byte[] val)
-            {
-                if (val == null)
-                    throw new ArgumentNullException("val");
-
-                byte c = 0;
-
-                foreach (byte b in val)
-                {
-                    c = table[c ^ b];
-                }
-
-                return c;
-            }
-
-            public byte[] Table
-            {
-                get
-                {
-                    return this.table;
-                }
-                set
-                {
-                    this.table = value;
-                }
-            }
-
-            public byte[] GenerateTable(CRC8_POLY polynomial)
-            {
-                byte[] csTable = new byte[256];
-
-                for (int i = 0; i < 256; ++i)
-                {
-                    int curr = i;
-
-                    for (int j = 0; j < 8; ++j)
-                    {
-                        if ((curr & 0x80) != 0)
-                        {
-                            curr = (curr << 1) ^ (int)polynomial;
-                        }
-                        else
-                        {
-                            curr <<= 1;
-                        }
-                    }
-
-                    csTable[i] = (byte)curr;
-                }
-
-                return csTable;
-            }
-
-            public CRC8Calc(CRC8_POLY polynomial)
-            {
-                this.table = this.GenerateTable(polynomial);
-            }
-        }
-
-        public static byte ComputeAdditionChecksum(byte[] data)
-        {
-            byte sum = 0;
-            unchecked // Let overflow occur without exceptions
-            {
-                foreach (byte b in data)
-                {
-                    sum += b;
-                }
-            }
-            return sum;
-        }
-
         public static void RunTest()
         {
-            //using (ArchiveFile archiveFile = new ArchiveFile(@"c:\random-archive"))
-            //{
-            //    archiveFile.Extract("Output");
-            //}
-            //var xxx = Nito.KitchenSink.CRC.CRC16.Create("kurt");
-
-
-
-
+            #region testdata
             //                /* E:\Amiga\KrustWB3\Output\Work\Workbench314Clean.lha (2018-10-02 00:00:24)
             //   StartOffset(h): 00000024, EndOffset(h): 000001DF, Length(h): 000001BC */
 
@@ -340,6 +168,7 @@ namespace AmigaOsBuilder
             //var crc8_CRC_8_WCDMA = crc8CalcerCRC_8_WCDMA.Checksum(rawDataHeader);
 
             //var add = ComputeAdditionChecksum(rawDataHeader);
+            #endregion
 
             try
             {
