@@ -18,7 +18,7 @@ namespace AmigaOsBuilder
         bool DirectoryExists(string path);
         void DirectoryCreateDirectory(string path);
         void DirectoryDelete(string path, bool recursive);
-        IList<string> DirectoryGetFileSystemEntries(string path);
+        IList<string> DirectoryGetFileSystemEntriesRecursive(string path);
         //string GetSubPath(string fullPath);
         FileType GetFileType(string path);
         IFileInfo GetFileInfo(string path);
@@ -30,7 +30,32 @@ namespace AmigaOsBuilder
         DateTime LastWriteTimeUtc { get; }
         long Length { get; }
 
-        Stream OpenRead();
+        IStream OpenRead();
+    }
+
+    public interface IStream : IDisposable
+    {
+        int Read(byte[] buffer, int offset, int count);
+    }
+
+    public class FileSystemStream : IStream
+    {
+        private readonly Stream _stream;
+
+        public FileSystemStream(Stream stream)
+        {
+            _stream = stream;
+        }
+
+        public void Dispose()
+        {
+            _stream?.Dispose();
+        }
+
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            return _stream.Read(buffer, offset, count);
+        }
     }
 
     public class FileSystemFileInfo : IFileInfo
@@ -46,9 +71,9 @@ namespace AmigaOsBuilder
         public DateTime LastWriteTimeUtc => _fileInfo.LastWriteTimeUtc;
         public long Length => _fileInfo.Length;
 
-        public Stream OpenRead()
+        public IStream OpenRead()
         {
-            return _fileInfo.OpenRead();
+            return new FileSystemStream(_fileInfo.OpenRead());
         }
     }
 
@@ -130,7 +155,7 @@ namespace AmigaOsBuilder
             Directory.Delete(fullPath, recursive);
         }
 
-        public IList<string> DirectoryGetFileSystemEntries(string path)
+        public IList<string> DirectoryGetFileSystemEntriesRecursive(string path)
         {
             var fullPath = GetFullPath(path);
 

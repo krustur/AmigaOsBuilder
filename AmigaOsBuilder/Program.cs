@@ -30,7 +30,7 @@ namespace AmigaOsBuilder
                     .Build();
 
                 _logger = new LoggerConfiguration()
-                    //.MinimumLevel.Debug()
+                    .MinimumLevel.Debug()
                     .WriteTo.Console()
                     .WriteTo.File("AmigaOsBuilder_log.txt")
                     .CreateLogger();
@@ -145,7 +145,7 @@ namespace AmigaOsBuilder
                             var contentReverseFileOutputPath = Path.Combine(packageOutputPath, contentReversePackageSubPath);
                             if (outputHandler.DirectoryExists(contentReverseFileOutputPath))
                             {
-                                var innerContentReversePackageEntries = outputHandler.DirectoryGetFileSystemEntries(contentReverseFileOutputPath);
+                                var innerContentReversePackageEntries = outputHandler.DirectoryGetFileSystemEntriesRecursive(contentReverseFileOutputPath);
                                 foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
                                 {
                                     //var innerContentReversePackageSubPath = outputHandler.GetSubPath(innerContentReversePackageEntry);
@@ -217,7 +217,7 @@ namespace AmigaOsBuilder
 
         private static void AddDeleteToSyncList(IOutputHandler outputHandler, List<Sync> syncList)
         {
-            var outputEntries = outputHandler.DirectoryGetFileSystemEntries("");
+            var outputEntries = outputHandler.DirectoryGetFileSystemEntriesRecursive("");
             var syncListKeys = syncList
                 .Select(x => x.TargetPath.ToLowerInvariant())
                 .Distinct()

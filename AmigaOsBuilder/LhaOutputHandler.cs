@@ -30,13 +30,15 @@ namespace AmigaOsBuilder
             {
                 _fileStream = new FileStream(outputBasePath, FileMode.Open, FileAccess.ReadWrite);
                 _content = ReadContent(_fileStream);
-                _fileStream.Seek(-1, SeekOrigin.End);
+                if (_fileStream.Length > 0)
+                {
+                    _fileStream.Seek(-1, SeekOrigin.End);
+                }
             }
             else
             {
                 _fileStream = new FileStream(outputBasePath, FileMode.Create, FileAccess.Write);
                 _content = new List<LhaContent>();
-                //_fileStreamCurrentPos = 0;
 
             }
         }
@@ -44,7 +46,6 @@ namespace AmigaOsBuilder
         private List<LhaContent> ReadContent(FileStream fileStream)
         {
             var content = new List<LhaContent>();
-            //bool endOfFile = false;
             while (fileStream.Position < fileStream.Length)
             {
                 var readBytes = fileStream.Read(_headerBuffer, 0, 22);
@@ -95,6 +96,8 @@ namespace AmigaOsBuilder
                     {
                     }
                 }
+
+                var streamHeaderPosition = fileStream.Position;
                 fileStream.Read(_headerBuffer, 22, pathLength + 2);
                 var path = System.Text.Encoding.UTF8.GetString(_headerBuffer, 22, pathLength);
 
@@ -104,14 +107,10 @@ namespace AmigaOsBuilder
                     throw new Exception($"Header CRC mismatch: headerCrc={headerCrc} calcHeaderCrc={calcHeaderCrc}");
                 }
 
+                var streamContentPosition = fileStream.Position;
                 fileStream.Seek(contentLength, SeekOrigin.Current);
 
-                content.Add(new LhaContent
-                {
-                    Date = dateTime,
-                    Length = contentLength,
-                    Path = path
-                });
+                content.Add(new LhaContent(path, dateTime, contentLength, streamHeaderPosition, streamContentPosition));
             }
 
             return content;
@@ -123,7 +122,13 @@ namespace AmigaOsBuilder
 
         public bool FileExists(string path)
         {
-            throw new NotImplementedException();
+            path = ToAmigaPath(path)
+                .ToLowerInvariant();
+
+            var fileExists = _content
+                .Any(x => x.Path.ToLowerInvariant() == path);
+
+            return fileExists;
         }
 
         public string FileReadAllText(string path)
@@ -141,11 +146,9 @@ namespace AmigaOsBuilder
             path = ToAmigaPath(path);
             var sourceContent = File.ReadAllBytes(syncSourcePath);
             var sourceFileInfo = new FileInfo(syncSourcePath);
-            var dateTime = DateTimeToInt(sourceFileInfo.LastWriteTime);
+            var dateTime = sourceFileInfo.LastWriteTime;
+            var dateTimeInt = DateTimeToInt(dateTime);
 
-            //var fileName = "helloworld.txt";
-            //var fileContent = "Hello cruel world!";
-            //var fileContentBytes = System.Text.Encoding.UTF8.GetBytes(fileContent);
             var fileContentCrc = _crc16Calcer.ComputeChecksum(sourceContent);
             var fileContentCrc00FF = (byte)(fileContentCrc & 0x00FF);
             var fileContentCrcFF00 = (byte)((fileContentCrc & 0xFF00) >> 8);
@@ -157,10 +160,10 @@ namespace AmigaOsBuilder
             var length00FF0000 = (byte)((sourceContentLength & 0x00FF0000) >> 16);
             var lengthFF000000 = (byte)((sourceContentLength & 0xFF000000) >> 24);
             //var dateTime = 0x00000000;
-            var dateTime000000FF = (byte)(dateTime & 0x000000FF);
-            var dateTime0000FF00 = (byte)((dateTime & 0x0000FF00) >> 8);
-            var dateTime00FF0000 = (byte)((dateTime & 0x00FF0000) >> 16);
-            var dateTimeFF000000 = (byte)((dateTime & 0xFF000000) >> 24);
+            var dateTime000000FF = (byte)(dateTimeInt & 0x000000FF);
+            var dateTime0000FF00 = (byte)((dateTimeInt & 0x0000FF00) >> 8);
+            var dateTime00FF0000 = (byte)((dateTimeInt & 0x00FF0000) >> 16);
+            var dateTimeFF000000 = (byte)((dateTimeInt & 0xFF000000) >> 24);
             byte attribute = 0x00;
             
             EnsureHeaderBufferLength(headerLength);
@@ -198,18 +201,14 @@ namespace AmigaOsBuilder
             
             _headerBuffer[1] = headerCrc;
 
+            var sourceHeaderPosition = _fileStream.Position;
             _fileStream.Write(_headerBuffer, 0, headerLength);
+            var sourceContentPosition = _fileStream.Position;
             _fileStream.Write(sourceContent, 0, sourceContentLength);
             _fileStream.WriteByte(0);
             _fileStream.Seek(-1, SeekOrigin.Current);
-            //_fileStreamCurrentPos += headerLength + sourceContentLength;
 
-            _content.Add(new LhaContent
-            {
-                Date = DateTime.MinValue,
-                Length = sourceContentLength, 
-                Path = path
-            });
+            _content.Add(new LhaContent(path, dateTime, sourceContentLength, sourceHeaderPosition, sourceContentPosition));
         }
 
         private void EnsureHeaderBufferLength(int headerLength)
@@ -217,7 +216,6 @@ namespace AmigaOsBuilder
             if (headerLength > _headerBufferLength)
             {
                 _headerBufferLength = headerLength * 2;
-                //_headerBuffer = new byte[_headerBufferLength];
                 Array.Resize(ref _headerBuffer, _headerBufferLength);
             }
         }
@@ -241,19 +239,12 @@ namespace AmigaOsBuilder
         {
             uint dateTimeInt = 0;
 
-            //var y1 = ((i1 & 0xFE000000) >> 25) + 1980;
-            //var mo1 = (i1 & 0x01E00000) >> 21;
-            //var d1 = (i1 & 0x001F0000) >> 16;
-            //var h1 = (i1 & 0x0000F800) >> 11;
-            //var mi1 = (i1 & 0x000007E0) >> 5;
-            //var s1 = (i1 & 0x0000001F) << 1;
             dateTimeInt |= (uint)((dateTime.Year - 1980) << 25);
             dateTimeInt |= (uint)(dateTime.Month << 21);
             dateTimeInt |= (uint)(dateTime.Day << 16);
             dateTimeInt |= (uint)(dateTime.Hour << 11);
             dateTimeInt |= (uint)(dateTime.Minute << 5);
             dateTimeInt |= (uint)(dateTime.Second / 2);
-
 
             return dateTimeInt;
         }
@@ -284,13 +275,82 @@ namespace AmigaOsBuilder
 
         public bool DirectoryExists(string path)
         {
-            path = ToAmigaPath(path);
-            path += '/';
+            path = ToAmigaPath(path)
+                       .ToLowerInvariant()
+                   + '/';
             if (_content.Any(x => x.Path.ToLowerInvariant().StartsWith(path)))
             {
                 return true;
             }
             return false;
+        }
+
+        public void DirectoryCreateDirectory(string path)
+        {
+        }
+
+        public void DirectoryDelete(string path, bool recursive)
+        {
+            if (recursive == false)
+            {
+                throw new NotImplementedException("Non-recursive deletes is not implemented!");
+            }
+            throw new NotImplementedException();
+        }
+
+        public IList<string> DirectoryGetFileSystemEntriesRecursive(string path)
+        {
+            path = ToAmigaPath(path)
+                       .ToLowerInvariant()
+                   //+ '/'
+                ;
+
+            var fileSystemEntries = _content
+                .Where(x => x.Path.ToLowerInvariant().StartsWith(path.ToLowerInvariant()))
+                .Select(x => ToWindowsPath(x.Path))
+                .ToList();
+
+            return fileSystemEntries;
+        }
+
+        public FileType GetFileType(string path)
+        {
+            path = ToAmigaPath(path)
+                .ToLowerInvariant();
+
+            var firstFile = _content
+                .FirstOrDefault(x => x.Path.ToLowerInvariant() == path);
+
+            if (firstFile != null)
+            {
+                return FileType.File;
+            }
+
+            var contents = _content
+                .Where(x => x.Path.ToLowerInvariant().StartsWith(path));
+
+            if (contents.Any())
+            {
+                return FileType.Directory;
+            }
+
+            return FileType.Unknown;
+        }
+
+        public IFileInfo GetFileInfo(string path)
+        {
+
+            path = ToAmigaPath(path)
+                .ToLowerInvariant();
+            var content = _content.SingleOrDefault(x => x.Path.ToLowerInvariant() == path);
+            //var arne = new FileInfo("c:\\knutsomintefinns.töst");
+            var fileInfo = new LhaContentFileInfo(content, _fileStream);
+            return fileInfo;
+        }
+
+        public void Dispose()
+        {
+            _fileStream?.Dispose();
         }
 
         private string ToAmigaPath(string path)
@@ -299,52 +359,22 @@ namespace AmigaOsBuilder
             return amigaPath;
         }
 
-        public void DirectoryCreateDirectory(string path)
+        private string ToWindowsPath(string path)
         {
-            //throw new NotImplementedException();
-        }
-
-        public void DirectoryDelete(string path, bool recursive)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IList<string> DirectoryGetFileSystemEntries(string path)
-        {
-            return _content
-                .Select(x => x.Path)
-                .ToList();
-            //throw new NotImplementedException();
-        }
-
-        public FileType GetFileType(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IFileInfo GetFileInfo(string path)
-        {
-
-            path = ToAmigaPath(path);
-            var content = _content.SingleOrDefault(x => x.Path.ToLowerInvariant() == path);
-            var arne = new FileInfo("c:\\knutsomintefinns.töst");
-            var fileInfo = new LhaContentFileInfo(content);
-            return fileInfo;
-        }
-
-        public void Dispose()
-        {
-            _fileStream?.Dispose();
+            var amigaPath = path.Replace('/', '\\');
+            return amigaPath;
         }
     }
 
     public class LhaContentFileInfo : IFileInfo
     {
         private readonly LhaContent _content;
+        private readonly Stream _stream;
 
-        public LhaContentFileInfo(LhaContent content)
+        public LhaContentFileInfo(LhaContent content, Stream stream)
         {
             _content = content;
+            _stream = stream;
         }
 
         public bool Exists => _content != null;
@@ -353,16 +383,62 @@ namespace AmigaOsBuilder
 
         public long Length => _content?.Length ?? 0;
 
-        public Stream OpenRead()
+        public IStream OpenRead()
         {
-            throw new NotImplementedException();
+            _stream.Seek(_content.StreamContentPosition, SeekOrigin.Begin);
+            return new LhaContentStream(_stream, _content.Length);
         }
     }
 
     public class LhaContent
     {
+        public LhaContent(string path, DateTime date, long length, long streamHeaderPosition, long streamContentPosition)
+        {
+            Path = path;
+            Date = date;
+            Length = length;
+            StreamHeaderPosition = streamHeaderPosition;
+            StreamContentPosition = streamContentPosition;
+        }
         public string Path { get; set; }
         public DateTime Date { get; set; }
         public long Length { get; set; }
+        public long StreamHeaderPosition { get; set; }
+        public long StreamContentPosition { get; set; }
+    }
+
+    public class LhaContentStream : IStream
+    {
+        private readonly Stream _stream;
+        private readonly long _contentLength;
+        private long _totalCount;
+
+        public LhaContentStream(Stream stream, long contentLength)
+        {
+            _stream = stream;
+            _contentLength = contentLength;
+            _totalCount = 0;
+        }
+
+        public void Dispose()
+        {
+            // do nothing!
+        }
+
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            if (_totalCount > _contentLength)
+            {
+                return 0;
+            }
+
+            var readCount = _stream.Read(buffer, offset, count);
+            _totalCount += readCount;
+            if (_totalCount > _contentLength)
+            {
+                return (int) (readCount - (_totalCount - _contentLength));
+            }
+            return readCount;
+        }
     }
 }

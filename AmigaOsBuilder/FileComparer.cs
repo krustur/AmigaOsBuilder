@@ -32,7 +32,7 @@ namespace AmigaOsBuilder
             return result;
         }
 
-        private static bool StreamsContentsAreEqual(Stream stream1, Stream stream2)
+        private static bool StreamsContentsAreEqual(Stream stream1, IStream stream2)
         {
             const int bufferSize = 1024 * sizeof(Int64);
             var buffer1 = new byte[bufferSize];
@@ -53,10 +53,18 @@ namespace AmigaOsBuilder
                     return true;
                 }
 
-                int iterations = (int)Math.Ceiling((double)count1 / sizeof(Int64));
-                for (int i = 0; i < iterations; i++)
+                //int iterations = (int)Math.Ceiling((double)count1 / sizeof(Int64));
+                //for (int i = 0; i < iterations; i++)
+                //{
+                //    if (BitConverter.ToInt64(buffer1, i * sizeof(Int64)) != BitConverter.ToInt64(buffer2, i * sizeof(Int64)))
+                //    {
+                //        return false;
+                //    }
+                //}
+                //int iterations = (int)Math.Ceiling((double)count1 / sizeof(Int64));
+                for (int i = 0; i < count1; i++)
                 {
-                    if (BitConverter.ToInt64(buffer1, i * sizeof(Int64)) != BitConverter.ToInt64(buffer2, i * sizeof(Int64)))
+                    if (buffer1[i] != buffer2[i])
                     {
                         return false;
                     }
