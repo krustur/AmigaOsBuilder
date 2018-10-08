@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+//using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +15,7 @@ namespace AmigaOsBuilder
     class Program
     {
         private static Logger _logger;
+        private static IPathService _pathService;
         private static readonly StringBuilder UserStartupBuilder = new StringBuilder(32727);
         private static readonly StringBuilder ReadmeBuilder = new StringBuilder(32727);
 
@@ -21,26 +23,24 @@ namespace AmigaOsBuilder
         {
             try
             {
-                //LhaTest.RunTest();
-                //return;
-
                 var configuration = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .AddCommandLine(args)
                     .Build();
 
                 _logger = new LoggerConfiguration()
-                    .MinimumLevel.Debug()
+                    //.MinimumLevel.Debug()
                     .WriteTo.Console()
                     .WriteTo.File("AmigaOsBuilder_log.txt")
                     .CreateLogger();
+
+                _pathService = new PathService();
 
                 var location = configuration["Location"];
                 var sourceBasePath = configuration["SourceBasePath"];
                 
                 var outputBasePath = configuration["OutputBasePath"];
 
-                //var outputHandler = new FolderOutputHandler(_logger, outputBasePath);
                 var outputHandler = OutputHandlerFactory.Create(_logger, outputBasePath);
 
                 var configFile = configuration["ConfigFile"];
@@ -62,7 +62,6 @@ namespace AmigaOsBuilder
         {
             var config = ConfigService.GetConfig(location, configFileName);
 
-            //AliasService.CreateOutputAliasDirectories(_logger, outputBasePath);
             outputHandler.CreateBasePaths();
 
             var syncList = BuildSyncList(sourceBasePath, outputHandler, config);
@@ -113,13 +112,13 @@ namespace AmigaOsBuilder
                     ReadmeBuilder.AppendLine($"");
                 }
 
-                var packageBasePath = Path.Combine(sourceBasePath, package.Path);
+                var packageBasePath = _pathService.Combine(sourceBasePath, package.Path);
                 if (Directory.Exists(packageBasePath) == false)
                 {
                     throw new Exception($"Package [{package.Path}] base path [{packageBasePath}] is missing, check your configuration.");
                 }
 
-                var packageContentBasePath = Path.Combine(sourceBasePath, package.Path, contentFolderName);
+                var packageContentBasePath = _pathService.Combine(sourceBasePath, package.Path, contentFolderName);
                 if (Directory.Exists(packageContentBasePath) == false)
                 {
                     continue;
@@ -132,17 +131,17 @@ namespace AmigaOsBuilder
                     var targetAlias = dirInfo.Name;
 
                     var packageOutputPath = AliasService.TargetAliasToOutputPath(targetAlias);
-                    //packageOutputPath = Path.Combine(outputBasePath, packageOutputPath);
+                    //packageOutputPath = _pathService.Combine(outputBasePath, packageOutputPath);
 
                     var packageEntries = Directory.GetFileSystemEntries(sourcePath, "*", SearchOption.AllDirectories);
                     foreach (var packageEntry in packageEntries)
                     {
-                        var packageEntryFileName = Path.GetFileName(packageEntry);
+                        var packageEntryFileName = _pathService.GetFileName(packageEntry);
                         if (ShouldContentReverseAll(packageEntryFileName))
                         {
-                            var contentReversePackageEntryPath = Path.GetDirectoryName(packageEntry);
+                            var contentReversePackageEntryPath = _pathService.GetDirectoryName(packageEntry);
                             var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
-                            var contentReverseFileOutputPath = Path.Combine(packageOutputPath, contentReversePackageSubPath);
+                            var contentReverseFileOutputPath = _pathService.Combine(packageOutputPath, contentReversePackageSubPath);
                             if (outputHandler.DirectoryExists(contentReverseFileOutputPath))
                             {
                                 var innerContentReversePackageEntries = outputHandler.DirectoryGetFileSystemEntriesRecursive(contentReverseFileOutputPath);
@@ -151,7 +150,7 @@ namespace AmigaOsBuilder
                                     //var innerContentReversePackageSubPath = outputHandler.GetSubPath(innerContentReversePackageEntry);
                                     //var innerContentReversePackageSubPath = innerContentReversePackageEntry;
                                     var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
-                                    var innerContentReverseSourcePath = Path.Combine(sourcePath, innerContentReversePackageSubPath);
+                                    var innerContentReverseSourcePath = _pathService.Combine(sourcePath, innerContentReversePackageSubPath);
 
                                     var innerSync = new Sync
                                     {
@@ -169,7 +168,7 @@ namespace AmigaOsBuilder
                         else
                         {
                             var packageSubPath = RemoveRoot(sourcePath, packageEntry);
-                            var fileOutputPath = Path.Combine(packageOutputPath, packageSubPath);
+                            var fileOutputPath = _pathService.Combine(packageOutputPath, packageSubPath);
                             //_logger.Information($"{packageEntry} => {fileOutputPath}");
                             var sync = new Sync
                             {
@@ -187,7 +186,7 @@ namespace AmigaOsBuilder
                 var packageFiles = Directory.GetFiles(packageContentBasePath);
                 foreach (var packageFile in packageFiles)
                 {
-                    var packageFileName = Path.GetFileName(packageFile).ToLowerInvariant();
+                    var packageFileName = _pathService.GetFileName(packageFile).ToLowerInvariant();
                     switch (packageFileName)
                     {
                         case "user-startup":
@@ -312,7 +311,7 @@ namespace AmigaOsBuilder
 
         private static void SynchronizeTextFile(string content, IOutputHandler outputHandler, string outputSubPath, string fileName)
         {
-            var outputPath = Path.Combine(AliasService.TargetAliasToOutputPath(outputSubPath), fileName);
+            var outputPath = _pathService.Combine(AliasService.TargetAliasToOutputPath(outputSubPath), fileName);
 
             var oldContent = outputHandler.FileExists(outputPath) ? outputHandler.FileReadAllText(outputPath) : string.Empty;
 
@@ -401,7 +400,7 @@ namespace AmigaOsBuilder
                 }
                 case SyncType.DeleteTarget:
                 {
-                    if (File.Exists(sync.TargetPath))
+                    if (outputHandler.FileExists(sync.TargetPath))
                     {
                         _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.DeleteTarget.GetDescription(), sync.TargetPath);
                         outputHandler.FileDelete(sync.TargetPath);
@@ -438,12 +437,12 @@ namespace AmigaOsBuilder
                 return FileDiff.Equal;
             }
 
-            if (sourceInfo.LastWriteTimeUtc < targetInfo.LastWriteTimeUtc)
+            if (sourceInfo.LastWriteTime < targetInfo.LastWriteTime)
             {
                 return FileDiff.DiffTargetNewer;
             }
 
-            if (targetInfo.LastWriteTimeUtc < sourceInfo.LastWriteTimeUtc)
+            if (targetInfo.LastWriteTime < sourceInfo.LastWriteTime)
             {
                 return FileDiff.DiffSourceNewer;
             }

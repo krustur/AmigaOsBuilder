@@ -39,20 +39,6 @@ namespace AmigaOsBuilder
         };
         // @formatter:on
 
-        //public static void CreateOutputAliasDirectories(Logger logger, string outputBasePath)
-        //{
-        //    logger.Information("Creating output alias directories ...");
-        //    Directory.CreateDirectory(outputBasePath);
-        //    foreach (var map in AliasService.AliasToOutputMap)
-        //    {
-        //        var outputAliasPath = Path.Combine(outputBasePath, map.Value);
-        //        logger.Information($@"[{map.Key}] = [{outputAliasPath}]");
-        //        Directory.CreateDirectory(outputAliasPath);
-        //    }
-
-        //    logger.Information("Create output alias directories done!");
-        //}
-
         public static string TargetAliasToOutputPath(string aliasedPath)
         {
             foreach (var mapKey in AliasToOutputMap.Keys)

@@ -27,7 +27,7 @@ namespace AmigaOsBuilder
     public interface IFileInfo
     {
         bool Exists { get; }
-        DateTime LastWriteTimeUtc { get; }
+        DateTime LastWriteTime { get; }
         long Length { get; }
 
         IStream OpenRead();
@@ -68,7 +68,15 @@ namespace AmigaOsBuilder
         }
 
         public bool Exists => _fileInfo.Exists;
-        public DateTime LastWriteTimeUtc => _fileInfo.LastWriteTimeUtc;
+        public DateTime LastWriteTime
+        {
+            get
+            {
+                var lastWriteTime = _fileInfo.LastWriteTime;
+                return lastWriteTime;
+            }
+        }
+
         public long Length => _fileInfo.Length;
 
         public IStream OpenRead()
