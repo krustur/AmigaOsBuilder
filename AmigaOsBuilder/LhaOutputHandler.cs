@@ -100,7 +100,7 @@ namespace AmigaOsBuilder
 
                 var streamHeaderPosition = fileStream.Position;
                 fileStream.Read(_headerBuffer, 22, pathLength + 2);
-                var path = System.Text.Encoding.UTF8.GetString(_headerBuffer, 22, pathLength);
+                var path = LhaEncoding.GetString(_headerBuffer, 22, pathLength);
 
                 var calcHeaderCrc = CalcHeaderCrc(2, 2 + headerLength);
                 if (calcHeaderCrc != headerCrc)
@@ -135,7 +135,13 @@ namespace AmigaOsBuilder
 
         public string FileReadAllText(string path)
         {
-            throw new NotImplementedException();
+            var content = GetSingleContentByPath(path);
+            _fileStreamReadyForAppend = false;
+            _fileStream.Seek(content.StreamContentPosition, SeekOrigin.Begin);
+            var bytes = new byte[content.Length];
+            _fileStream.Read(bytes, 0, content.Length);
+            var text = LhaEncoding.GetString(bytes);
+            return text;
         }
 
         public void FileWriteAllText(string path, string content)
@@ -364,13 +370,17 @@ namespace AmigaOsBuilder
 
         public IFileInfo GetFileInfo(string path)
         {
+            var content = GetSingleContentByPath(path);
+            var fileInfo = new LhaContentFileInfo(content, GiveAwayStreamAction);
+            return fileInfo;
+        }
 
+        private LhaContent GetSingleContentByPath(string path)
+        {
             path = ToAmigaPath(path)
                 .ToLowerInvariant();
             var content = _content.SingleOrDefault(x => x.Path.ToLowerInvariant() == path);
-            //var arne = new FileInfo("c:\\knutsomintefinns.töst");
-            var fileInfo = new LhaContentFileInfo(content, GiveAwayStreamAction);
-            return fileInfo;
+            return content;
         }
 
         private Stream GiveAwayStreamAction()
@@ -424,7 +434,7 @@ namespace AmigaOsBuilder
 
     public class LhaContent
     {
-        public LhaContent(string path, DateTime date, long length, long streamHeaderPosition, long streamContentPosition)
+        public LhaContent(string path, DateTime date, int length, long streamHeaderPosition, long streamContentPosition)
         {
             Path = path;
             Date = date;
@@ -434,7 +444,7 @@ namespace AmigaOsBuilder
         }
         public string Path { get; set; }
         public DateTime Date { get; set; }
-        public long Length { get; set; }
+        public int Length { get; set; }
         public long StreamHeaderPosition { get; set; }
         public long StreamContentPosition { get; set; }
     }
