@@ -41,11 +41,11 @@ namespace AmigaOsBuilder
                 
                 var outputBasePath = configuration["OutputBasePath"];
 
-                var fileHandler = FileHandlerFactory.Create(_logger, outputBasePath);
+                var outputFileHandler = FileHandlerFactory.Create(_logger, outputBasePath);
 
                 var configFile = configuration["ConfigFile"];
 
-                BuildIt(location, sourceBasePath, fileHandler, configFile);
+                BuildIt(location, sourceBasePath, outputFileHandler, configFile);
             }
             catch (Exception e)
             {
@@ -58,30 +58,30 @@ namespace AmigaOsBuilder
             Console.ReadLine();
         }
 
-        private static void BuildIt(string location, string sourceBasePath, IFileHandler fileHandler, string configFileName)
+        private static void BuildIt(string location, string sourceBasePath, IFileHandler outputFileHandler, string configFileName)
         {
             var config = ConfigService.GetConfig(location, configFileName);
 
-            fileHandler.CreateBasePaths();
+            outputFileHandler.CreateBasePaths();
 
-            var syncList = BuildSyncList(sourceBasePath, fileHandler, config);
+            var syncList = BuildSyncList(sourceBasePath, outputFileHandler, config);
 
-            SynchronizeV2(syncList, fileHandler);
+            SynchronizeV2(syncList, outputFileHandler);
 
-            SynchronizeTextFile(UserStartupBuilder.ToString(), fileHandler, "__s__", "user-startup");
-            SynchronizeTextFile(ReadmeBuilder.ToString(), fileHandler, "__systemdrive__", "readme_krustwb3.txt");
+            SynchronizeTextFile(UserStartupBuilder.ToString(), outputFileHandler, "__s__", "user-startup");
+            SynchronizeTextFile(ReadmeBuilder.ToString(), outputFileHandler, "__systemdrive__", "readme_krustwb3.txt");
 
         }
 
-        private static List<Sync> BuildSyncList(string sourceBasePath, IFileHandler fileHandler, Config config)
+        private static List<Sync> BuildSyncList(string sourceBasePath, IFileHandler outputFileHandler, Config config)
         {
             _logger.Information("Building sync list ...");
 
             var syncList = new List<Sync>();
 
-            AddContentToSyncList(sourceBasePath, fileHandler, config, "content", SyncType.SourceToTarget, syncList, appendToReadme: true);
-            AddDeleteToSyncList(fileHandler, syncList);
-            AddContentToSyncList(sourceBasePath, fileHandler, config, "content_reverse", SyncType.TargetToSource, syncList, appendToReadme: false);
+            AddContentToSyncList(sourceBasePath, outputFileHandler, config, "content", SyncType.SourceToTarget, syncList, appendToReadme: true);
+            AddDeleteToSyncList(outputFileHandler, syncList);
+            AddContentToSyncList(sourceBasePath, outputFileHandler, config, "content_reverse", SyncType.TargetToSource, syncList, appendToReadme: false);
 
             ProgressBar.ClearProgressBar();
 
@@ -90,7 +90,7 @@ namespace AmigaOsBuilder
             return syncList;
         }
 
-        private static void AddContentToSyncList(string sourceBasePath, IFileHandler fileHandler, Config config,
+        private static void AddContentToSyncList(string sourceBasePath, IFileHandler outputFileHandler, Config config,
             string contentFolderName, SyncType syncType, List<Sync> syncList, bool appendToReadme)
         {
             int packageCnt = 0;
@@ -142,9 +142,9 @@ namespace AmigaOsBuilder
                             var contentReversePackageEntryPath = _pathService.GetDirectoryName(packageEntry);
                             var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
                             var contentReverseFileOutputPath = _pathService.Combine(packageOutputPath, contentReversePackageSubPath);
-                            if (fileHandler.DirectoryExists(contentReverseFileOutputPath))
+                            if (outputFileHandler.DirectoryExists(contentReverseFileOutputPath))
                             {
-                                var innerContentReversePackageEntries = fileHandler.DirectoryGetFileSystemEntriesRecursive(contentReverseFileOutputPath);
+                                var innerContentReversePackageEntries = outputFileHandler.DirectoryGetFileSystemEntriesRecursive(contentReverseFileOutputPath);
                                 foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
                                 {
                                     //var innerContentReversePackageSubPath = fileHandler.GetSubPath(innerContentReversePackageEntry);
@@ -158,7 +158,7 @@ namespace AmigaOsBuilder
                                         TargetPath = innerContentReversePackageEntry,
                                         //TargetPath = innerContentReversePackageSubPath,
                                         SyncType = syncType,
-                                        FileType = fileHandler.GetFileType(innerContentReversePackageEntry)
+                                        FileType = outputFileHandler.GetFileType(innerContentReversePackageEntry)
                                     };
 
                                     syncList.Add(innerSync);
@@ -214,9 +214,9 @@ namespace AmigaOsBuilder
             return false;
         }
 
-        private static void AddDeleteToSyncList(IFileHandler fileHandler, List<Sync> syncList)
+        private static void AddDeleteToSyncList(IFileHandler outputFileHandler, List<Sync> syncList)
         {
-            var outputEntries = fileHandler.DirectoryGetFileSystemEntriesRecursive("");
+            var outputEntries = outputFileHandler.DirectoryGetFileSystemEntriesRecursive("");
             var syncListKeys = syncList
                 .Select(x => x.TargetPath.ToLowerInvariant())
                 .Distinct()
@@ -232,7 +232,7 @@ namespace AmigaOsBuilder
                     syncList.Add(new Sync
                     {
                         SyncType = SyncType.DeleteTarget,
-                        FileType = fileHandler.GetFileType(outputEntry),
+                        FileType = outputFileHandler.GetFileType(outputEntry),
                         TargetPath = outputEntry
                     });
                     syncListKeys.Add(outputEntryLower);
@@ -240,7 +240,7 @@ namespace AmigaOsBuilder
             }
         }
 
-        private static void SynchronizeV2(IList<Sync> syncList, IFileHandler fileHandler)
+        private static void SynchronizeV2(IList<Sync> syncList, IFileHandler outputFileHandler)
         {
             _logger.Information("Synchronizing ...");
            
@@ -282,10 +282,10 @@ namespace AmigaOsBuilder
                 switch (actualSync.FileType)
                 {
                     case FileType.File:
-                        SynchronizeFile(actualSync, fileHandler);
+                        SynchronizeFile(actualSync, outputFileHandler);
                         break;
                     case FileType.Directory:
-                        SynchronizeDirectory(actualSync, fileHandler);
+                        SynchronizeDirectory(actualSync, outputFileHandler);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -309,11 +309,11 @@ namespace AmigaOsBuilder
             _logger.Information("Synchronizing done!");
         }
 
-        private static void SynchronizeTextFile(string content, IFileHandler fileHandler, string outputSubPath, string fileName)
+        private static void SynchronizeTextFile(string content, IFileHandler outputFileHandler, string outputSubPath, string fileName)
         {
             var outputPath = _pathService.Combine(AliasService.TargetAliasToOutputPath(outputSubPath), fileName);
 
-            var oldContent = fileHandler.FileExists(outputPath) ? fileHandler.FileReadAllText(outputPath) : string.Empty;
+            var oldContent = outputFileHandler.FileExists(outputPath) ? outputFileHandler.FileReadAllText(outputPath) : string.Empty;
 
             content = content.Replace("\r\n", "\n");
             //if (content != oldContent)
@@ -323,17 +323,17 @@ namespace AmigaOsBuilder
                 _logger.Information("<<<< Begin content >>>>");
                 _logger.Information(content);
                 _logger.Information("<<<< End content >>>>");
-                fileHandler.FileWriteAllText(outputPath, content);
+                outputFileHandler.FileWriteAllText(outputPath, content);
             }
         }
 
-        private static void SynchronizeFile(Sync sync, IFileHandler fileHandler)
+        private static void SynchronizeFile(Sync sync, IFileHandler outputFileHandler)
         {
             switch (sync.SyncType)
             {
                 case SyncType.SourceToTarget:
                 {
-                    var fileDiff = GetFileDiff(sync, fileHandler);
+                    var fileDiff = GetFileDiff(sync, outputFileHandler);
                     if (fileDiff == FileDiff.Equal)
                     {
                         _logger.Debug(@"{SyncLogType}: [{TargetPath}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath);
@@ -352,14 +352,14 @@ namespace AmigaOsBuilder
                             _logger.Debug(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, fileDiff);
                         }
 
-                        fileHandler.FileCopy(sync.SourcePath, sync.TargetPath, overwrite: true);
+                        outputFileHandler.FileCopy(sync.SourcePath, sync.TargetPath, overwrite: true);
                     }
 
                     break;
                 }
                 case SyncType.TargetToSource:
                 {
-                    var fileDiff = GetFileDiff(sync, fileHandler);
+                    var fileDiff = GetFileDiff(sync, outputFileHandler);
                     {
                         switch (fileDiff)
                         {
@@ -374,14 +374,14 @@ namespace AmigaOsBuilder
                             {
                                 _logger.Information(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
                                 _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
-                                fileHandler.FileCopyBack(sync.TargetPath, sync.SourcePath, overwrite: true);
+                                outputFileHandler.FileCopyBack(sync.TargetPath, sync.SourcePath, overwrite: true);
                                 break;
                             }
                             case FileDiff.DiffTargetMissing:
                             {
                                 _logger.Information(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
                                 _logger.Debug(@"{SyncLogType}: (invserse) [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
-                                fileHandler.FileCopy(sync.SourcePath, sync.TargetPath, overwrite: true);
+                                outputFileHandler.FileCopy(sync.SourcePath, sync.TargetPath, overwrite: true);
                                 break;
                             }
                             case FileDiff.DiffContent:
@@ -390,7 +390,7 @@ namespace AmigaOsBuilder
                             {
                                 _logger.Warning(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
                                 _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
-                                fileHandler.FileCopyBack(sync.TargetPath, sync.SourcePath, overwrite: true);
+                                outputFileHandler.FileCopyBack(sync.TargetPath, sync.SourcePath, overwrite: true);
                                 break;
                             }
                         }
@@ -400,10 +400,10 @@ namespace AmigaOsBuilder
                 }
                 case SyncType.DeleteTarget:
                 {
-                    if (fileHandler.FileExists(sync.TargetPath))
+                    if (outputFileHandler.FileExists(sync.TargetPath))
                     {
                         _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.DeleteTarget.GetDescription(), sync.TargetPath);
-                        fileHandler.FileDelete(sync.TargetPath);
+                        outputFileHandler.FileDelete(sync.TargetPath);
                     }
                     else
                     {
@@ -417,10 +417,10 @@ namespace AmigaOsBuilder
             }
         }
 
-        private static FileDiff GetFileDiff(Sync sync, IFileHandler fileHandler)
+        private static FileDiff GetFileDiff(Sync sync, IFileHandler outputFileHandler)
         {
             var sourceInfo = new FileInfo(sync.SourcePath);
-            var targetInfo = fileHandler.GetFileInfo(sync.TargetPath);
+            var targetInfo = outputFileHandler.GetFileInfo(sync.TargetPath);
 
             if (sourceInfo.Exists == true && targetInfo.Exists == false)
             {
@@ -450,19 +450,19 @@ namespace AmigaOsBuilder
             return FileDiff.DiffContent;
         }
 
-        private static void SynchronizeDirectory(Sync sync, IFileHandler fileHandler)
+        private static void SynchronizeDirectory(Sync sync, IFileHandler outputFileHandler)
         {
             switch (sync.SyncType)
             {
                 case SyncType.SourceToTarget:
-                    if (fileHandler.DirectoryExists(sync.TargetPath))
+                    if (outputFileHandler.DirectoryExists(sync.TargetPath))
                     {
                         _logger.Debug(@"{SyncLogType}: (already exists) [{TargetPath}]", SyncLogType.CreateTargetDirectory.GetDescription(), sync.TargetPath);
                     }
                     else
                     {
                         _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.CreateTargetDirectory.GetDescription(), sync.TargetPath);
-                        fileHandler.DirectoryCreateDirectory(sync.TargetPath);
+                        outputFileHandler.DirectoryCreateDirectory(sync.TargetPath);
                     }
 
                     break;
@@ -477,18 +477,18 @@ namespace AmigaOsBuilder
                         Directory.CreateDirectory(sync.SourcePath);
                     }
 
-                    if (fileHandler.DirectoryExists(sync.TargetPath) == false)
+                    if (outputFileHandler.DirectoryExists(sync.TargetPath) == false)
                     { 
                         _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.CreateTargetDirectory.GetDescription(), sync.TargetPath);
-                        fileHandler.DirectoryCreateDirectory(sync.TargetPath);
+                        outputFileHandler.DirectoryCreateDirectory(sync.TargetPath);
                     }
 
                     break;
                 case SyncType.DeleteTarget:
-                    if (fileHandler.DirectoryExists(sync.TargetPath))
+                    if (outputFileHandler.DirectoryExists(sync.TargetPath))
                     {
                         _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.DeleteTargetDirectory.GetDescription(), sync.TargetPath);
-                        fileHandler.DirectoryDelete(sync.TargetPath, recursive: true);
+                        outputFileHandler.DirectoryDelete(sync.TargetPath, recursive: true);
                     }
                     else
                     {
