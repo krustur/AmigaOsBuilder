@@ -2,13 +2,13 @@
 
 namespace AmigaOsBuilder
 {
-    public class OutputHandlerFactory
+    public class FileHandlerFactory
     {
-        public static IOutputHandler Create(Logger logger, string outputBasePath)
+        public static IFileHandler Create(Logger logger, string outputBasePath)
         {
             if (IsLhaFile(outputBasePath))
             {
-                return new LhaOutputHandler(logger, outputBasePath);
+                return new LhaFileHandler(logger, outputBasePath);
 
             }
             return new FolderOutputHandler(logger, outputBasePath);

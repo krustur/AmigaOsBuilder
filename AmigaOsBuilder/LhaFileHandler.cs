@@ -8,7 +8,7 @@ using Serilog.Core;
 
 namespace AmigaOsBuilder
 {
-    public class LhaOutputHandler : IOutputHandler, IDisposable
+    public class LhaFileHandler : IFileHandler, IDisposable
     {
         private const int INITIAL_HEADER_BUFFER_LENGTH = 32;
         public Encoding LhaEncoding => Encoding.UTF8;
@@ -21,7 +21,7 @@ namespace AmigaOsBuilder
         private byte[] _headerBuffer = new byte[INITIAL_HEADER_BUFFER_LENGTH];
         private int _headerBufferLength = INITIAL_HEADER_BUFFER_LENGTH;
 
-        public LhaOutputHandler(Logger logger, string outputBasePath)
+        public LhaFileHandler(Logger logger, string outputBasePath)
         {
             _logger = logger;
             _crc16Calcer = new Crc16();

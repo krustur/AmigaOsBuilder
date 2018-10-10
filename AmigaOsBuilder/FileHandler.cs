@@ -6,38 +6,6 @@ using Serilog.Core;
 
 namespace AmigaOsBuilder
 {
-    public interface IOutputHandler
-    {
-        void CreateBasePaths();
-        bool FileExists(string path);
-        string FileReadAllText(string path);
-        void FileWriteAllText(string path, string content);
-        void FileCopy(string syncSourcePath, string path, bool overwrite);
-        void FileCopyBack(string path, string syncSourcePath, bool overwrite);
-        void FileDelete(string path);
-        bool DirectoryExists(string path);
-        void DirectoryCreateDirectory(string path);
-        void DirectoryDelete(string path, bool recursive);
-        IList<string> DirectoryGetFileSystemEntriesRecursive(string path);
-        //string GetSubPath(string fullPath);
-        FileType GetFileType(string path);
-        IFileInfo GetFileInfo(string path);
-    }
-
-    public interface IFileInfo
-    {
-        bool Exists { get; }
-        DateTime LastWriteTime { get; }
-        long Length { get; }
-
-        IStream OpenRead();
-    }
-
-    public interface IStream : IDisposable
-    {
-        int Read(byte[] buffer, int offset, int count);
-    }
-
     public class FileSystemStream : IStream
     {
         private readonly Stream _stream;
@@ -85,7 +53,7 @@ namespace AmigaOsBuilder
         }
     }
 
-    public class FolderOutputHandler : IOutputHandler
+    public class FolderOutputHandler : IFileHandler
     {
         private readonly Logger _logger;
         private readonly string _outputBasePath;
