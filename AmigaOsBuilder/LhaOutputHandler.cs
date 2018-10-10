@@ -387,11 +387,11 @@ namespace AmigaOsBuilder
 
         public void DirectoryDelete(string path, bool recursive)
         {
-            if (recursive == false)
-            {
-                throw new NotImplementedException("Non-recursive deletes is not implemented!");
-            }
-            throw new NotImplementedException();
+            //if (recursive == false)
+            //{
+            //    throw new ArgumentException("Non-recursive deletes is not implemented!");
+            //}
+            //throw new NotImplementedException();
         }
 
         public IList<string> DirectoryGetFileSystemEntriesRecursive(string path)
