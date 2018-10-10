@@ -29,7 +29,7 @@ namespace AmigaOsBuilder
             if (File.Exists(outputBasePath))
             {
                 _fileStream = new FileStream(outputBasePath, FileMode.Open, FileAccess.ReadWrite);
-                _content = ReadContent(_fileStream);
+                _content = ReadAllContent(_fileStream);
                 if (_fileStream.Length > 0)
                 {
                     _fileStream.Seek(-1, SeekOrigin.End);
@@ -44,77 +44,105 @@ namespace AmigaOsBuilder
             _fileStreamReadyForAppend = true;
         }
 
-        private List<LhaContent> ReadContent(FileStream fileStream)
+        private List<LhaContent> ReadAllContent(FileStream fileStream)
         {
-            var content = new List<LhaContent>();
-            while (fileStream.Position < fileStream.Length)
+            var allContent = new List<LhaContent>();
+            var keepGoing = true;
+            while (keepGoing == true)//fileStream.Position < fileStream.Length)
             {
-                var readBytes = fileStream.Read(_headerBuffer, 0, 22);
-                if (readBytes == 0 || (readBytes > 1 && readBytes < 22))
+                var (content, bytes) = ReadContent(fileStream);
+                if (content != null)
                 {
-                    _logger.Error("Abnormal end of archive file!");
-                    break;
+                    allContent.Add(content);
                 }
-
-                var headerLength = _headerBuffer[0];
-                if (headerLength == 0)
+                else
                 {
-                    // End of archive
-                    break;
+                    keepGoing = false;
                 }
-
-                // crc will be written later
-                var headerCrc = _headerBuffer[1];
-                var length000000FF = _headerBuffer[7]; // little endian
-                var length0000FF00 = _headerBuffer[8];
-                var length00FF0000 = _headerBuffer[9];
-                var lengthFF000000 = _headerBuffer[10];
-                var dateTime000000FF = _headerBuffer[15];
-                var dateTime0000FF00 = _headerBuffer[16];
-                var dateTime00FF0000 = _headerBuffer[17];
-                var dateTimeFF000000 = _headerBuffer[18];
-                var attribute = _headerBuffer[19];
-                //var levelIdentifier = _headerBuffer[20];
-                var pathLength = _headerBuffer[21];
-
-
-                int contentLength = length000000FF;
-                contentLength |= length0000FF00 << 8;
-                contentLength |= length00FF0000 << 16;
-                contentLength |= lengthFF000000 << 24;
-
-                uint dateTimeInt = dateTime000000FF;
-                dateTimeInt |= (uint)(dateTime0000FF00 << 8);
-                dateTimeInt |= (uint)(dateTime00FF0000 << 16);
-                dateTimeInt |= (uint)(dateTimeFF000000 << 24);
-                var dateTime = IntToDateTime(dateTimeInt);
-
-                EnsureHeaderBufferLength(headerLength + 2);
-
-                if (headerLength < 22 + pathLength + 2)
-                {
-                    if (_headerBufferLength < 22 + pathLength + 2)
-                    {
-                    }
-                }
-
-                var streamHeaderPosition = fileStream.Position;
-                fileStream.Read(_headerBuffer, 22, pathLength + 2);
-                var path = LhaEncoding.GetString(_headerBuffer, 22, pathLength);
-
-                var calcHeaderCrc = CalcHeaderCrc(2, 2 + headerLength);
-                if (calcHeaderCrc != headerCrc)
-                {
-                    throw new Exception($"Header CRC mismatch: headerCrc={headerCrc} calcHeaderCrc={calcHeaderCrc}");
-                }
-
-                var streamContentPosition = fileStream.Position;
-                fileStream.Seek(contentLength, SeekOrigin.Current);
-
-                content.Add(new LhaContent(path, dateTime, contentLength, streamHeaderPosition, streamContentPosition));
             }
 
-            return content;
+            return allContent;
+        }
+
+        private (LhaContent, byte[]) ReadContent(FileStream fileStream, long? position = null)
+        {
+            if (position.HasValue)
+            {
+                _fileStreamReadyForAppend = false;
+                _fileStream.Seek(position.Value, SeekOrigin.Begin);
+
+            }
+
+            var streamHeaderPosition = fileStream.Position;
+            var readBytes = fileStream.Read(_headerBuffer, 0, 22);
+            if (readBytes == 0 || (readBytes > 1 && readBytes < 22))
+            {
+                _logger.Error("Abnormal end of archive file!");
+                //break;
+                return (null, null);
+            }
+
+            var headerLength = _headerBuffer[0];
+            if (headerLength == 0)
+            {
+                // End of archive
+                //break;
+                return (null, null);
+            }
+
+            // crc will be written later
+            var headerCrc = _headerBuffer[1];
+            var methodId = LhaEncoding.GetString(_headerBuffer, 2, 5);
+            if (methodId != "-lh0-")
+            {
+                throw new Exception($"Unknown Method ID: {methodId}");
+            }
+
+            var length000000FF = _headerBuffer[7]; // little endian
+            var length0000FF00 = _headerBuffer[8];
+            var length00FF0000 = _headerBuffer[9];
+            var lengthFF000000 = _headerBuffer[10];
+            var dateTime000000FF = _headerBuffer[15];
+            var dateTime0000FF00 = _headerBuffer[16];
+            var dateTime00FF0000 = _headerBuffer[17];
+            var dateTimeFF000000 = _headerBuffer[18];
+            var attribute = _headerBuffer[19];
+            var levelIdentifier = _headerBuffer[20];
+            if (levelIdentifier != 0)
+            {
+                throw new Exception($"Level identifier: {methodId}");
+            }
+
+            var pathLength = _headerBuffer[21];
+
+            int contentLength = length000000FF;
+            contentLength |= length0000FF00 << 8;
+            contentLength |= length00FF0000 << 16;
+            contentLength |= lengthFF000000 << 24;
+
+            uint dateTimeInt = dateTime000000FF;
+            dateTimeInt |= (uint) (dateTime0000FF00 << 8);
+            dateTimeInt |= (uint) (dateTime00FF0000 << 16);
+            dateTimeInt |= (uint) (dateTimeFF000000 << 24);
+            var dateTime = IntToDateTime(dateTimeInt);
+
+            EnsureHeaderBufferLength(headerLength + 2);
+
+            fileStream.Read(_headerBuffer, 22, pathLength + 2);
+            var path = LhaEncoding.GetString(_headerBuffer, 22, pathLength);
+
+            var calcHeaderCrc = CalcHeaderCrc(2, headerLength);
+            if (calcHeaderCrc != headerCrc)
+            {
+                throw new Exception($"Header CRC mismatch: headerCrc={headerCrc} calcHeaderCrc={calcHeaderCrc}");
+            }
+
+            var streamContentPosition = fileStream.Position;
+            fileStream.Seek(contentLength, SeekOrigin.Current);
+
+            var content = new LhaContent(path, dateTime, contentLength, streamHeaderPosition, streamContentPosition);
+
+            return (content, _headerBuffer);
         }
 
         public void CreateBasePaths()
@@ -124,8 +152,7 @@ namespace AmigaOsBuilder
         public bool FileExists(string path)
         {
             path = ToAmigaPath(path)
-                .ToLowerInvariant()
-                ;
+                .ToLowerInvariant();
 
             var fileExists = _content
                 .Any(x => x.Path.ToLowerInvariant() == path);
@@ -163,32 +190,46 @@ namespace AmigaOsBuilder
 
         private void AddLhaContent(string path, byte[] bytes, DateTime dateTime)
         {
-            var pathBytes = LhaEncoding.GetBytes(path);
-            var pathBytesLength = pathBytes.Length;
-            //var sourceContent = File.ReadAllBytes(syncSourcePath);
-            //var sourceFileInfo = new FileInfo(syncSourcePath);
-            //var dateTime = sourceFileInfo.LastWriteTime;
-            var dateTimeInt = DateTimeToInt(dateTime);
-
             var fileContentCrc = _crc16Calcer.ComputeChecksum(bytes);
-            var fileContentCrc00FF = (byte)(fileContentCrc & 0x00FF);
-            var fileContentCrcFF00 = (byte)((fileContentCrc & 0xFF00) >> 8);
-            var headerLength = (byte)(24 + pathBytesLength);
-            byte headerCrc = 0x00;
             var bytesLength = bytes.Length;
-            var length000000FF = (byte)(bytesLength & 0x000000FF);
-            var length0000FF00 = (byte)((bytesLength & 0x0000FF00) >> 8);
-            var length00FF0000 = (byte)((bytesLength & 0x00FF0000) >> 16);
-            var lengthFF000000 = (byte)((bytesLength & 0xFF000000) >> 24);
-            //var dateTime = 0x00000000;
-            var dateTime000000FF = (byte)(dateTimeInt & 0x000000FF);
-            var dateTime0000FF00 = (byte)((dateTimeInt & 0x0000FF00) >> 8);
-            var dateTime00FF0000 = (byte)((dateTimeInt & 0x00FF0000) >> 16);
-            var dateTimeFF000000 = (byte)((dateTimeInt & 0xFF000000) >> 24);
-            byte attribute = 0x00;
-            
-            EnsureHeaderBufferLength(headerLength);
-            _headerBuffer[0] = (byte)(headerLength - 2);
+   
+            var sourceHeaderPosition = WriteLhaHeader(path, dateTime, fileContentCrc, bytesLength, true);
+
+            var sourceContentPosition = _fileStream.Position;
+            _fileStream.Write(bytes, 0, bytesLength);
+            _fileStream.WriteByte(0);
+            _fileStream.Seek(-1, SeekOrigin.Current);
+
+            _content.Add(new LhaContent(path, dateTime, bytesLength, sourceHeaderPosition, sourceContentPosition));
+        }
+
+        private long WriteLhaHeader(string path, DateTime ?dateTime, ushort? contentCrc, int? bytesLength, bool appendToEnd)
+        {
+            int headerLength;
+            int fullHeaderLength;
+            int pathBytesLength;
+            if (path != null)
+            {
+                var pathBytes = LhaEncoding.GetBytes(path);
+                pathBytesLength = pathBytes.Length;
+                headerLength = (22 + pathBytesLength);
+                fullHeaderLength = headerLength + 2;
+                EnsureHeaderBufferLength(fullHeaderLength);
+                _headerBuffer[21] = (byte)pathBytesLength;
+                for (var i = 0; i < pathBytesLength; i++)
+                {
+                    _headerBuffer[22 + i] = pathBytes[i];
+                }
+            }
+            else
+            {
+                headerLength = _headerBuffer[0];
+                fullHeaderLength = headerLength + 2;
+                EnsureHeaderBufferLength(fullHeaderLength);
+                pathBytesLength = _headerBuffer[21];
+            }
+
+            _headerBuffer[0] = (byte)(headerLength);
             // crc will be written later
             //headerBytes[1] = headerCrc;
             _headerBuffer[2] = 0x2D; // -lh0-
@@ -196,50 +237,60 @@ namespace AmigaOsBuilder
             _headerBuffer[4] = 0x68;
             _headerBuffer[5] = 0x30;
             _headerBuffer[6] = 0x2D;
-            _headerBuffer[7] = length000000FF; // little endian
-            _headerBuffer[8] = length0000FF00;
-            _headerBuffer[9] = length00FF0000;
-            _headerBuffer[10] = lengthFF000000;
-            _headerBuffer[11] = length000000FF;
-            _headerBuffer[12] = length0000FF00;
-            _headerBuffer[13] = length00FF0000;
-            _headerBuffer[14] = lengthFF000000;
-            _headerBuffer[15] = dateTime000000FF;
-            _headerBuffer[16] = dateTime0000FF00;
-            _headerBuffer[17] = dateTime00FF0000;
-            _headerBuffer[18] = dateTimeFF000000;
+            if (bytesLength.HasValue)
+            {
+                //var bytesLength = bytes.Length;
+                var length000000FF = (byte) (bytesLength & 0x000000FF);
+                var length0000FF00 = (byte) ((bytesLength & 0x0000FF00) >> 8);
+                var length00FF0000 = (byte) ((bytesLength & 0x00FF0000) >> 16);
+                var lengthFF000000 = (byte) ((bytesLength & 0xFF000000) >> 24);
+                _headerBuffer[7] = length000000FF; // little endian
+                _headerBuffer[8] = length0000FF00;
+                _headerBuffer[9] = length00FF0000;
+                _headerBuffer[10] = lengthFF000000;
+                _headerBuffer[11] = length000000FF;
+                _headerBuffer[12] = length0000FF00;
+                _headerBuffer[13] = length00FF0000;
+                _headerBuffer[14] = lengthFF000000;
+            }
+
+            if (dateTime.HasValue)
+            {
+                var dateTimeInt = DateTimeToInt(dateTime.Value);
+                var dateTime000000FF = (byte)(dateTimeInt & 0x000000FF);
+                var dateTime0000FF00 = (byte)((dateTimeInt & 0x0000FF00) >> 8);
+                var dateTime00FF0000 = (byte)((dateTimeInt & 0x00FF0000) >> 16);
+                var dateTimeFF000000 = (byte)((dateTimeInt & 0xFF000000) >> 24);
+                _headerBuffer[15] = dateTime000000FF;
+                _headerBuffer[16] = dateTime0000FF00;
+                _headerBuffer[17] = dateTime00FF0000;
+                _headerBuffer[18] = dateTimeFF000000;
+            }
+
+            byte attribute = 0x00;
             _headerBuffer[19] = attribute;
             _headerBuffer[20] = 0x00; // Level identifier
-            
-            _headerBuffer[21] = (byte)pathBytesLength;
-            //if (path.Length != pathBytes.Length)
-            //{
 
-            //}
-            for (var i = 0; i < pathBytesLength; i++)
+            if (contentCrc.HasValue)
             {
-                _headerBuffer[22 + i] = pathBytes[i];//(byte)path[i];
+                var fileContentCrc00FF = (byte)(contentCrc.Value & 0x00FF);
+                var fileContentCrcFF00 = (byte)((contentCrc.Value & 0xFF00) >> 8);
+                _headerBuffer[22 + pathBytesLength] = fileContentCrc00FF;
+                _headerBuffer[23 + pathBytesLength] = fileContentCrcFF00;
             }
-            _headerBuffer[22 + pathBytesLength] = fileContentCrc00FF;
-            _headerBuffer[23 + pathBytesLength] = fileContentCrcFF00;
 
-            headerCrc = CalcHeaderCrc(2, headerLength);
-            
+            var headerCrc = CalcHeaderCrc(2, headerLength);
+
             _headerBuffer[1] = headerCrc;
 
-            if (_fileStreamReadyForAppend == false)
+            if (appendToEnd && _fileStreamReadyForAppend == false)
             {
                 _fileStream.Seek(-1, SeekOrigin.End);
                 _fileStreamReadyForAppend = true;
             }
             var sourceHeaderPosition = _fileStream.Position;
-            _fileStream.Write(_headerBuffer, 0, headerLength);
-            var sourceContentPosition = _fileStream.Position;
-            _fileStream.Write(bytes, 0, bytesLength);
-            _fileStream.WriteByte(0);
-            _fileStream.Seek(-1, SeekOrigin.Current);
-
-            _content.Add(new LhaContent(path, dateTime, bytesLength, sourceHeaderPosition, sourceContentPosition));
+            _fileStream.Write(_headerBuffer, 0, fullHeaderLength);
+            return sourceHeaderPosition;
         }
 
         private void EnsureHeaderBufferLength(int headerLength)
@@ -251,12 +302,12 @@ namespace AmigaOsBuilder
             }
         }
 
-        private byte CalcHeaderCrc(int start, int end)
+        private byte CalcHeaderCrc(int start, int count)
         {
             byte crc = 0;
             unchecked
             {
-                for (var i = start; i < end; i++)
+                for (var i = start; i < start+count; i++)
                 {
 
                     crc += _headerBuffer[i];
@@ -301,7 +352,21 @@ namespace AmigaOsBuilder
 
         public void FileDelete(string path)
         {
-            //throw new NotImplementedException();
+            var content = GetSingleContentByPath(path);
+            var (contentRead, bytes) = ReadContent(_fileStream, content.StreamHeaderPosition);
+            var pathLength = _headerBuffer[21];
+            if (pathLength < 2)
+            {
+                throw new Exception($"Unable to delete path {path}");
+            }
+
+            bytes[22] = (byte) 'd';
+            bytes[23] = (byte) '/';
+
+            _fileStreamReadyForAppend = false;
+            _fileStream.Seek(content.StreamHeaderPosition, SeekOrigin.Begin);
+            WriteLhaHeader(path: null, dateTime: null, contentCrc: null, bytesLength: null, appendToEnd: false);
+            _content.Remove(content);
         }
 
         public bool DirectoryExists(string path)
@@ -333,10 +398,10 @@ namespace AmigaOsBuilder
         {
             path = ToAmigaPath(path)
                        .ToLowerInvariant()
-                   //+ '/'
                 ;
 
             var fileSystemEntries = _content
+                .Where(x => x.Path.ToLowerInvariant().StartsWith("d/") == false)
                 .Where(x => x.Path.ToLowerInvariant().StartsWith(path.ToLowerInvariant()))
                 .Select(x => ToWindowsPath(x.Path))
                 .ToList();
@@ -434,6 +499,11 @@ namespace AmigaOsBuilder
 
     public class LhaContent
     {
+        public override string ToString()
+        {
+            return $"{Path}";
+        }
+
         public LhaContent(string path, DateTime date, int length, long streamHeaderPosition, long streamContentPosition)
         {
             Path = path;
