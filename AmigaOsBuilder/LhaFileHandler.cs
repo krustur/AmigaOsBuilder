@@ -14,6 +14,12 @@ namespace AmigaOsBuilder
         public Encoding LhaEncoding => Encoding.UTF8;
 
         private readonly Logger _logger;
+        public string OutputBasePath { get; }
+        public byte[] FileReadAllBytes(string path)
+        {
+            throw new NotImplementedException();
+        }
+
         private readonly List<LhaContent> _content;
         private readonly FileStream _fileStream;
         private bool _fileStreamReadyForAppend;
@@ -24,6 +30,7 @@ namespace AmigaOsBuilder
         public LhaFileHandler(Logger logger, string outputBasePath)
         {
             _logger = logger;
+            OutputBasePath = outputBasePath;
             _crc16Calcer = new Crc16();
 
             if (File.Exists(outputBasePath))
@@ -110,7 +117,7 @@ namespace AmigaOsBuilder
             var levelIdentifier = _headerBuffer[20];
             if (levelIdentifier != 0)
             {
-                throw new Exception($"Level identifier: {methodId}");
+                throw new Exception($"Unknown Level identifier: {levelIdentifier}");
             }
 
             var pathLength = _headerBuffer[21];
@@ -179,10 +186,10 @@ namespace AmigaOsBuilder
             AddLhaContent(path, bytes, dateTime);
         }
 
-        public void FileCopy(string syncSourcePath, string path, bool overwrite)
+        public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path, bool overwrite)
         {
             path = ToAmigaPath(path);
-            var sourceBytes = File.ReadAllBytes(syncSourcePath);
+            var sourceBytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
             var sourceFileInfo = new FileInfo(syncSourcePath);
             var dateTime = sourceFileInfo.LastWriteTime;
             AddLhaContent(path, sourceBytes, dateTime);
@@ -440,6 +447,18 @@ namespace AmigaOsBuilder
             return fileInfo;
         }
 
+        public IEnumerable<string> DirectoryGetDirectories(string path)
+        {
+            var amigaPath = ToAmigaPath(path)
+                .ToLowerInvariant();
+            var xxx = _content
+                .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
+                .Select(x => x.Path.Split('/').First())
+                .ToList();
+
+            throw new NotImplementedException();
+        }
+
         private LhaContent GetSingleContentByPath(string path)
         {
             path = ToAmigaPath(path)
@@ -461,13 +480,13 @@ namespace AmigaOsBuilder
 
         private string ToAmigaPath(string path)
         {
-            var amigaPath = path.Replace('\\', '/');
+            var amigaPath = path;//.Replace('\\', '/');
             return amigaPath;
         }
 
         private string ToWindowsPath(string path)
         {
-            var amigaPath = path.Replace('/', '\\');
+            var amigaPath = path;//.Replace('/', '\\');
             return amigaPath;
         }
     }

@@ -8,7 +8,7 @@ namespace AmigaOsBuilder
         bool FileExists(string path);
         string FileReadAllText(string path);
         void FileWriteAllText(string path, string content);
-        void FileCopy(string syncSourcePath, string path, bool overwrite);
+        void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path, bool overwrite);
         void FileCopyBack(string path, string syncSourcePath, bool overwrite);
         void FileDelete(string path);
         bool DirectoryExists(string path);
@@ -18,5 +18,8 @@ namespace AmigaOsBuilder
         //string GetSubPath(string fullPath);
         FileType GetFileType(string path);
         IFileInfo GetFileInfo(string path);
+        IEnumerable<string> DirectoryGetDirectories(string path);
+        string OutputBasePath { get; }
+        byte[] FileReadAllBytes(string path);
     }
 }

@@ -22,6 +22,14 @@ namespace AmigaOsBuilder
                     },
                     new Package
                     {
+                        Include = false,
+                        Path = "Workbench (clean install)_3.1.4",
+                        Category = "OS",
+                        Description = "Workbench 3.1.4 operation system (clean Install)",
+                        //Source = ""
+                    },
+                    new Package
+                    {
                         Include = true,
                         Path = "WorkbenchMultiView",
                         Category = "OS",

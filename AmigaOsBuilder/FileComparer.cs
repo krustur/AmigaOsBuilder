@@ -5,7 +5,7 @@ namespace AmigaOsBuilder
 {
     public class FileComparer
     {
-        public static bool FilesContentsAreEqual(FileInfo fileInfo1, IFileInfo fileInfo2)
+        public static bool FilesContentsAreEqual(IFileInfo fileInfo1, IFileInfo fileInfo2)
         {
             bool result;
 
@@ -32,7 +32,7 @@ namespace AmigaOsBuilder
             return result;
         }
 
-        private static bool StreamsContentsAreEqual(Stream stream1, IStream stream2)
+        private static bool StreamsContentsAreEqual(IStream stream1, IStream stream2)
         {
             const int bufferSize = 1024 * sizeof(Int64);
             var buffer1 = new byte[bufferSize];

@@ -2,8 +2,13 @@
 {
     public class Sync
     {
+        public Sync()
+        {
+            
+        }
         public SyncType SyncType { get; set; }
         public FileType FileType { get; set; }
+        public string PackageContentBasePath { get; set; }
         public string SourcePath { get; set; }
         public string TargetPath { get; set; }
 

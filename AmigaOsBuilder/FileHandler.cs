@@ -56,22 +56,21 @@ namespace AmigaOsBuilder
     public class FolderOutputHandler : IFileHandler
     {
         private readonly Logger _logger;
-        private readonly string _outputBasePath;
 
         public FolderOutputHandler(Logger logger, string outputBasePath)
         {
             _logger = logger;
-            _outputBasePath = outputBasePath;
+            OutputBasePath = outputBasePath;
         }
 
         public void CreateBasePaths()
         {
             _logger.Information("Creating output alias directories ...");
-            Directory.CreateDirectory(_outputBasePath);
+            Directory.CreateDirectory(OutputBasePath);
             foreach (var alias in AliasService.GetAliases())
             {
                 var aliasPath = AliasService.GetAliasPath(alias);
-                var outputAliasPath = Path.Combine(_outputBasePath, aliasPath);
+                var outputAliasPath = Path.Combine(OutputBasePath, aliasPath);
                 _logger.Information($@"Alias [{alias}] = [{outputAliasPath}]");
                 Directory.CreateDirectory(outputAliasPath);
             }
@@ -95,10 +94,12 @@ namespace AmigaOsBuilder
             File.WriteAllText(fullPath, content);
         }
 
-        public void FileCopy(string syncSourcePath, string path, bool overwrite)
+        public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path, bool overwrite)
         {
             var fullPath = GetFullPath(path);
-            File.Copy(syncSourcePath, fullPath, overwrite);
+            //File.Copy(syncSourcePath, fullPath, overwrite);
+            var bytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
+            File.WriteAllBytes(fullPath, bytes);
         }
 
         public void FileCopyBack(string path, string syncSourcePath, bool overwrite)
@@ -147,8 +148,16 @@ namespace AmigaOsBuilder
         public FileType GetFileType(string path)
         {
             var fullPath = GetFullPath(path);
-            var fileType = Program.GetFileType(SyncType.Unknown, fullPath);
+            
+            var packageEntryFileInfo = new FileInfo(fullPath);
+            var fileType = (packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory ? FileType.Directory : FileType.File;
+
             return fileType;
+
+            //var fileType = Program.GetFileType(SyncType.Unknown, fullPath);
+            //return fileType;
+
+
         }
 
         public IFileInfo GetFileInfo(string path)
@@ -158,15 +167,38 @@ namespace AmigaOsBuilder
             return new FileSystemFileInfo(fileInfo);
         }
 
+        public IEnumerable<string> DirectoryGetDirectories(string path)
+        {
+            var fullPath = GetFullPath(path);
+
+            var directories = Directory.GetDirectories(fullPath);
+
+            var fixedDirectories = directories
+                .Select(GetSubPath)
+                .ToList();
+
+            return fixedDirectories;
+        }
+
+        public string OutputBasePath { get; }
+        public byte[] FileReadAllBytes(string path)
+        {
+            var fullPath = GetFullPath(path);
+
+            var bytes = File.ReadAllBytes(fullPath);
+
+            return bytes;
+        }
+
         private string GetSubPath(string fullPath)
         {
-            var subPath = Program.RemoveRoot(_outputBasePath, fullPath);
+            var subPath = Program.RemoveRoot(OutputBasePath, fullPath);
             return subPath;
         }
 
         private string GetFullPath(string path)
         {
-            var fullPath = Path.Combine(_outputBasePath, path);
+            var fullPath = Path.Combine(OutputBasePath, path);
             return fullPath;
         }
     }
