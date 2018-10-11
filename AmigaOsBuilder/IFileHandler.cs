@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AmigaOsBuilder
 {
-    public interface IFileHandler
+    public interface IFileHandler : IDisposable
     {
         void CreateBasePaths();
         bool FileExists(string path);
@@ -18,8 +19,10 @@ namespace AmigaOsBuilder
         //string GetSubPath(string fullPath);
         FileType GetFileType(string path);
         IFileInfo GetFileInfo(string path);
-        IEnumerable<string> DirectoryGetDirectories(string path);
+        IList<string> DirectoryGetDirectories(string path);
         string OutputBasePath { get; }
         byte[] FileReadAllBytes(string path);
+        IList<string> DirectoryGetFiles(string path);
+        DateTime GetDate(string path);
     }
 }

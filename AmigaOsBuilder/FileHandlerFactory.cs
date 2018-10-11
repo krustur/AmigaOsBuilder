@@ -6,6 +6,11 @@ namespace AmigaOsBuilder
     {
         public static IFileHandler Create(Logger logger, string outputBasePath)
         {
+            if (outputBasePath == null)
+            {
+                return new NullFileHandler(outputBasePath);
+            }
+
             if (IsLhaFile(outputBasePath))
             {
                 return new LhaFileHandler(logger, outputBasePath);

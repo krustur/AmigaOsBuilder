@@ -41,11 +41,13 @@ namespace AmigaOsBuilder
                 
                 var outputBasePath = configuration["OutputBasePath"];
 
-                var outputFileHandler = FileHandlerFactory.Create(_logger, outputBasePath);
+                using (var outputFileHandler = FileHandlerFactory.Create(_logger, outputBasePath))
+                {
 
-                var configFile = configuration["ConfigFile"];
+                    var configFile = configuration["ConfigFile"];
 
-                BuildIt(location, sourceBasePath, outputFileHandler, configFile);
+                    BuildIt(location, sourceBasePath, outputFileHandler, configFile);
+                }
             }
             catch (Exception e)
             {
@@ -142,85 +144,89 @@ namespace AmigaOsBuilder
                     continue;
                 }
 
-                var contentFileHandler = FileHandlerFactory.Create(_logger, packageContentBasePath);
-
-
-                var packageTargets = contentFileHandler.DirectoryGetDirectories("");
-                foreach (var sourcePath in packageTargets)
+                using (var contentFileHandler = FileHandlerFactory.Create(_logger, packageContentBasePath))
                 {
-                    var dirInfo = new DirectoryInfo(sourcePath);
-                    var targetAlias = dirInfo.Name;
 
-                    var packageOutputPath = AliasService.TargetAliasToOutputPath(targetAlias);
-                    //packageOutputPath = _pathService.Combine(outputBasePath, packageOutputPath);
 
-                    var packageEntries = contentFileHandler.DirectoryGetFileSystemEntriesRecursive(sourcePath);
-                    foreach (var packageEntry in packageEntries)
+                    var packageTargets = contentFileHandler.DirectoryGetDirectories("");
+                    foreach (var sourcePath in packageTargets)
                     {
-                        var packageEntryFileName = _pathService.GetFileName(packageEntry);
-                        if (ShouldContentReverseAll(packageEntryFileName))
+                        var dirInfo = new DirectoryInfo(sourcePath);
+                        var targetAlias = dirInfo.Name;
+
+                        var packageOutputPath = AliasService.TargetAliasToOutputPath(targetAlias);
+                        //packageOutputPath = _pathService.Combine(outputBasePath, packageOutputPath);
+
+                        var packageEntries = contentFileHandler.DirectoryGetFileSystemEntriesRecursive(sourcePath);
+                        foreach (var packageEntry in packageEntries)
                         {
-                            var contentReversePackageEntryPath = _pathService.GetDirectoryName(packageEntry);
-                            var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
-                            var contentReverseFileOutputPath = _pathService.Combine(packageOutputPath, contentReversePackageSubPath);
-                            if (outputFileHandler.DirectoryExists(contentReverseFileOutputPath))
+                            var packageEntryFileName = _pathService.GetFileName(packageEntry);
+                            if (ShouldContentReverseAll(packageEntryFileName))
                             {
-                                var innerContentReversePackageEntries = outputFileHandler.DirectoryGetFileSystemEntriesRecursive(contentReverseFileOutputPath);
-                                foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
+                                var contentReversePackageEntryPath = _pathService.GetDirectoryName(packageEntry);
+                                var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
+                                var contentReverseFileOutputPath = _pathService.Combine(packageOutputPath, contentReversePackageSubPath);
+                                if (outputFileHandler.DirectoryExists(contentReverseFileOutputPath))
                                 {
-                                    //var innerContentReversePackageSubPath = fileHandler.GetSubPath(innerContentReversePackageEntry);
-                                    //var innerContentReversePackageSubPath = innerContentReversePackageEntry;
-                                    var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
-                                    var innerContentReverseSourcePath = _pathService.Combine(sourcePath, innerContentReversePackageSubPath);
-
-                                    var innerSync = new Sync
+                                    var innerContentReversePackageEntries = outputFileHandler.DirectoryGetFileSystemEntriesRecursive(contentReverseFileOutputPath);
+                                    foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
                                     {
-                                        PackageContentBasePath = packageContentBasePath,
-                                        SourcePath = innerContentReverseSourcePath,
-                                        TargetPath = innerContentReversePackageEntry,
-                                        //TargetPath = innerContentReversePackageSubPath,
-                                        SyncType = syncType,
-                                        FileType = outputFileHandler.GetFileType(innerContentReversePackageEntry)
-                                    };
+                                        //var innerContentReversePackageSubPath = fileHandler.GetSubPath(innerContentReversePackageEntry);
+                                        //var innerContentReversePackageSubPath = innerContentReversePackageEntry;
+                                        var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
+                                        var innerContentReverseSourcePath = _pathService.Combine(sourcePath, innerContentReversePackageSubPath);
 
-                                    syncList.Add(innerSync);
+                                        var innerSync = new Sync
+                                        {
+                                            PackageContentBasePath = packageContentBasePath,
+                                            SourcePath = innerContentReverseSourcePath,
+                                            TargetPath = innerContentReversePackageEntry,
+                                            //TargetPath = innerContentReversePackageSubPath,
+                                            SyncType = syncType,
+                                            FileType = outputFileHandler.GetFileType(innerContentReversePackageEntry)
+                                        };
+
+                                        syncList.Add(innerSync);
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            var packageSubPath = RemoveRoot(sourcePath, packageEntry);
-                            var fileOutputPath = _pathService.Combine(packageOutputPath, packageSubPath);
-                            //_logger.Information($"{packageEntry} => {fileOutputPath}");
-                            var sync = new Sync
+                            else
                             {
-                                PackageContentBasePath = packageContentBasePath,
-                                SourcePath = packageEntry,
-                                //TargetPath = fileOutputPath,
-                                TargetPath = fileOutputPath,
-                                SyncType = syncType,
-                                FileType = contentFileHandler.GetFileType(packageEntry)
-                            };
+                                var packageSubPath = RemoveRoot(sourcePath, packageEntry);
+                                var fileOutputPath = _pathService.Combine(packageOutputPath, packageSubPath);
+                                //_logger.Information($"{packageEntry} => {fileOutputPath}");
+                                var sync = new Sync
+                                {
+                                    PackageContentBasePath = packageContentBasePath,
+                                    SourcePath = packageEntry,
+                                    //TargetPath = fileOutputPath,
+                                    TargetPath = fileOutputPath,
+                                    SyncType = syncType,
+                                    FileType = contentFileHandler.GetFileType(packageEntry)
+                                };
 
-                            syncList.Add(sync);
+                                syncList.Add(sync);
+                            }
                         }
                     }
-                }
-                var packageFiles = Directory.GetFiles(packageContentBasePath);
-                foreach (var packageFile in packageFiles)
-                {
-                    var packageFileName = _pathService.GetFileName(packageFile).ToLowerInvariant();
-                    switch (packageFileName)
+
+                    var packageFiles = contentFileHandler.DirectoryGetFiles("");
+                    foreach (var packageFile in packageFiles)
                     {
-                        case "user-startup":
+                        var packageFileName = _pathService.GetFileName(packageFile)
+                            .ToLowerInvariant();
+                        switch (packageFileName)
                         {
-                            var userStartupContent = File.ReadAllText(packageFile);
-                            UserStartupBuilder.Append(userStartupContent);
-                            break;
-                        }
-                        default:
-                        {
-                            throw new Exception($"Package file [{packageFileName}] is not supported!");
+                            case "user-startup":
+                            {
+                                var userStartupContent = contentFileHandler.FileReadAllText(packageFile);
+                                UserStartupBuilder.Append(userStartupContent);
+                                break;
+                            }
+                            default:
+                            {
+                                throw new Exception($"Package file [{packageFileName}] is not supported!");
+                            }
                         }
                     }
                 }
@@ -254,7 +260,7 @@ namespace AmigaOsBuilder
                 {
                     syncList.Add(new Sync
                     {
-                        PackageContentBasePath = outputFileHandler.OutputBasePath,
+                        PackageContentBasePath = null,//outputFileHandler.OutputBasePath,
                         SyncType = SyncType.DeleteTarget,
                         FileType = outputFileHandler.GetFileType(outputEntry),
                         TargetPath = outputEntry
@@ -303,17 +309,19 @@ namespace AmigaOsBuilder
 
                 var actualSync = syncListForTarget.Last();
                 _logger.Debug("Sync {Sync})", actualSync);
-                var contentFileHandler = FileHandlerFactory.Create(_logger, actualSync.PackageContentBasePath);
-                switch (actualSync.FileType)
+                using (var contentFileHandler = FileHandlerFactory.Create(_logger, actualSync.PackageContentBasePath))
                 {
-                    case FileType.File:
-                        SynchronizeFile(actualSync, contentFileHandler , outputFileHandler);
-                        break;
-                    case FileType.Directory:
-                        SynchronizeDirectory(actualSync, contentFileHandler, outputFileHandler);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    switch (actualSync.FileType)
+                    {
+                        case FileType.File:
+                            SynchronizeFile(actualSync, contentFileHandler, outputFileHandler);
+                            break;
+                        case FileType.Directory:
+                            SynchronizeDirectory(actualSync, contentFileHandler, outputFileHandler);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
 
                 var syncListForTargetSourcePaths = syncListForTarget

@@ -17,7 +17,12 @@ namespace AmigaOsBuilder
         public string OutputBasePath { get; }
         public byte[] FileReadAllBytes(string path)
         {
-            throw new NotImplementedException();
+            var content = GetSingleContentByPath(path);
+            _fileStreamReadyForAppend = false;
+            _fileStream.Seek(content.StreamContentPosition, SeekOrigin.Begin);
+            var bytes = new byte[content.Length];
+            _fileStream.Read(bytes, 0, content.Length);
+            return bytes;
         }
 
         private readonly List<LhaContent> _content;
@@ -29,6 +34,7 @@ namespace AmigaOsBuilder
 
         public LhaFileHandler(Logger logger, string outputBasePath)
         {
+            if (outputBasePath.ToLowerInvariant().Contains("output")) { }
             _logger = logger;
             OutputBasePath = outputBasePath;
             _crc16Calcer = new Crc16();
@@ -169,11 +175,7 @@ namespace AmigaOsBuilder
 
         public string FileReadAllText(string path)
         {
-            var content = GetSingleContentByPath(path);
-            _fileStreamReadyForAppend = false;
-            _fileStream.Seek(content.StreamContentPosition, SeekOrigin.Begin);
-            var bytes = new byte[content.Length];
-            _fileStream.Read(bytes, 0, content.Length);
+            var bytes = FileReadAllBytes(path);
             var text = LhaEncoding.GetString(bytes);
             return text;
         }
@@ -190,8 +192,9 @@ namespace AmigaOsBuilder
         {
             path = ToAmigaPath(path);
             var sourceBytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
-            var sourceFileInfo = new FileInfo(syncSourcePath);
-            var dateTime = sourceFileInfo.LastWriteTime;
+            //var sourceFileInfo = new FileInfo(syncSourcePath);
+            //var dateTime = sourceFileInfo.LastWriteTime;
+            var dateTime = sourceFileHandler.GetDate(syncSourcePath);
             AddLhaContent(path, sourceBytes, dateTime);
         }
 
@@ -447,16 +450,19 @@ namespace AmigaOsBuilder
             return fileInfo;
         }
 
-        public IEnumerable<string> DirectoryGetDirectories(string path)
+        public IList<string> DirectoryGetDirectories(string path)
         {
             var amigaPath = ToAmigaPath(path)
                 .ToLowerInvariant();
-            var xxx = _content
-                .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
-                .Select(x => x.Path.Split('/').First())
-                .ToList();
 
-            throw new NotImplementedException();
+            var directories = _content
+                .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
+                .Select(x => x.Path.Split('\\').First())
+                .Distinct()
+                .ToList()
+                ;
+
+            return directories;
         }
 
         private LhaContent GetSingleContentByPath(string path)
@@ -475,6 +481,7 @@ namespace AmigaOsBuilder
 
         public void Dispose()
         {
+            //_logger?.Dispose();
             _fileStream?.Dispose();
         }
 
@@ -488,6 +495,44 @@ namespace AmigaOsBuilder
         {
             var amigaPath = path;//.Replace('/', '\\');
             return amigaPath;
+        }
+
+        public IList<string> DirectoryGetFiles(string path)
+        {
+            var amigaPath = ToAmigaPath(path)
+                .ToLowerInvariant();
+
+            var files = _content
+                .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
+                .Select(x => x.Path.ToLowerInvariant())
+                .Distinct()
+                .ToList();
+
+            if (amigaPath.Length != 0)
+            {
+                files = files
+                    .Select(x => x.Replace(amigaPath, string.Empty))
+                    .Distinct()
+                    .ToList();
+            }
+
+            files = files
+                    .Where(x => x.Contains('\\') == false)
+                    .Distinct()
+                    .ToList();
+
+            if (files.Count > 0)
+            {
+
+            }
+            return files;
+
+        }
+
+        public DateTime GetDate(string path)
+        {
+            var content = GetSingleContentByPath(path);
+            return content.Date;
         }
     }
 

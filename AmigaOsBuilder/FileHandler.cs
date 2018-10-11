@@ -167,7 +167,7 @@ namespace AmigaOsBuilder
             return new FileSystemFileInfo(fileInfo);
         }
 
-        public IEnumerable<string> DirectoryGetDirectories(string path)
+        public IList<string> DirectoryGetDirectories(string path)
         {
             var fullPath = GetFullPath(path);
 
@@ -200,6 +200,31 @@ namespace AmigaOsBuilder
         {
             var fullPath = Path.Combine(OutputBasePath, path);
             return fullPath;
+        }
+
+        public IList<string> DirectoryGetFiles(string path)
+        {
+            var fullPath = Path.Combine(OutputBasePath, path);
+
+            var files = Directory.GetFiles(fullPath);
+
+            return files;
+        }
+
+        public DateTime GetDate(string path)
+        {
+            var fullPath = Path.Combine(OutputBasePath, path);
+
+            var fileInfo = new FileInfo(fullPath);
+
+            var dateTime = fileInfo.LastWriteTime;
+
+            return dateTime;
+        }
+
+        public void Dispose()
+        {
+            //_logger?.Dispose();
         }
     }
 }
