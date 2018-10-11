@@ -36,18 +36,16 @@ namespace AmigaOsBuilder
 
                 _pathService = new PathService();
 
-                var location = configuration["Location"];
-                var sourceBasePath = configuration["SourceBasePath"];
-                
+                var sourceBasePath = configuration["SourceBasePath"];                
                 var outputBasePath = configuration["OutputBasePath"];
 
-                using (var outputFileHandler = FileHandlerFactory.Create(_logger, outputBasePath))
-                {
+                var sourceBasePath2 = configuration["SourceBasePath2"];
+                var outputBasePath2 = configuration["OutputBasePath2"];
 
-                    var configFile = configuration["ConfigFile"];
+                var configFile = configuration["ConfigFile"];
 
-                    BuildIt(location, sourceBasePath, outputFileHandler, configFile);
-                }
+                BuildIt(sourceBasePath, outputBasePath, configFile);
+                //BuildIt(sourceBasePath2, outputBasePath2, configFile);
             }
             catch (Exception e)
             {
@@ -60,19 +58,21 @@ namespace AmigaOsBuilder
             Console.ReadLine();
         }
 
-        private static void BuildIt(string location, string sourceBasePath, IFileHandler outputFileHandler, string configFileName)
+        private static void BuildIt(string sourceBasePath, string outputBasePath, string configFileName)
         {
-            var config = ConfigService.GetConfig(location, configFileName);
+            using (var outputFileHandler = FileHandlerFactory.Create(_logger, outputBasePath))
+            {
+                var config = ConfigService.GetConfig(configFileName);
 
-            outputFileHandler.CreateBasePaths();
+                outputFileHandler.CreateBasePaths();
 
-            var syncList = BuildSyncList(sourceBasePath, outputFileHandler, config);
+                var syncList = BuildSyncList(sourceBasePath, outputFileHandler, config);
 
-            SynchronizeV2(syncList, outputFileHandler);
+                SynchronizeV2(syncList, outputFileHandler);
 
-            SynchronizeTextFile(UserStartupBuilder.ToString(), outputFileHandler, "__s__", "user-startup");
-            SynchronizeTextFile(ReadmeBuilder.ToString(), outputFileHandler, "__systemdrive__", "readme_krustwb3.txt");
-
+                SynchronizeTextFile(UserStartupBuilder.ToString(), outputFileHandler, "__s__", "user-startup");
+                SynchronizeTextFile(ReadmeBuilder.ToString(), outputFileHandler, "__systemdrive__", "readme_krustwb3.txt");
+            }
         }
 
         private static List<Sync> BuildSyncList(string sourceBasePath, IFileHandler outputFileHandler, Config config)

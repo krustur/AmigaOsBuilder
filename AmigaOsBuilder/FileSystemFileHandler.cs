@@ -6,58 +6,11 @@ using Serilog.Core;
 
 namespace AmigaOsBuilder
 {
-    public class FileSystemStream : IStream
-    {
-        private readonly Stream _stream;
-
-        public FileSystemStream(Stream stream)
-        {
-            _stream = stream;
-        }
-
-        public void Dispose()
-        {
-            _stream?.Dispose();
-        }
-
-        public int Read(byte[] buffer, int offset, int count)
-        {
-            return _stream.Read(buffer, offset, count);
-        }
-    }
-
-    public class FileSystemFileInfo : IFileInfo
-    {
-        private readonly FileInfo _fileInfo;
-
-        public FileSystemFileInfo(FileInfo fileInfo)
-        {
-            _fileInfo = fileInfo;
-        }
-
-        public bool Exists => _fileInfo.Exists;
-        public DateTime LastWriteTime
-        {
-            get
-            {
-                var lastWriteTime = _fileInfo.LastWriteTime;
-                return lastWriteTime;
-            }
-        }
-
-        public long Length => _fileInfo.Length;
-
-        public IStream OpenRead()
-        {
-            return new FileSystemStream(_fileInfo.OpenRead());
-        }
-    }
-
-    public class FolderOutputHandler : IFileHandler
+    public class FileSystemFileHandler : IFileHandler
     {
         private readonly Logger _logger;
 
-        public FolderOutputHandler(Logger logger, string outputBasePath)
+        public FileSystemFileHandler(Logger logger, string outputBasePath)
         {
             _logger = logger;
             OutputBasePath = outputBasePath;
@@ -91,15 +44,24 @@ namespace AmigaOsBuilder
         public void FileWriteAllText(string path, string content)
         {
             var fullPath = GetFullPath(path);
+            EnsurePathExists(fullPath);
             File.WriteAllText(fullPath, content);
         }
 
         public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path)
         {
             var fullPath = GetFullPath(path);
-            //File.Copy(syncSourcePath, fullPath, overwrite);
+            EnsurePathExists(fullPath);
             var bytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
             File.WriteAllBytes(fullPath, bytes);
+        }
+
+        private void EnsurePathExists(string fullPath)
+        {
+            var fullPath2 = Path.GetFullPath(fullPath);
+            var directoryName = Path.GetDirectoryName(fullPath);
+            var pathRoot = Path.GetPathRoot(fullPath);
+            Directory.CreateDirectory(fullPath2);
         }
 
         public void FileCopyBack(string path, string syncSourcePath, bool overwrite)
@@ -225,6 +187,53 @@ namespace AmigaOsBuilder
         public void Dispose()
         {
             //_logger?.Dispose();
+        }
+    }
+
+    public class FileSystemStream : IStream
+    {
+        private readonly Stream _stream;
+
+        public FileSystemStream(Stream stream)
+        {
+            _stream = stream;
+        }
+
+        public void Dispose()
+        {
+            _stream?.Dispose();
+        }
+
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            return _stream.Read(buffer, offset, count);
+        }
+    }
+
+    public class FileSystemFileInfo : IFileInfo
+    {
+        private readonly FileInfo _fileInfo;
+
+        public FileSystemFileInfo(FileInfo fileInfo)
+        {
+            _fileInfo = fileInfo;
+        }
+
+        public bool Exists => _fileInfo.Exists;
+        public DateTime LastWriteTime
+        {
+            get
+            {
+                var lastWriteTime = _fileInfo.LastWriteTime;
+                return lastWriteTime;
+            }
+        }
+
+        public long Length => _fileInfo.Length;
+
+        public IStream OpenRead()
+        {
+            return new FileSystemStream(_fileInfo.OpenRead());
         }
     }
 }

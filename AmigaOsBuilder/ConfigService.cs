@@ -587,18 +587,18 @@ namespace AmigaOsBuilder
 
         // @formatter:on
 
-        public static Config GetConfig(string location, string configFileName)
+        public static Config GetConfig(string configFileName)
         {
             var config = TestConfig;
-            
+
             //var configFilePath = Path.Combine(location, configFileName);
-            
+
             //// Serialize
             //var configString = JsonConvert.SerializeObject(config, Formatting.Indented);
-            //File.WriteAllText(configFilePath, configString, Encoding.UTF8);
+            //File.WriteAllText(configFileName, configString, Encoding.UTF8);
 
             //// Deserialize
-            //var configString = File.ReadAllText(configFilePath);
+            //var configString = File.ReadAllText(configFileName);
             //config = JsonConvert.DeserializeObject<Config>(configString);
 
             return config;

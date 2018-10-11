@@ -16,7 +16,7 @@ namespace AmigaOsBuilder
                 return new LhaFileHandler(logger, outputBasePath);
 
             }
-            return new FolderOutputHandler(logger, outputBasePath);
+            return new FileSystemFileHandler(logger, outputBasePath);
         }
 
         private static bool IsLhaFile(string outputBasePath)
