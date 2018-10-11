@@ -33,12 +33,14 @@ namespace AmigaOsBuilder
 
         public bool FileExists(string path)
         {
-            return File.Exists(GetFullPath(path));
+            var fullPath = GetFullPath(path);
+            return File.Exists(fullPath);
         }
 
         public string FileReadAllText(string path)
         {
-            return File.ReadAllText(GetFullPath(path));
+            var fullPath = GetFullPath(path);
+            return File.ReadAllText(fullPath);
         }
 
         public void FileWriteAllText(string path, string content)

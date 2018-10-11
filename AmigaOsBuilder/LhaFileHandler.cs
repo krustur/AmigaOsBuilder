@@ -12,6 +12,7 @@ namespace AmigaOsBuilder
     {
         private const int INITIAL_HEADER_BUFFER_LENGTH = 32;
         public Encoding LhaEncoding => Encoding.UTF8;
+        private const char FolderSeparator = '\\';
 
         private readonly Logger _logger;
         public string OutputBasePath { get; }
@@ -377,7 +378,7 @@ namespace AmigaOsBuilder
             }
 
             bytes[22] = (byte) 'd';
-            bytes[23] = (byte) '/';
+            bytes[23] = (byte) FolderSeparator;
 
             _fileStreamReadyForAppend = false;
             _fileStream.Seek(content.StreamHeaderPosition, SeekOrigin.Begin);
@@ -389,7 +390,7 @@ namespace AmigaOsBuilder
         {
             path = ToAmigaPath(path)
                        .ToLowerInvariant()
-                   + '/';
+                   + FolderSeparator;
             if (_content.Any(x => x.Path.ToLowerInvariant().StartsWith(path)))
             {
                 return true;
@@ -416,8 +417,9 @@ namespace AmigaOsBuilder
                        .ToLowerInvariant()
                 ;
 
+            var startsWidth = $"d{FolderSeparator}";
             var fileSystemEntries = _content
-                .Where(x => x.Path.ToLowerInvariant().StartsWith("d/") == false)
+                .Where(x => x.Path.ToLowerInvariant().StartsWith(startsWidth) == false)
                 .Where(x => x.Path.ToLowerInvariant().StartsWith(path.ToLowerInvariant()))
                 .Select(x => ToWindowsPath(x.Path))
                 .ToList();
@@ -463,7 +465,7 @@ namespace AmigaOsBuilder
 
             var directories = _content
                 .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
-                .Select(x => x.Path.Split('\\').First())
+                .Select(x => x.Path.Split(FolderSeparator).First())
                 .Distinct()
                 .ToList()
                 ;
@@ -523,7 +525,7 @@ namespace AmigaOsBuilder
             }
 
             files = files
-                    .Where(x => x.Contains('\\') == false)
+                    .Where(x => x.Contains(FolderSeparator) == false)
                     .Distinct()
                     .ToList();
 
