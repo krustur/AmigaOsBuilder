@@ -54,7 +54,7 @@ namespace AmigaOsBuilder
             
         }
 
-        public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path, bool overwrite)
+        public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path)
         {
             
         }

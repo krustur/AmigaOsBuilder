@@ -9,7 +9,7 @@ namespace AmigaOsBuilder
         bool FileExists(string path);
         string FileReadAllText(string path);
         void FileWriteAllText(string path, string content);
-        void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path, bool overwrite);
+        void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path);
         void FileCopyBack(string path, string syncSourcePath, bool overwrite);
         void FileDelete(string path);
         bool DirectoryExists(string path);

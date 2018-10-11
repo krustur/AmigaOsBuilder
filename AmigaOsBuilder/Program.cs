@@ -385,7 +385,7 @@ namespace AmigaOsBuilder
                             _logger.Debug(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, fileDiff);
                         }
 
-                        outputFileHandler.FileCopy(contentFileHandler, sync.SourcePath, sync.TargetPath, overwrite: true);
+                        outputFileHandler.FileCopy(contentFileHandler, sync.SourcePath, sync.TargetPath);
                     }
 
                     break;
@@ -414,7 +414,7 @@ namespace AmigaOsBuilder
                             {
                                 _logger.Information(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
                                 _logger.Debug(@"{SyncLogType}: (invserse) [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
-                                outputFileHandler.FileCopy(contentFileHandler, sync.SourcePath, sync.TargetPath, overwrite: true);
+                                outputFileHandler.FileCopy(contentFileHandler, sync.SourcePath, sync.TargetPath);
                                 break;
                             }
                             case FileDiff.DiffContent:

@@ -504,7 +504,7 @@ namespace AmigaOsBuilder
                         Category = "Programs",
                         Description = @"WHDLoad",
                         Source = "http://whdload.de/"
-                    },              
+                    },
                     new Package
                     {
                         Include = true,
@@ -512,6 +512,14 @@ namespace AmigaOsBuilder
                         Category = "Programs",
                         Description = @"Frontend to launching WHDLoad games",
                         Source = "http://aminet.net/package/util/misc/iGame"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "DirOpus_4.16",
+                        Category = "Programs",
+                        Description = @"Legendary File Manager for Amiga Computers",
+                        Source = "http://aminet.net/package/util/dopus/DOpus416JRbin"
                     },
                     #endregion
                     #region A-Games     

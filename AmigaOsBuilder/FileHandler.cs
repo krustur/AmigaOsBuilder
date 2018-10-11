@@ -94,7 +94,7 @@ namespace AmigaOsBuilder
             File.WriteAllText(fullPath, content);
         }
 
-        public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path, bool overwrite)
+        public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path)
         {
             var fullPath = GetFullPath(path);
             //File.Copy(syncSourcePath, fullPath, overwrite);

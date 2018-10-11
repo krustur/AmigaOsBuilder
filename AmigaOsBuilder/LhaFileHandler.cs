@@ -106,10 +106,7 @@ namespace AmigaOsBuilder
             // crc will be written later
             var headerCrc = _headerBuffer[1];
             var methodId = LhaEncoding.GetString(_headerBuffer, 2, 5);
-            if (methodId != "-lh0-")
-            {
-                throw new Exception($"Unknown Method ID: {methodId}");
-            }
+            
 
             var length000000FF = _headerBuffer[7]; // little endian
             var length0000FF00 = _headerBuffer[8];
@@ -121,10 +118,7 @@ namespace AmigaOsBuilder
             var dateTimeFF000000 = _headerBuffer[18];
             var attribute = _headerBuffer[19];
             var levelIdentifier = _headerBuffer[20];
-            if (levelIdentifier != 0)
-            {
-                throw new Exception($"Unknown Level identifier: {levelIdentifier}");
-            }
+            
 
             var pathLength = _headerBuffer[21];
 
@@ -145,9 +139,17 @@ namespace AmigaOsBuilder
             var path = LhaEncoding.GetString(_headerBuffer, 22, pathLength);
 
             var calcHeaderCrc = CalcHeaderCrc(2, headerLength);
+            if (methodId != "-lh0-")
+            {
+                throw new Exception($"Unknown Method ID in [{path}]: {methodId}");
+            }
+            if (levelIdentifier != 0)
+            {
+                throw new Exception($"Unknown Level identifier in [{path}]: {levelIdentifier}");
+            }
             if (calcHeaderCrc != headerCrc)
             {
-                throw new Exception($"Header CRC mismatch: headerCrc={headerCrc} calcHeaderCrc={calcHeaderCrc}");
+                throw new Exception($"Header CRC mismatch in [{path}]: headerCrc={headerCrc} calcHeaderCrc={calcHeaderCrc}");
             }
 
             var streamContentPosition = fileStream.Position;
@@ -188,8 +190,12 @@ namespace AmigaOsBuilder
             AddLhaContent(path, bytes, dateTime);
         }
 
-        public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path, bool overwrite)
+        public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path)
         {
+            if (FileExists(path))
+            {
+                FileDelete(path);
+            }
             path = ToAmigaPath(path);
             var sourceBytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
             //var sourceFileInfo = new FileInfo(syncSourcePath);
