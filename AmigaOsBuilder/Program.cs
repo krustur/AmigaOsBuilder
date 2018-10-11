@@ -407,7 +407,7 @@ namespace AmigaOsBuilder
                             {
                                 _logger.Information(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
                                 _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
-                                outputFileHandler.FileCopyBack(sync.TargetPath, sync.SourcePath, overwrite: true);
+                                contentFileHandler.FileCopyBack(sync.SourcePath, outputFileHandler, sync.TargetPath);
                                 break;
                             }
                             case FileDiff.DiffTargetMissing:
@@ -423,7 +423,7 @@ namespace AmigaOsBuilder
                             {
                                 _logger.Warning(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
                                 _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
-                                outputFileHandler.FileCopyBack(sync.TargetPath, sync.SourcePath, overwrite: true);
+                                outputFileHandler.FileCopyBack(sync.SourcePath, outputFileHandler, sync.TargetPath);
                                 break;
                             }
                         }

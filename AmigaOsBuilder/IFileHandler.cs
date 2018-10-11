@@ -10,7 +10,7 @@ namespace AmigaOsBuilder
         string FileReadAllText(string path);
         void FileWriteAllText(string path, string content);
         void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path);
-        void FileCopyBack(string path, string syncSourcePath, bool overwrite);
+        void FileCopyBack(string path, IFileHandler contentFileHandler, string contentPath);
         void FileDelete(string path);
         bool DirectoryExists(string path);
         void DirectoryCreateDirectory(string path);

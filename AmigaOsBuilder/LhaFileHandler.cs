@@ -361,7 +361,7 @@ namespace AmigaOsBuilder
             return dateTime;
         }
 
-        public void FileCopyBack(string path, string syncSourcePath, bool overwrite)
+        public void FileCopyBack(string path, IFileHandler contentFileHandler, string contentPath)
         {
             throw new NotImplementedException();
         }

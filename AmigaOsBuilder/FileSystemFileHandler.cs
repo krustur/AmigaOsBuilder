@@ -62,10 +62,12 @@ namespace AmigaOsBuilder
             Directory.CreateDirectory(directoryName);
         }
 
-        public void FileCopyBack(string path, string syncSourcePath, bool overwrite)
+        public void FileCopyBack(string path, IFileHandler contentFileHandler, string contentPath)
         {
             var fullPath = GetFullPath(path);
-            File.Copy(fullPath, syncSourcePath, overwrite);
+            EnsurePathExists(fullPath);
+            var bytes = contentFileHandler.FileReadAllBytes(contentPath);
+            File.WriteAllBytes(fullPath, bytes);
         }
 
         public void FileDelete(string path)
