@@ -45,7 +45,7 @@ namespace AmigaOsBuilder
                 var configFile = configuration["ConfigFile"];
 
                 BuildIt(sourceBasePath, outputBasePath, configFile);
-                //BuildIt(sourceBasePath2, outputBasePath2, configFile);
+                BuildIt(sourceBasePath2, outputBasePath2, configFile);
             }
             catch (Exception e)
             {

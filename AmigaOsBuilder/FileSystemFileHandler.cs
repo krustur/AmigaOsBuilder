@@ -58,10 +58,8 @@ namespace AmigaOsBuilder
 
         private void EnsurePathExists(string fullPath)
         {
-            var fullPath2 = Path.GetFullPath(fullPath);
             var directoryName = Path.GetDirectoryName(fullPath);
-            var pathRoot = Path.GetPathRoot(fullPath);
-            Directory.CreateDirectory(fullPath2);
+            Directory.CreateDirectory(directoryName);
         }
 
         public void FileCopyBack(string path, string syncSourcePath, bool overwrite)
