@@ -55,7 +55,37 @@ namespace AmigaOsBuilder
             var fullPath = GetFullPath(path);
             EnsurePathExists(fullPath);
             var bytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
+            fullPath = WinFixPath(fullPath);
             File.WriteAllBytes(fullPath, bytes);
+        }
+
+        private string WinFixPath(string path)
+        {
+
+            var invalidFileNames = new List<string>
+            {
+                "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+            };
+            var fileCompare = Path.GetFileName(path).ToUpperInvariant();
+            if (invalidFileNames.Contains(fileCompare))
+            {
+                var dir = Path.GetDirectoryName(path);
+                var file = Path.GetFileName(path);
+                path = Path.Combine(dir, $"_amiga_{file}");
+            }
+
+            foreach (var invalidFileName in invalidFileNames)
+            {
+                if (fileCompare.StartsWith(invalidFileName + "."))
+                {
+                    var dir = Path.GetDirectoryName(path);
+                    var file = Path.GetFileName(path);
+                    path = Path.Combine(dir, $"_amiga_{file}");
+                    break;
+                }
+            }
+
+            return path;
         }
 
         private void EnsurePathExists(string fullPath)
