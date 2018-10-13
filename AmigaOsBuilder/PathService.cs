@@ -1,4 +1,7 @@
-﻿namespace AmigaOsBuilder
+﻿using System;
+using System.Linq;
+
+namespace AmigaOsBuilder
 {
     public interface IPathService
     {
@@ -24,14 +27,14 @@
 
         public string GetFileName(string path)
         {
-            var fileName= System.IO.Path.GetFileName(path);
+            var fileName = System.IO.Path.GetFileName(path);
             return fileName;
         }
 
         public string GetDirectoryName(string path)
         {
-            var fileName = System.IO.Path.GetDirectoryName(path);
-            return fileName;
+            var dirName = System.IO.Path.GetDirectoryName(path);
+            return dirName;
         }
     }
 }

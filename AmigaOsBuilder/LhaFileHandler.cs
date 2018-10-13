@@ -138,6 +138,15 @@ namespace AmigaOsBuilder
 
             fileStream.Read(_headerBuffer, 22, pathLength + 2);
             var path = LhaEncoding.GetString(_headerBuffer, 22, pathLength);
+            string comment = null;
+            for (var i = 0; i < pathLength; i++)
+            {
+                if (_headerBuffer[22+i] == 0)
+                {
+                    path = LhaEncoding.GetString(_headerBuffer, 22, i);
+                    comment = LhaEncoding.GetString(_headerBuffer, 22 + i + 1, pathLength - i - 1);
+                }
+            }
 
             var calcHeaderCrc = CalcHeaderCrc(2, headerLength);
             if (methodId != "-lh0-")
