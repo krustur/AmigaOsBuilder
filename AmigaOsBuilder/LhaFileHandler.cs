@@ -373,7 +373,7 @@ namespace AmigaOsBuilder
 
         public void FileCopyBack(string path, IFileHandler contentFileHandler, string contentPath)
         {
-            throw new NotImplementedException();
+            _logger.Error("FileCopyBack not implemented");
         }
 
         public void FileDelete(string path)

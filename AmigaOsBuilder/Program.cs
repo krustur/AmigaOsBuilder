@@ -353,9 +353,9 @@ namespace AmigaOsBuilder
             if (content.Equals(oldContent, StringComparison.Ordinal) == false)
             {
                 _logger.Information(@"Updating text file: [{TargetPath}]", outputPath);
-                _logger.Information("<<<< Begin content >>>>");
-                _logger.Information(content);
-                _logger.Information("<<<< End content >>>>");
+                _logger.Debug("<<<< Begin content >>>>");
+                _logger.Debug(content);
+                _logger.Debug("<<<< End content >>>>");
                 outputFileHandler.FileWriteAllText(outputPath, content);
             }
         }

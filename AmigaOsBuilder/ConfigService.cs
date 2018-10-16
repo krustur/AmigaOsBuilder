@@ -14,7 +14,7 @@ namespace AmigaOsBuilder
                     #region OS
                     new Package
                     {
-                        Include = true,
+                        Include = false,
                         Path = "Workbench (clean install)_3.1",
                         Category = "OS",
                         Description = "Workbench 3.1 operation system (clean Install)",
@@ -22,10 +22,18 @@ namespace AmigaOsBuilder
                     },
                     new Package
                     {
-                        Include = false,
+                        Include = true,
                         Path = "Workbench (clean install)_3.1.4",
                         Category = "OS",
                         Description = "Workbench 3.1.4 operation system (clean Install)",
+                        //Source = ""
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Workbench (glowicons)_3.1.4",
+                        Category = "OS",
+                        Description = "Workbench 3.1.4 Glowicons",
                         //Source = ""
                     },
                     new Package
@@ -47,7 +55,6 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        //Name = "Startup-Sequence",
                         Path = "Startup-Sequence",
                         Category = "KrustWB",
                         Description = "KrustWB startup-sequence and user-startup files",
@@ -56,7 +63,6 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        //Name = "Backdrop",
                         Path = "Backdrop",
                         Category = "KrustWB",
                         Description = "KrustWB .backdrop file. OS setting file that keeps track of \"Leave Out\".",
@@ -65,7 +71,6 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        //Name = "Env-Archive",
                         Path = "Env-Archive",
                         Category = "KrustWB",
                         Description = "KrustWB system settings files kept in Prefs/Env-Archive",
@@ -74,7 +79,6 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
-                        //Name = "Monitors",
                         Path = "Monitors",
                         Category = "KrustWB",
                         Description = "KrustWB monitors Devs/Monitors",
@@ -98,10 +102,20 @@ namespace AmigaOsBuilder
                         //Source = ""
                     },
                     #endregion
-                    #region A-System
+                    #region ROMS
                     new Package
                     {
                         Include = true,
+                        Path = "AmigaOS ROM_46.143",
+                        Category = "ROMS",
+                        Description = "Amiga OS ROM 46.143 (3.1.4)",
+                        //Source = ""
+                    },
+                    #endregion
+                    #region A-System
+                    new Package
+                    {
+                        Include = false,
                         Path = "SetPatch_43.6b",
                         Category = "System",
                         Description = "Makes ROM patches in system software",
@@ -117,7 +131,7 @@ namespace AmigaOsBuilder
                     },
                     new Package
                     {
-                        Include = true,
+                        Include = false, //???
                         Path = "Installer_44.10",
                         Category = "System",
                         Description = "Installer software",
@@ -174,7 +188,7 @@ namespace AmigaOsBuilder
                     },
                     new Package
                     {
-                        Include = true,
+                        Include = false,//???
                         Path = "SCSI_43.45p",
                         Category = "System",
                         Description = "Patched scsi.device to enable use of 128 GB or bigger IDE devices",
@@ -198,7 +212,7 @@ namespace AmigaOsBuilder
                     },
                     new Package
                     {
-                        Include = true,
+                        Include = false,//???
                         Path = "AmigaOS ROM Update from OS3.9 BB2",
                         Category = "System",
                         Description = "44.57 AmigaOS ROM Update from OS3.9 BB2",
@@ -283,6 +297,14 @@ namespace AmigaOsBuilder
                     new Package
                     {
                         Include = true,
+                        Path = "ToolsDaemon_2.2",
+                        Category = "System",
+                        Description = @"These patches fix ToolsDaemon 2.1a, written by Nico François, to take advantage of V45 (OS 3.9) Workbench API",
+                        Source = "http://aminet.net/package/util/boot/ToolsDaemon22"
+                    },
+                    new Package
+                    {
+                        Include = false,
                         Path = "Info_39.18b",
                         Category = "System",
                         Description = @"ToolsDaemon allows you to run programs simply by selecting a menu item from the menu strip of Workbench",
@@ -322,7 +344,7 @@ namespace AmigaOsBuilder
                     },
                     new Package
                     {
-                        Include = true,
+                        Include = false,
                         Path = "PatchRAM_1.11",
                         Category = "System",
                         Description = @"Patches the RAM disk to show the real size occupied",
@@ -332,9 +354,17 @@ namespace AmigaOsBuilder
                     {
                         Include = true,
                         Path = "MUI_3.9-2015R1",
-                        Category = "Library",
+                        Category = "System",
                         Description = @"Magical User Interface",
                         Source = "https://muidev.de/downloads"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "BlizKick_1.24",
+                        Category = "System",
+                        Description = @"BlizKick is used to rekick any Kickstart ROM image with Blizzard turbo boards having MAPROM feature (jumper).",
+                        Source = "http://aminet.net/package/util/boot/BlizKick"
                     },
                     #endregion
                     #region Libraries
@@ -348,7 +378,7 @@ namespace AmigaOsBuilder
                     },
                     new Package
                     {
-                        Include = true,
+                        Include = true,//???
                         Path = "ReqTools_39.3",
                         Category = "Library",
                         Description = @"ReqTools library",
@@ -438,6 +468,14 @@ namespace AmigaOsBuilder
                         Category = "Library",
                         Description = @"Master Control Program. Collect all usual patches for AmigaOS at a time when the development of AmigaOS seemed to have stopped",
                         Source = "http://mcp.a1k.org/indexe.html"
+                    },
+                    new Package
+                    {
+                        Include = true,
+                        Path = "Workbench (intuition-v45-library)_3.1.4",
+                        Category = "OS",
+                        Description = "Workbench 3.1.4 operation system v-45 intuition.library. Will allow you to drag windows partially off the screen",
+                        //Source = ""
                     },
                     #endregion
                     #region A-Programs
