@@ -15,6 +15,7 @@ namespace AmigaOsBuilder
                 Aliases = SysAliases,
                 Packages = SysPackages,
                 ReverseSync = true,
+                UserStartup = true,
             };
         }
         public static Config SysLhaConfig()
@@ -26,6 +27,7 @@ namespace AmigaOsBuilder
                 Aliases = SysAliases,
                 Packages = SysPackages,
                 ReverseSync = false,
+                UserStartup = true,
             };
         }
         public static Config WorkConfig()
@@ -37,6 +39,7 @@ namespace AmigaOsBuilder
                 Aliases = WorkAliases,
                 Packages = WorkPackages,
                 ReverseSync = true,
+                UserStartup = false,
             };
         }
         public static Config WorkLhaConfig()
@@ -48,6 +51,7 @@ namespace AmigaOsBuilder
                 Aliases = WorkAliases,
                 Packages = WorkPackages,
                 ReverseSync = false,
+                UserStartup = false,
             };
         }
 
@@ -60,6 +64,7 @@ namespace AmigaOsBuilder
                 Aliases = DevAliases,
                 Packages = DevPackages,
                 ReverseSync = true,
+                UserStartup = false,
             };
         }
         public static Config DevLhaConfig()
@@ -71,6 +76,7 @@ namespace AmigaOsBuilder
                 Aliases = DevAliases,
                 Packages = DevPackages,
                 ReverseSync = false,
+                UserStartup = false,
             };
         }
 

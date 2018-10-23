@@ -17,7 +17,7 @@ namespace AmigaOsBuilder
             }
             var barWidth = 50;
             var maxWidth = (packagesCount - 1);
-            if (maxWidth == 0)
+            if (maxWidth < 1)
             {
                 maxWidth = 1;
             }
@@ -27,10 +27,11 @@ namespace AmigaOsBuilder
             {
                 _progressLastWidth = progressWidth;
 
+                var minuses = (barWidth - progressWidth) < 1 ? string.Empty : new string('-', barWidth - progressWidth);
                 var barText = string.Format("{0}: [{1}{2}]\r",
                     title,
                     new string('#', progressWidth),
-                    new string('-', barWidth - progressWidth));
+                    minuses);
 
                 Console.Write(barText);
             }

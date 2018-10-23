@@ -35,12 +35,18 @@ namespace AmigaOsBuilder
 
                 _pathService = new PathService();
 
-                BuildIt(ConfigService.SysConfig());
-                BuildIt(ConfigService.SysLhaConfig());
-                //BuildIt(ConfigService.WorkConfig());
-                //BuildIt(ConfigService.WorkLhaConfig());
-                BuildIt(ConfigService.DevConfig());
-                BuildIt(ConfigService.DevLhaConfig());
+                BuildIt(new List<Config>
+                {
+                    ConfigService.SysConfig(),
+                    //ConfigService.WorkConfig(),
+                    ConfigService.DevConfig()
+                });
+                BuildIt(new List<Config>
+                {
+                    ConfigService.SysLhaConfig(),
+                    //ConfigService.WorkLhaConfig(),
+                    ConfigService.DevLhaConfig(),
+                });
             }
             catch (Exception e)
             {
@@ -53,40 +59,41 @@ namespace AmigaOsBuilder
             Console.ReadLine();
         }
 
-        private static void BuildIt(Config config)
+        private static void BuildIt(IList<Config> configs)
         {
-            _logger.Information("");
-            _logger.Information("Building from {SourcePath} to {TargetPath} ...", config.SourceBasePath, config.OutputBasePath);
-            using (var outputFileHandler = FileHandlerFactory.Create(_logger, config.OutputBasePath))
+            foreach (var config in configs)
             {
-                AliasService aliasService = new AliasService(config.Aliases);
-                outputFileHandler.CreateBasePaths(aliasService);
+                _logger.Information("");
+                _logger.Information("Building from {SourcePath} to {TargetPath} ...", config.SourceBasePath, config.OutputBasePath);
+                using (var outputFileHandler = FileHandlerFactory.Create(_logger, config.OutputBasePath))
+                {
+                    AliasService aliasService = new AliasService(config.Aliases);
+                    outputFileHandler.CreateBasePaths(aliasService);
 
-                var syncList = BuildSyncList(config.SourceBasePath, outputFileHandler, config, aliasService);
-
-                SynchronizeV2(syncList, outputFileHandler);
-
-                //SynchronizeTextFile(UserStartupBuilder.ToString(), outputFileHandler, "__s__", "user-startup", aliasService);
-                
-                //SynchronizeTextFile(readme, outputFileHandler, "__systemdrive__", "readme_krustwb3.txt", aliasService);
+                    var syncList = BuildSyncList(outputFileHandler, config, aliasService);
+                    if (config.UserStartup)
+                    {
+                        BuildUserStartup(configs, syncList);
+                    }
+                    SynchronizeV2(syncList, outputFileHandler);
+                }
+                _logger.Information("Build done");
             }
-            _logger.Information("Build done");
-
         }
 
-        private static IList<Sync> BuildSyncList(string sourceBasePath, IFileHandler outputFileHandler, Config config, AliasService aliasService)
+        private static IList<Sync> BuildSyncList(IFileHandler outputFileHandler, Config config, AliasService aliasService)
         {
             _logger.Information("Building sync list ...");
 
             var syncList = new List<Sync>();
 
-            var packages = GetIncludedPackages(sourceBasePath, config);
+            var packages = GetIncludedPackages(config);
 
-            AddContentToSyncList(sourceBasePath, outputFileHandler, packages, "content", SyncType.SourceToTarget, syncList, aliasService: aliasService);
+            AddContentToSyncList(config.SourceBasePath, outputFileHandler, packages, "content", SyncType.SourceToTarget, syncList, aliasService: aliasService);
             AddDeleteToSyncList(outputFileHandler, syncList);
             if (config.ReverseSync)
             {
-                AddContentToSyncList(sourceBasePath, outputFileHandler, packages, "content_reverse", SyncType.TargetToSource, syncList, aliasService: aliasService);
+                AddContentToSyncList(config.SourceBasePath, outputFileHandler, packages, "content_reverse", SyncType.TargetToSource, syncList, aliasService: aliasService);
             }
 
 
@@ -99,7 +106,7 @@ namespace AmigaOsBuilder
             return syncList;
         }
 
-        private static IList<Package> GetIncludedPackages(string sourceBasePath, Config config)
+        private static IList<Package> GetIncludedPackages(Config config)
         {
             var packages = config.Packages
                 .Where(x => x.Include == true)
@@ -107,7 +114,7 @@ namespace AmigaOsBuilder
 
             foreach (var package in packages)
             {                
-                var packageBasePath = _pathService.Combine(sourceBasePath, package.Path);
+                var packageBasePath = _pathService.Combine(config.SourceBasePath, package.Path);
                 if (Directory.Exists(packageBasePath) == false)
                 {
                     throw new Exception($"Package [{package.Path}] base path [{packageBasePath}] is missing, check your configuration.");
@@ -201,27 +208,6 @@ namespace AmigaOsBuilder
                 }
             }
         }
-        
-         //var packageFiles = contentFileHandler.DirectoryGetFiles("");
-         //foreach (var packageFile in packageFiles)
-         //{
-         //    var packageFileName = _pathService.GetFileName(packageFile)
-         //        .ToLowerInvariant();
-         //    switch (packageFileName)
-         //    {
-         //        case "user-startup":
-         //        {
-         //            var userStartupContent = contentFileHandler.FileReadAllText(packageFile);
-         //            UserStartupBuilder.Append(userStartupContent);
-         //            break;
-         //        }
-         //        default:
-         //        {
-         //            throw new Exception($"Package file [{packageFileName}] is not supported!");
-         //        }
-         //    }
-         //}
-
 
         private static bool ShouldContentReverseAll(string packageEntryFileName)
         {
@@ -338,6 +324,7 @@ namespace AmigaOsBuilder
 
             int packageCnt = 0;
             var builder = new StringBuilder(32727);
+            var outputPath = "KrustWB3.readme.txt";
 
             foreach (var package in packages)
             {
@@ -356,13 +343,58 @@ namespace AmigaOsBuilder
                 PackageContentBasePath = "KrustWB3.readme.txt",
                 SyncType = SyncType.SourceToTarget,
                 FileType = FileType.File,
-                SourcePath = "KrustWB3.readme.txt",
-                TargetPath = "KrustWB3.readme.txt"
+                SourcePath = outputPath,
+                TargetPath = outputPath
             });
 
-            FileHandlerFactory.ReadmeFileHandler = new InmemoryFileHandler("KrustWB3.readme.txt", builder.ToString());
+            
+            FileHandlerFactory.AddCustomFileHandler(outputPath, new InmemoryFileHandler(outputPath, builder.ToString()));
             ProgressBar.ClearProgressBar();
             _logger.Information("Build Readme done!");
+        }
+
+        private static void BuildUserStartup(IList<Config> configs, IList<Sync> syncList)
+        {
+            _logger.Information("Building user-startup ...");
+
+            var configCnt = 0;
+            var builder = new StringBuilder(32727);
+            var path = "user-startup";
+            var innerPath = "s\\user-startup";
+
+            foreach (var config in configs)
+            {
+                configCnt++;
+                var packageCnt = 0;
+                var packages = GetIncludedPackages(config);
+                foreach (var package in packages)
+                {
+                    ProgressBar.DrawProgressBar($"Build user-startup {configCnt}", packageCnt++, packages.Count);
+
+                    var packagFolderBasePath = _pathService.Combine(config.SourceBasePath, package.Path, "");
+                    using (var fileHandler = FileHandlerFactory.Create(_logger, packagFolderBasePath))
+                    {
+                        if (fileHandler.FileExists(path))
+                        {
+                            var userstartup = fileHandler.FileReadAllText(path);
+                            builder.Append(userstartup);                    
+                        }
+                    }
+                }
+            }
+            syncList.Add(new Sync
+            {
+                PackageContentBasePath = path,
+                SyncType = SyncType.SourceToTarget,
+                FileType = FileType.File,
+                SourcePath = innerPath,
+                TargetPath = innerPath
+            });
+            var str = builder.ToString();
+            FileHandlerFactory.AddCustomFileHandler(path, new InmemoryFileHandler(innerPath, str));
+
+            ProgressBar.ClearProgressBar();
+            _logger.Information("Build user-startup done!");
         }
 
         private static void SynchronizeTextFile(string content, IFileHandler outputFileHandler, string outputSubPath, string fileName, AliasService aliasService)

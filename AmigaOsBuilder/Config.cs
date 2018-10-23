@@ -9,5 +9,6 @@ namespace AmigaOsBuilder
         public IDictionary<string, string> Aliases { get; internal set; }
         public IList<Package> Packages { get; internal set; }
         public bool ReverseSync { get; internal set; }
+        public bool UserStartup { get; internal set; }
     }
 }
