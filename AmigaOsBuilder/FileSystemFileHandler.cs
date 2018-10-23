@@ -205,7 +205,7 @@ namespace AmigaOsBuilder
             return files;
         }
 
-        public DateTime GetDate(string path)
+        public (DateTime DateTime, byte Attributes) GetDate(string path)
         {
             var fullPath = Path.Combine(OutputBasePath, path);
 
@@ -213,7 +213,7 @@ namespace AmigaOsBuilder
 
             var dateTime = fileInfo.LastWriteTime;
 
-            return dateTime;
+            return (dateTime, FileAttributeHelper.ToAmigaAttributes(fileInfo.Attributes));
         }
 
         public void Dispose()

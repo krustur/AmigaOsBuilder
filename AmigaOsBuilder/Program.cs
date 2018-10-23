@@ -348,7 +348,7 @@ namespace AmigaOsBuilder
             });
 
             
-            FileHandlerFactory.AddCustomFileHandler(outputPath, new InmemoryFileHandler(outputPath, builder.ToString()));
+            FileHandlerFactory.AddCustomFileHandler(outputPath, new InmemoryFileHandler(outputPath, builder.ToString(), 0x00));
             ProgressBar.ClearProgressBar();
             _logger.Information("Build Readme done!");
         }
@@ -377,6 +377,11 @@ namespace AmigaOsBuilder
                         if (fileHandler.FileExists(path))
                         {
                             var userstartup = fileHandler.FileReadAllText(path);
+                            if (userstartup.Contains(Environment.NewLine))
+                            {
+                                _logger.Warning($"user-starttup for {package.Path} has incorrect NewLine! Correct NewLine is '\\n'");
+                                userstartup = userstartup.Replace(Environment.NewLine, "\n");
+                            }
                             builder.Append(userstartup);                    
                         }
                     }
@@ -391,29 +396,11 @@ namespace AmigaOsBuilder
                 TargetPath = innerPath
             });
             var str = builder.ToString();
-            FileHandlerFactory.AddCustomFileHandler(path, new InmemoryFileHandler(innerPath, str));
+            FileHandlerFactory.AddCustomFileHandler(path, new InmemoryFileHandler(innerPath, str, 0x40)); // 0x40 = S
 
             ProgressBar.ClearProgressBar();
             _logger.Information("Build user-startup done!");
-        }
-
-        private static void SynchronizeTextFile(string content, IFileHandler outputFileHandler, string outputSubPath, string fileName, AliasService aliasService)
-        {
-            var outputPath = _pathService.Combine(aliasService.TargetAliasToOutputPath(outputSubPath), fileName);
-
-            var oldContent = outputFileHandler.FileExists(outputPath) ? outputFileHandler.FileReadAllText(outputPath) : string.Empty;
-
-            content = content.Replace("\r\n", "\n");
-            //if (content != oldContent)
-            if (content.Equals(oldContent, StringComparison.Ordinal) == false)
-            {
-                _logger.Information(@"Updating text file: [{TargetPath}]", outputPath);
-                _logger.Debug("<<<< Begin content >>>>");
-                _logger.Debug(content);
-                _logger.Debug("<<<< End content >>>>");
-                outputFileHandler.FileWriteAllText(outputPath, content);
-            }
-        }
+        }   
 
         private static void SynchronizeFile(Sync sync, IFileHandler contentFileHandler, IFileHandler outputFileHandler)
         {

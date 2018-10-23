@@ -23,6 +23,6 @@ namespace AmigaOsBuilder
         string OutputBasePath { get; }
         byte[] FileReadAllBytes(string path);
         IList<string> DirectoryGetFiles(string path);
-        DateTime GetDate(string path);
+        (DateTime DateTime, byte Attributes) GetDate(string path);
     }
 }

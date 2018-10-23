@@ -90,9 +90,9 @@ namespace AmigaOsBuilder
             
         }
 
-        public DateTime GetDate(string path)
+        public (DateTime DateTime, byte Attributes) GetDate(string path)
         {
-            return DateTime.MinValue;
+            return (DateTime.MinValue, 0x00);
 
         }
 

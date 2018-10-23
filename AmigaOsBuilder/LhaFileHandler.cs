@@ -117,7 +117,7 @@ namespace AmigaOsBuilder
             var dateTime0000FF00 = _headerBuffer[16];
             var dateTime00FF0000 = _headerBuffer[17];
             var dateTimeFF000000 = _headerBuffer[18];
-            var attribute = _headerBuffer[19];
+            var attributes = _headerBuffer[19];
             var levelIdentifier = _headerBuffer[20];
             
 
@@ -165,7 +165,7 @@ namespace AmigaOsBuilder
             var streamContentPosition = fileStream.Position;
             fileStream.Seek(contentLength, SeekOrigin.Current);
 
-            var content = new LhaContent(path, dateTime, contentLength, streamHeaderPosition, streamContentPosition);
+            var content = new LhaContent(path, dateTime, attributes, contentLength, streamHeaderPosition, streamContentPosition);
 
             return (content, _headerBuffer);
         }
@@ -197,7 +197,7 @@ namespace AmigaOsBuilder
             path = ToAmigaPath(path);
             var bytes = LhaEncoding.GetBytes(content);
             var dateTime = DateTime.Now;
-            AddLhaContent(path, bytes, dateTime);
+            AddLhaContent(path, bytes, dateTime, 0x00);
         }
 
         public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path)
@@ -210,26 +210,27 @@ namespace AmigaOsBuilder
             var sourceBytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
             //var sourceFileInfo = new FileInfo(syncSourcePath);
             //var dateTime = sourceFileInfo.LastWriteTime;
-            var dateTime = sourceFileHandler.GetDate(syncSourcePath);
-            AddLhaContent(path, sourceBytes, dateTime);
+            var getDate = sourceFileHandler.GetDate(syncSourcePath);
+            
+            AddLhaContent(path, sourceBytes, getDate.DateTime, getDate.Attributes);
         }
 
-        private void AddLhaContent(string path, byte[] bytes, DateTime dateTime)
+        private void AddLhaContent(string path, byte[] bytes, DateTime dateTime, byte attributes)
         {
             var fileContentCrc = _crc16Calcer.ComputeChecksum(bytes);
             var bytesLength = bytes.Length;
    
-            var sourceHeaderPosition = WriteLhaHeader(path, dateTime, fileContentCrc, bytesLength, true);
+            var sourceHeaderPosition = WriteLhaHeader(path, dateTime, attributes, fileContentCrc, bytesLength, true);
 
             var sourceContentPosition = _fileStream.Position;
             _fileStream.Write(bytes, 0, bytesLength);
             _fileStream.WriteByte(0);
             _fileStream.Seek(-1, SeekOrigin.Current);
 
-            _content.Add(new LhaContent(path, dateTime, bytesLength, sourceHeaderPosition, sourceContentPosition));
+            _content.Add(new LhaContent(path, dateTime, attributes, bytesLength, sourceHeaderPosition, sourceContentPosition));
         }
 
-        private long WriteLhaHeader(string path, DateTime ?dateTime, ushort? contentCrc, int? bytesLength, bool appendToEnd)
+        private long WriteLhaHeader(string path, DateTime ?dateTime, byte attributes, ushort? contentCrc, int? bytesLength, bool appendToEnd)
         {
             int headerLength;
             int fullHeaderLength;
@@ -293,8 +294,8 @@ namespace AmigaOsBuilder
                 _headerBuffer[18] = dateTimeFF000000;
             }
 
-            byte attribute = 0x00;
-            _headerBuffer[19] = attribute;
+            
+            _headerBuffer[19] = attributes;
             _headerBuffer[20] = 0x00; // Level identifier
 
             if (contentCrc.HasValue)
@@ -391,7 +392,7 @@ namespace AmigaOsBuilder
 
             _fileStreamReadyForAppend = false;
             _fileStream.Seek(content.StreamHeaderPosition, SeekOrigin.Begin);
-            WriteLhaHeader(path: null, dateTime: null, contentCrc: null, bytesLength: null, appendToEnd: false);
+            WriteLhaHeader(path: null, dateTime: null, attributes: 0x00, contentCrc: null, bytesLength: null, appendToEnd: false);
             _content.Remove(content);
         }
 
@@ -546,10 +547,10 @@ namespace AmigaOsBuilder
 
         }
 
-        public DateTime GetDate(string path)
+        public (DateTime DateTime, byte Attributes) GetDate(string path)
         {
             var content = GetSingleContentByPath(path);
-            return content.Date;
+            return (content.Date, content.Attributes);
         }
     }
 
@@ -585,16 +586,18 @@ namespace AmigaOsBuilder
             return $"{Path}";
         }
 
-        public LhaContent(string path, DateTime date, int length, long streamHeaderPosition, long streamContentPosition)
+        public LhaContent(string path, DateTime date, byte attributes, int length, long streamHeaderPosition, long streamContentPosition)
         {
             Path = path;
             Date = date;
+            Attributes = attributes;
             Length = length;
             StreamHeaderPosition = streamHeaderPosition;
             StreamContentPosition = streamContentPosition;
         }
         public string Path { get; set; }
         public DateTime Date { get; set; }
+        public byte Attributes { get; set; }
         public int Length { get; set; }
         public long StreamHeaderPosition { get; set; }
         public long StreamContentPosition { get; set; }
