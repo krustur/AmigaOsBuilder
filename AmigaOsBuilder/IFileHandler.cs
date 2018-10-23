@@ -5,7 +5,7 @@ namespace AmigaOsBuilder
 {
     public interface IFileHandler : IDisposable
     {
-        void CreateBasePaths();
+        void CreateBasePaths(AliasService aliasService);
         bool FileExists(string path);
         string FileReadAllText(string path);
         void FileWriteAllText(string path, string content);

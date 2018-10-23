@@ -17,7 +17,6 @@ namespace AmigaOsBuilder
         private static Logger _logger;
         private static IPathService _pathService;
         private static readonly StringBuilder UserStartupBuilder = new StringBuilder(32727);
-        private static readonly StringBuilder ReadmeBuilder = new StringBuilder(32727);
 
         static void Main(string[] args)
         {
@@ -36,16 +35,12 @@ namespace AmigaOsBuilder
 
                 _pathService = new PathService();
 
-                var sourceBasePath = configuration["SourceBasePath"];                
-                var outputBasePath = configuration["OutputBasePath"];
-
-                var sourceBasePath2 = configuration["SourceBasePath2"];
-                var outputBasePath2 = configuration["OutputBasePath2"];
-
-                var configFile = configuration["ConfigFile"];
-
-                BuildIt(sourceBasePath, outputBasePath, configFile);
-                BuildIt(sourceBasePath2, outputBasePath2, configFile);
+                BuildIt(ConfigService.SysConfig());
+                BuildIt(ConfigService.SysLhaConfig());
+                //BuildIt(ConfigService.WorkConfig());
+                //BuildIt(ConfigService.WorkLhaConfig());
+                BuildIt(ConfigService.DevConfig());
+                BuildIt(ConfigService.DevLhaConfig());
             }
             catch (Exception e)
             {
@@ -58,32 +53,44 @@ namespace AmigaOsBuilder
             Console.ReadLine();
         }
 
-        private static void BuildIt(string sourceBasePath, string outputBasePath, string configFileName)
+        private static void BuildIt(Config config)
         {
-            using (var outputFileHandler = FileHandlerFactory.Create(_logger, outputBasePath))
+            _logger.Information("");
+            _logger.Information("Building from {SourcePath} to {TargetPath} ...", config.SourceBasePath, config.OutputBasePath);
+            using (var outputFileHandler = FileHandlerFactory.Create(_logger, config.OutputBasePath))
             {
-                var config = ConfigService.GetConfig(configFileName);
+                AliasService aliasService = new AliasService(config.Aliases);
+                outputFileHandler.CreateBasePaths(aliasService);
 
-                outputFileHandler.CreateBasePaths();
-
-                var syncList = BuildSyncList(sourceBasePath, outputFileHandler, config);
+                var syncList = BuildSyncList(config.SourceBasePath, outputFileHandler, config, aliasService);
 
                 SynchronizeV2(syncList, outputFileHandler);
 
-                SynchronizeTextFile(UserStartupBuilder.ToString(), outputFileHandler, "__s__", "user-startup");
-                SynchronizeTextFile(ReadmeBuilder.ToString(), outputFileHandler, "__systemdrive__", "readme_krustwb3.txt");
+                //SynchronizeTextFile(UserStartupBuilder.ToString(), outputFileHandler, "__s__", "user-startup", aliasService);
+                
+                //SynchronizeTextFile(readme, outputFileHandler, "__systemdrive__", "readme_krustwb3.txt", aliasService);
             }
+            _logger.Information("Build done");
+
         }
 
-        private static List<Sync> BuildSyncList(string sourceBasePath, IFileHandler outputFileHandler, Config config)
+        private static IList<Sync> BuildSyncList(string sourceBasePath, IFileHandler outputFileHandler, Config config, AliasService aliasService)
         {
             _logger.Information("Building sync list ...");
 
             var syncList = new List<Sync>();
 
-            AddContentToSyncList(sourceBasePath, outputFileHandler, config, "content", SyncType.SourceToTarget, syncList, appendToReadme: true);
+            var packages = GetIncludedPackages(sourceBasePath, config);
+
+            AddContentToSyncList(sourceBasePath, outputFileHandler, packages, "content", SyncType.SourceToTarget, syncList, aliasService: aliasService);
             AddDeleteToSyncList(outputFileHandler, syncList);
-            AddContentToSyncList(sourceBasePath, outputFileHandler, config, "content_reverse", SyncType.TargetToSource, syncList, appendToReadme: false);
+            if (config.ReverseSync)
+            {
+                AddContentToSyncList(sourceBasePath, outputFileHandler, packages, "content_reverse", SyncType.TargetToSource, syncList, aliasService: aliasService);
+            }
+
+
+            BuildReadme(packages, syncList);
 
             ProgressBar.ClearProgressBar();
 
@@ -92,42 +99,37 @@ namespace AmigaOsBuilder
             return syncList;
         }
 
-        private static void AddContentToSyncList(string sourceBasePath, IFileHandler outputFileHandler, Config config,
-            string contentFolderName, SyncType syncType, List<Sync> syncList, bool appendToReadme)
+        private static IList<Package> GetIncludedPackages(string sourceBasePath, Config config)
         {
-            int packageCnt = 0;
-            foreach (var package in config.Packages)
-            {
-                ProgressBar.DrawProgressBar("AddContentToSyncList ", packageCnt++, config.Packages.Count);
-                if (package.Include == false)
-                {
-                    continue;
-                }
+            var packages = config.Packages
+                .Where(x => x.Include == true)
+                .ToList();
 
-                if (appendToReadme)
-                {
-                    ReadmeBuilder.AppendLine($"{package.Path}");
-                    ReadmeBuilder.AppendLine($"{new string('=', package.Path.Length)}");
-                    ReadmeBuilder.AppendLine($"Category: [{package.Category}]");
-                    ReadmeBuilder.AppendLine($"Source {package.Source}");
-                    ReadmeBuilder.AppendLine($"{package.Description}");
-                    ReadmeBuilder.AppendLine($"");
-                }
-
+            foreach (var package in packages)
+            {                
                 var packageBasePath = _pathService.Combine(sourceBasePath, package.Path);
                 if (Directory.Exists(packageBasePath) == false)
                 {
                     throw new Exception($"Package [{package.Path}] base path [{packageBasePath}] is missing, check your configuration.");
                 }
+            }
 
+            return packages;
+        }
 
-
+        private static void AddContentToSyncList(string sourceBasePath, IFileHandler outputFileHandler, IList<Package> packages,
+            string contentFolderName, SyncType syncType, List<Sync> syncList, AliasService aliasService)
+        {
+            int packageCnt = 0;
+            foreach (var package in packages)
+            {
+                ProgressBar.DrawProgressBar($"AddContentToSyncList [{contentFolderName}]", packageCnt++, packages.Count);
+                
                 var packageContentFolderBasePath = _pathService.Combine(sourceBasePath, package.Path, contentFolderName);
                 var packageContentLhaBasePath = _pathService.Combine(sourceBasePath, package.Path, contentFolderName+".lha");
                 if (Directory.Exists(packageContentFolderBasePath) && File.Exists(packageContentLhaBasePath))
                 {
                     throw new Exception($"Package [{package.Path}] has both [content] folder and [content.lha].");
-
                 }
 
                 string packageContentBasePath;
@@ -146,92 +148,80 @@ namespace AmigaOsBuilder
 
                 using (var contentFileHandler = FileHandlerFactory.Create(_logger, packageContentBasePath))
                 {
-
-
-                    var packageTargets = contentFileHandler.DirectoryGetDirectories("");
-                    foreach (var sourcePath in packageTargets)
+                    var packageOutputPath = "";
+                    var sourcePath = "";
+                    var packageEntries = contentFileHandler.DirectoryGetFileSystemEntriesRecursive(sourcePath);
+                    foreach (var packageEntry in packageEntries)
                     {
-                        var dirInfo = new DirectoryInfo(sourcePath);
-                        var targetAlias = dirInfo.Name;
+                        var outputPath = aliasService.TargetAliasToOutputPath(packageEntry);
 
-                        var packageOutputPath = AliasService.TargetAliasToOutputPath(targetAlias);
-                        //packageOutputPath = _pathService.Combine(outputBasePath, packageOutputPath);
-
-                        var packageEntries = contentFileHandler.DirectoryGetFileSystemEntriesRecursive(sourcePath);
-                        foreach (var packageEntry in packageEntries)
+                        var packageEntryFileName = _pathService.GetFileName(outputPath);
+                        if (ShouldContentReverseAll(packageEntryFileName))
                         {
-                            var packageEntryFileName = _pathService.GetFileName(packageEntry);
-                            if (ShouldContentReverseAll(packageEntryFileName))
+                            var contentReversePackageEntryPath = _pathService.GetDirectoryName(outputPath);
+                            var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
+                            var contentReverseFileOutputPath = _pathService.Combine(packageOutputPath, contentReversePackageSubPath);
+                            if (outputFileHandler.DirectoryExists(contentReverseFileOutputPath))
                             {
-                                var contentReversePackageEntryPath = _pathService.GetDirectoryName(packageEntry);
-                                var contentReversePackageSubPath = RemoveRoot(sourcePath, contentReversePackageEntryPath);
-                                var contentReverseFileOutputPath = _pathService.Combine(packageOutputPath, contentReversePackageSubPath);
-                                if (outputFileHandler.DirectoryExists(contentReverseFileOutputPath))
+                                var innerContentReversePackageEntries = outputFileHandler.DirectoryGetFileSystemEntriesRecursive(contentReverseFileOutputPath);
+                                foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
                                 {
-                                    var innerContentReversePackageEntries = outputFileHandler.DirectoryGetFileSystemEntriesRecursive(contentReverseFileOutputPath);
-                                    foreach (var innerContentReversePackageEntry in innerContentReversePackageEntries)
+                                    var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
+                                    var innerContentReverseSourcePath = _pathService.Combine(sourcePath, innerContentReversePackageSubPath);
+
+                                    var innerSync = new Sync
                                     {
-                                        //var innerContentReversePackageSubPath = fileHandler.GetSubPath(innerContentReversePackageEntry);
-                                        //var innerContentReversePackageSubPath = innerContentReversePackageEntry;
-                                        var innerContentReversePackageSubPath = RemoveRoot(packageOutputPath, innerContentReversePackageEntry);
-                                        var innerContentReverseSourcePath = _pathService.Combine(sourcePath, innerContentReversePackageSubPath);
+                                        PackageContentBasePath = packageContentBasePath,
+                                        SourcePath = innerContentReverseSourcePath,
+                                        TargetPath = innerContentReversePackageEntry,
+                                        SyncType = syncType,
+                                        FileType = outputFileHandler.GetFileType(innerContentReversePackageEntry)
+                                    };
 
-                                        var innerSync = new Sync
-                                        {
-                                            PackageContentBasePath = packageContentBasePath,
-                                            SourcePath = innerContentReverseSourcePath,
-                                            TargetPath = innerContentReversePackageEntry,
-                                            //TargetPath = innerContentReversePackageSubPath,
-                                            SyncType = syncType,
-                                            FileType = outputFileHandler.GetFileType(innerContentReversePackageEntry)
-                                        };
-
-                                        syncList.Add(innerSync);
-                                    }
+                                    syncList.Add(innerSync);
                                 }
                             }
-                            else
-                            {
-                                var packageSubPath = RemoveRoot(sourcePath, packageEntry);
-                                var fileOutputPath = _pathService.Combine(packageOutputPath, packageSubPath);
-                                //_logger.Information($"{packageEntry} => {fileOutputPath}");
-                                var sync = new Sync
-                                {
-                                    PackageContentBasePath = packageContentBasePath,
-                                    SourcePath = packageEntry,
-                                    //TargetPath = fileOutputPath,
-                                    TargetPath = fileOutputPath,
-                                    SyncType = syncType,
-                                    FileType = contentFileHandler.GetFileType(packageEntry)
-                                };
-
-                                syncList.Add(sync);
-                            }
                         }
-                    }
-
-                    var packageFiles = contentFileHandler.DirectoryGetFiles("");
-                    foreach (var packageFile in packageFiles)
-                    {
-                        var packageFileName = _pathService.GetFileName(packageFile)
-                            .ToLowerInvariant();
-                        switch (packageFileName)
+                        else
                         {
-                            case "user-startup":
+                            var packageSubPath = RemoveRoot(sourcePath, outputPath);
+                            var fileOutputPath = _pathService.Combine(packageOutputPath, packageSubPath);
+                            var sync = new Sync
                             {
-                                var userStartupContent = contentFileHandler.FileReadAllText(packageFile);
-                                UserStartupBuilder.Append(userStartupContent);
-                                break;
-                            }
-                            default:
-                            {
-                                throw new Exception($"Package file [{packageFileName}] is not supported!");
-                            }
+                                PackageContentBasePath = packageContentBasePath,
+                                SourcePath = packageEntry,
+                                TargetPath = fileOutputPath,
+                                SyncType = syncType,
+                                FileType = contentFileHandler.GetFileType(packageEntry)
+                            };
+
+                            syncList.Add(sync);
                         }
                     }
                 }
             }
         }
+        
+         //var packageFiles = contentFileHandler.DirectoryGetFiles("");
+         //foreach (var packageFile in packageFiles)
+         //{
+         //    var packageFileName = _pathService.GetFileName(packageFile)
+         //        .ToLowerInvariant();
+         //    switch (packageFileName)
+         //    {
+         //        case "user-startup":
+         //        {
+         //            var userStartupContent = contentFileHandler.FileReadAllText(packageFile);
+         //            UserStartupBuilder.Append(userStartupContent);
+         //            break;
+         //        }
+         //        default:
+         //        {
+         //            throw new Exception($"Package file [{packageFileName}] is not supported!");
+         //        }
+         //    }
+         //}
+
 
         private static bool ShouldContentReverseAll(string packageEntryFileName)
         {
@@ -272,7 +262,7 @@ namespace AmigaOsBuilder
 
         private static void SynchronizeV2(IList<Sync> syncList, IFileHandler outputFileHandler)
         {
-            _logger.Information("Synchronizing ...");
+            _logger.Information("Synchronizing ...", outputFileHandler.OutputBasePath);
            
             var targetPaths = syncList
                 .Select(x => x.TargetPath.ToLowerInvariant())
@@ -342,9 +332,42 @@ namespace AmigaOsBuilder
             _logger.Information("Synchronizing done!");
         }
 
-        private static void SynchronizeTextFile(string content, IFileHandler outputFileHandler, string outputSubPath, string fileName)
+        private static void BuildReadme(IList<Package> packages, IList<Sync> syncList)
         {
-            var outputPath = _pathService.Combine(AliasService.TargetAliasToOutputPath(outputSubPath), fileName);
+            _logger.Information("Building Readme ...");
+
+            int packageCnt = 0;
+            var builder = new StringBuilder(32727);
+
+            foreach (var package in packages)
+            {
+                ProgressBar.DrawProgressBar("BuildReadme ", packageCnt++, packages.Count);                
+
+                builder.AppendLine($"{package.Path}");
+                builder.AppendLine($"{new string('=', package.Path.Length)}");
+                builder.AppendLine($"Category: [{package.Category}]");
+                builder.AppendLine($"Source {package.Source}");
+                builder.AppendLine($"{package.Description}");
+                builder.AppendLine($"");
+            }
+
+            syncList.Add(new Sync
+            {
+                PackageContentBasePath = "KrustWB3.readme.txt",
+                SyncType = SyncType.SourceToTarget,
+                FileType = FileType.File,
+                SourcePath = "KrustWB3.readme.txt",
+                TargetPath = "KrustWB3.readme.txt"
+            });
+
+            FileHandlerFactory.ReadmeFileHandler = new InmemoryFileHandler("KrustWB3.readme.txt", builder.ToString());
+            ProgressBar.ClearProgressBar();
+            _logger.Information("Build Readme done!");
+        }
+
+        private static void SynchronizeTextFile(string content, IFileHandler outputFileHandler, string outputSubPath, string fileName, AliasService aliasService)
+        {
+            var outputPath = _pathService.Combine(aliasService.TargetAliasToOutputPath(outputSubPath), fileName);
 
             var oldContent = outputFileHandler.FileExists(outputPath) ? outputFileHandler.FileReadAllText(outputPath) : string.Empty;
 
@@ -424,6 +447,7 @@ namespace AmigaOsBuilder
                                 _logger.Warning(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
                                 _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
                                 outputFileHandler.FileCopyBack(sync.SourcePath, outputFileHandler, sync.TargetPath);
+                                //outputFileHandler.FileCopy(contentFileHandler, sync.SourcePath, sync.TargetPath);
                                 break;
                             }
                         }

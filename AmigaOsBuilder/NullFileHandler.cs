@@ -12,7 +12,7 @@ namespace AmigaOsBuilder
 
         public string OutputBasePath { get; } 
 
-        public void CreateBasePaths()
+        public void CreateBasePaths(AliasService aliasService)
         {
             
         }

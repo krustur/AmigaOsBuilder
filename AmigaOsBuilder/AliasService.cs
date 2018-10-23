@@ -1,49 +1,22 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using Serilog.Core;
 
 namespace AmigaOsBuilder
 {
-    class AliasService
+    public class AliasService
     {
-        // @formatter:off
-        private static readonly IDictionary<string, string> AliasToOutputMap = new Dictionary<string, string>
+        private readonly IDictionary<string, string> _aliasToOutputMap;
+    
+        public AliasService(IDictionary<string, string> aliasToOutputMap)
         {
-            // System drive
-            { @"__systemdrive__",        @"System" },
-            { @"__workdrive__",          @"Work" },
+            _aliasToOutputMap = aliasToOutputMap;
+        }
 
-            // Amiga OS folders
-            { @"__c__",                  @"System\C" },
-            { @"__devs__",               @"System\Devs" },
-            { @"__l__",                  @"System\L" },
-            { @"__locale__",             @"System\Locale" },
-            { @"__libs__",               @"System\Libs" },
-            { @"__prefs__",              @"System\Prefs" },
-            { @"__s__",                  @"System\S" },
-            { @"__storage__",            @"System\Storage" },
-            { @"__system__",             @"System\System" },
-            { @"__utilities__",          @"System\Utilities" },
-            { @"__wbstartup__",          @"System\WBStartup" },
-
-            // KrustWB folders
-            { @"__aprograms__",          @"System\A-Programs" },
-            { @"__asystem__",            @"System\A-System" },
-            { @"__adev__",               @"System\A-Dev" },
-            { @"__aguides__",            @"Work\A-Guides" },
-            { @"__awhdgames__",          @"Work\A-WHDGames" },
-
-            { @"__sdk__",                @"Work\SDK" },
-        };
-        // @formatter:on
-
-        public static string TargetAliasToOutputPath(string aliasedPath)
+        public string TargetAliasToOutputPath(string aliasedPath)
         {
-            foreach (var mapKey in AliasToOutputMap.Keys)
+            foreach (var mapKey in _aliasToOutputMap.Keys)
             {
-                aliasedPath = aliasedPath.Replace(mapKey, AliasToOutputMap[mapKey]);
+                aliasedPath = aliasedPath.Replace(mapKey, _aliasToOutputMap[mapKey]);
             }
 
             if (aliasedPath.Contains("__"))
@@ -54,14 +27,14 @@ namespace AmigaOsBuilder
             return aliasedPath;          
         }
 
-        public static IEnumerable<string> GetAliases()
+        public IEnumerable<string> GetAliases()
         {
-            return AliasToOutputMap.Keys;
+            return _aliasToOutputMap.Keys;
         }
 
-        public static string GetAliasPath(string alias)
+        public string GetAliasPath(string alias)
         {
-            return AliasToOutputMap[alias];
+            return _aliasToOutputMap[alias];
         }
     }
 }

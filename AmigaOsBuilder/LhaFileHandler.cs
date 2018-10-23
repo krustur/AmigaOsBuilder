@@ -170,7 +170,7 @@ namespace AmigaOsBuilder
             return (content, _headerBuffer);
         }
 
-        public void CreateBasePaths()
+        public void CreateBasePaths(AliasService aliasService)
         {            
         }
 
@@ -373,7 +373,7 @@ namespace AmigaOsBuilder
 
         public void FileCopyBack(string path, IFileHandler contentFileHandler, string contentPath)
         {
-            _logger.Error("FileCopyBack not implemented");
+            _logger.Error("LhaFileHandler.FileCopyBack(\"{Path}\"..., \"{ContentPath}\") not implemented", path, contentPath);
         }
 
         public void FileDelete(string path)

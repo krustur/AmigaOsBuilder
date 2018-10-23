@@ -16,15 +16,15 @@ namespace AmigaOsBuilder
             OutputBasePath = outputBasePath;
         }
 
-        public void CreateBasePaths()
+        public void CreateBasePaths(AliasService aliasService)
         {
             _logger.Information("Creating output alias directories ...");
             Directory.CreateDirectory(OutputBasePath);
-            foreach (var alias in AliasService.GetAliases())
+            foreach (var alias in aliasService.GetAliases())
             {
-                var aliasPath = AliasService.GetAliasPath(alias);
+                var aliasPath = aliasService.GetAliasPath(alias);
                 var outputAliasPath = Path.Combine(OutputBasePath, aliasPath);
-                _logger.Information($@"Alias [{alias}] = [{outputAliasPath}]");
+                _logger.Information("Alias [{Alias}] = [{OutputAliasPath}]", alias, outputAliasPath);
                 Directory.CreateDirectory(outputAliasPath);
             }
 

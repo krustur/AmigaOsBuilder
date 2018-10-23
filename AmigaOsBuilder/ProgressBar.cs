@@ -16,7 +16,12 @@ namespace AmigaOsBuilder
 
             }
             var barWidth = 50;
-            var progressWidth = (i * barWidth) / (packagesCount-1);
+            var maxWidth = (packagesCount - 1);
+            if (maxWidth == 0)
+            {
+                maxWidth = 1;
+            }
+            var progressWidth = (i * barWidth) / maxWidth;
 
             if (progressWidth > _progressLastWidth)
             {
