@@ -85,14 +85,14 @@ namespace AmigaOsBuilder
 
         }
 
-        public void FileWriteAllText(string path, string content)
-        {
+        //public void FileWriteAllText(string path, string content)
+        //{
             
-        }
+        //}
 
-        public (DateTime DateTime, byte Attributes) GetDate(string path)
+        public (DateTime DateTime, Attributes Attributes) GetDate(string path)
         {
-            return (DateTime.MinValue, 0x00);
+            return (DateTime.MinValue, new Attributes((byte)0x00));
 
         }
 

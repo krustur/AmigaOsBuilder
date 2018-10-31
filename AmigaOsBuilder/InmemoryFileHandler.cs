@@ -7,10 +7,10 @@ namespace AmigaOsBuilder
     internal class InmemoryFileHandler : IFileHandler
     {
         private string _content;
-        private byte _attributes;
+        private Attributes _attributes;
         private DateTime _lastWriteTime;
 
-        public InmemoryFileHandler(string path, string content, byte attributes)
+        public InmemoryFileHandler(string path, string content, Attributes attributes)
         {
             OutputBasePath = path;
             _content = content;
@@ -101,12 +101,12 @@ namespace AmigaOsBuilder
             return _content;
         }
 
-        public void FileWriteAllText(string path, string content)
-        {
-            throw new NotImplementedException();
-        }
+        //public void FileWriteAllText(string path, string content)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public (DateTime DateTime, byte Attributes) GetDate(string path)
+        public (DateTime DateTime, Attributes Attributes) GetDate(string path)
         {
             if (FileExists(path) == false)
             {
@@ -118,11 +118,12 @@ namespace AmigaOsBuilder
 
         public IFileInfo GetFileInfo(string path)
         {
-            var fileInfo = new InmemoryFileInfo(_content) {
-                Exists = true,
-                LastWriteTime = _lastWriteTime,
-                Length = _content.Length
-            };
+            var fileInfo = new InmemoryFileInfo(
+                _content, 
+                exists: true, 
+                lastWriteTime: _lastWriteTime, 
+                attributes: _attributes, 
+                length: _content.Length);
             return fileInfo;
         }
 

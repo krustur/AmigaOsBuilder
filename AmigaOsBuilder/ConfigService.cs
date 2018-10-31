@@ -23,7 +23,7 @@ namespace AmigaOsBuilder
             return new Config
             {
                 SourceBasePath = "E:\\Amiga\\KrustWB3\\Source\\",
-                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\System.lha",
+                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\KrustWB\\System.lha",
                 Aliases = SysAliases,
                 Packages = SysPackages,
                 ReverseSync = false,
@@ -47,14 +47,13 @@ namespace AmigaOsBuilder
             return new Config
             {
                 SourceBasePath = "E:\\Amiga\\KrustWB3\\Source\\",
-                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\Work.lha",
+                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\KrustWB\\Work.lha",
                 Aliases = WorkAliases,
                 Packages = WorkPackages,
                 ReverseSync = false,
                 UserStartup = false,
             };
         }
-
         public static Config DevConfig()
         {
             return new Config
@@ -72,10 +71,22 @@ namespace AmigaOsBuilder
             return new Config
             {
                 SourceBasePath = "E:\\Amiga\\KrustWB3\\Source\\",
-                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\Dev.lha",
+                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\KrustWB\\Dev.lha",
                 Aliases = DevAliases,
                 Packages = DevPackages,
                 ReverseSync = false,
+                UserStartup = false,
+            };
+        }
+        public static Config InstallerConfig()
+        {
+            return new Config
+            {
+                SourceBasePath = "E:\\Amiga\\KrustWB3\\Source\\",
+                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\KrustWB\\i\\",
+                Aliases = InstallerAliases,
+                Packages = InstallerPackages,
+                ReverseSync = true,
                 UserStartup = false,
             };
         }
@@ -100,22 +111,21 @@ namespace AmigaOsBuilder
             { @"__asystem__",            @"A-System" },
             { @"__aguides__",            @"A-Guides" },
         };
-
-
         private static readonly IDictionary<string, string> WorkAliases = new Dictionary<string, string>
         {
             // KrustWB folders
             { @"__aguides__",            @"A-Guides" },
             { @"__awhdgames__",          @"A-WHDGames" },
         };
-
         private static readonly IDictionary<string, string> DevAliases = new Dictionary<string, string>
         {
             // KrustWB folders
             { @"__aguides__",            @"A-Guides" },
             { @"__sdk__",                @"SDK" },
         };
-
+        private static readonly IDictionary<string, string> InstallerAliases = new Dictionary<string, string>
+        {
+        };
 
         private static readonly List<Package> SysPackages = new List<Package>
         {
@@ -220,7 +230,7 @@ namespace AmigaOsBuilder
             },
             new Package
             {
-                Include = true,
+                Include = false,
                 Path = "KrustWBInstall",
                 Category = "KrustWB",
                 Description = "Scripts to pack and install KrustWB",
@@ -402,6 +412,22 @@ namespace AmigaOsBuilder
                 Category = "System",
                 Description = @"A console-handler that optionally replaces the standard console devices. Adds some useful features, such as Filename-completion",
                 Source = "http://aminet.net/package/util/shell/KingCON_1.3"
+            },
+            new Package
+            {
+                Include = true,
+                Path = "MX1000_1.0",
+                Category = "System",
+                Description = @"AmigaKit DB9 optical mouse driver (MX1000.driver and MX1000Test)",
+                Source = "https://mega.nz/#!RttR3BiS!7FiIN5l-t5N6-NP66d79h9qcaOh1f9qQ46wwZtiEJVY"
+            },
+            new Package
+            {
+                Include = true,
+                Path = "NewMouse_1.2",
+                Category = "System",
+                Description = @"Serial mouse driver, wheel support",
+                Source = "http://aminet.net/package/driver/input/NewMouse12"
             },
             new Package
             {
@@ -757,10 +783,24 @@ namespace AmigaOsBuilder
 
         };
 
+        private static readonly List<Package> InstallerPackages = new List<Package>
+        { 
+            #region Installer
+            new Package
+            {
+                Include = true,
+                Path = "KrustWBInstall_3.0",
+                Category = "KrustWB",
+                Description = "Scripts to pack and install KrustWB",
+                //Source = ""
+            },
+            #endregion
 
-        public static Config GetSysConfig(string configFileName)
-        {
-            throw new NotImplementedException();
+        };
+
+        //public static Config GetSysConfig(string configFileName)
+        //{
+            //throw new NotImplementedException();
             //var config = SysConfig;
             //          "ConfigFile": "E:\\Amiga\\KrustWB3\\config.json",
             //"SourceBasePath": "E:\\Amiga\\KrustWB3\\Source\\",
@@ -780,6 +820,6 @@ namespace AmigaOsBuilder
             //config = JsonConvert.DeserializeObject<Config>(configString);
 
             //return config;
-        }
+        //}
     }
 }

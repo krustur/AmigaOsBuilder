@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
+using Trinet.Core.IO.Ntfs;
 
 namespace AmigaOsBuilder
 {
@@ -22,6 +23,32 @@ namespace AmigaOsBuilder
         {
             try
             {
+                //var files = Directory.GetFiles(@"E:\Amiga\KrustWB3\TempDisk\flags_win");
+                //foreach (var filepath in files)
+                //{
+                //    FileInfo file = new FileInfo(filepath);
+
+                //    // List the additional streams for a file:
+                //    //foreach (AlternateDataStreamInfo s in file.ListAlternateDataStreams())
+                //    //{
+                //    //    Console.WriteLine("{0} - {1} bytes", s.Name, s.Size);
+                //    //}
+                //    if (file.AlternateDataStreamExists("_UAEFSDB.___"))
+                //    {
+                //        AlternateDataStreamInfo s2 = file.GetAlternateDataStream("_UAEFSDB.___", FileMode.Open);
+                //        Console.WriteLine("{0} - {1} bytes", s2.Name, s2.Size);
+                //        using (var reader = s2.OpenRead())
+                //        {
+                //            var bytes = new byte[s2.Size];
+                //            var readcnt = reader.Read(bytes, 0, (int)s2.Size);
+                //            File.WriteAllBytes(filepath + s2.Name, bytes);
+                //            //Console.WriteLine(reader.ReadToEnd());
+                //        }
+                //    }
+
+                //}
+
+
                 var configuration = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                     .AddCommandLine(args)
@@ -46,6 +73,10 @@ namespace AmigaOsBuilder
                     ConfigService.SysLhaConfig(),
                     //ConfigService.WorkLhaConfig(),
                     ConfigService.DevLhaConfig(),
+                });
+                BuildIt(new List<Config>
+                {
+                    ConfigService.InstallerConfig(),
                 });
             }
             catch (Exception e)
@@ -348,7 +379,7 @@ namespace AmigaOsBuilder
             });
 
             
-            FileHandlerFactory.AddCustomFileHandler(outputPath, new InmemoryFileHandler(outputPath, builder.ToString(), 0x00));
+            FileHandlerFactory.AddCustomFileHandler(outputPath, new InmemoryFileHandler(outputPath, builder.ToString(), new Attributes((byte)0x00)));
             ProgressBar.ClearProgressBar();
             _logger.Information("Build Readme done!");
         }
@@ -382,7 +413,12 @@ namespace AmigaOsBuilder
                                 _logger.Warning($"user-starttup for {package.Path} has incorrect NewLine! Correct NewLine is '\\n'");
                                 userstartup = userstartup.Replace(Environment.NewLine, "\n");
                             }
-                            builder.Append(userstartup);                    
+                            builder.Append(userstartup);
+                            if (userstartup.EndsWith('\n') == false)
+                            {
+                                builder.Append("\n");
+                            }
+                            builder.Append("\n");
                         }
                     }
                 }
@@ -396,7 +432,7 @@ namespace AmigaOsBuilder
                 TargetPath = innerPath
             });
             var str = builder.ToString();
-            FileHandlerFactory.AddCustomFileHandler(path, new InmemoryFileHandler(innerPath, str, 0x40)); // 0x40 = S
+            FileHandlerFactory.AddCustomFileHandler(path, new InmemoryFileHandler(innerPath, str, new Attributes((byte)0x40))); // 0x40 = S
 
             ProgressBar.ClearProgressBar();
             _logger.Information("Build user-startup done!");
@@ -507,6 +543,11 @@ namespace AmigaOsBuilder
             {
                 return FileDiff.DiffSourceMissing;
             }
+
+            //if (sourceInfo.Attributes != targetInfo.Attributes)
+            //{
+            //    return FileDiff.DiffContent;
+            //}
 
             if (FileComparer.FilesContentsAreEqual(sourceInfo, targetInfo))
             {

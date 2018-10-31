@@ -43,12 +43,13 @@ namespace AmigaOsBuilder
             return File.ReadAllText(fullPath);
         }
 
-        public void FileWriteAllText(string path, string content)
-        {
-            var fullPath = GetFullPath(path);
-            EnsurePathExists(fullPath);
-            File.WriteAllText(fullPath, content);
-        }
+        //public void FileWriteAllText(string path, string content)
+        //{
+        //    var fullPath = GetFullPath(path);
+        //    EnsurePathExists(fullPath);
+        //    File.WriteAllText(fullPath, content);
+        //    //TODO: Write attrib/date
+        //}
 
         public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path)
         {
@@ -57,6 +58,7 @@ namespace AmigaOsBuilder
             var bytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
             fullPath = WinFixPath(fullPath);
             File.WriteAllBytes(fullPath, bytes);
+            //TODO: Write attrib/date
         }
 
         private string WinFixPath(string path)
@@ -99,7 +101,9 @@ namespace AmigaOsBuilder
             var fullPath = GetFullPath(path);
             EnsurePathExists(fullPath);
             var bytes = contentFileHandler.FileReadAllBytes(contentPath);
+            var getDate = contentFileHandler.GetDate(contentPath);
             File.WriteAllBytes(fullPath, bytes);
+            //TODO: Write attrib/date
         }
 
         public void FileDelete(string path)
@@ -118,6 +122,7 @@ namespace AmigaOsBuilder
         {
             var fullPath = GetFullPath(path);
             Directory.CreateDirectory(fullPath);
+            //TODO: Write attrib/date
         }
 
         public void DirectoryDelete(string path, bool recursive)
@@ -147,11 +152,6 @@ namespace AmigaOsBuilder
             var fileType = (packageEntryFileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory ? FileType.Directory : FileType.File;
 
             return fileType;
-
-            //var fileType = Program.GetFileType(SyncType.Unknown, fullPath);
-            //return fileType;
-
-
         }
 
         public IFileInfo GetFileInfo(string path)
@@ -205,7 +205,7 @@ namespace AmigaOsBuilder
             return files;
         }
 
-        public (DateTime DateTime, byte Attributes) GetDate(string path)
+        public (DateTime DateTime, Attributes Attributes) GetDate(string path)
         {
             var fullPath = Path.Combine(OutputBasePath, path);
 
@@ -213,7 +213,8 @@ namespace AmigaOsBuilder
 
             var dateTime = fileInfo.LastWriteTime;
 
-            return (dateTime, FileAttributeHelper.ToAmigaAttributes(fileInfo.Attributes));
+            return (dateTime, new Attributes(0x00));
+            //return (dateTime, new Attributes(fileInfo.Attributes));
         }
 
         public void Dispose()
@@ -258,6 +259,14 @@ namespace AmigaOsBuilder
             {
                 var lastWriteTime = _fileInfo.LastWriteTime;
                 return lastWriteTime;
+            }
+        }
+        public Attributes Attributes
+        {
+            get
+            {
+                return new Attributes(0x00);
+                //return new Attributes(_fileInfo.Attributes);
             }
         }
 

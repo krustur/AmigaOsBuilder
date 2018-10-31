@@ -11,7 +11,6 @@ namespace AmigaOsBuilder
     public class LhaFileHandler : IFileHandler, IDisposable
     {
         private const int INITIAL_HEADER_BUFFER_LENGTH = 32;
-        public Encoding LhaEncoding => Encoding.UTF8;
         private const char FolderSeparator = '\\';
 
         private readonly Logger _logger;
@@ -30,6 +29,7 @@ namespace AmigaOsBuilder
         private readonly FileStream _fileStream;
         private bool _fileStreamReadyForAppend;
         private readonly Crc16 _crc16Calcer;
+        private readonly EncodingConverter _encodingConverter;
         private byte[] _headerBuffer = new byte[INITIAL_HEADER_BUFFER_LENGTH];
         private int _headerBufferLength = INITIAL_HEADER_BUFFER_LENGTH;
 
@@ -39,6 +39,7 @@ namespace AmigaOsBuilder
             _logger = logger;
             OutputBasePath = outputBasePath;
             _crc16Calcer = new Crc16();
+            _encodingConverter = new EncodingConverter();
 
             if (File.Exists(outputBasePath))
             {
@@ -106,7 +107,8 @@ namespace AmigaOsBuilder
 
             // crc will be written later
             var headerCrc = _headerBuffer[1];
-            var methodId = LhaEncoding.GetString(_headerBuffer, 2, 5);
+            //var methodId = LhaEncoding.GetString(_headerBuffer, 2, 5);
+            var methodId = _encodingConverter.ConvertIsoBytesToUtf8String(_headerBuffer, 2, 5);
             
 
             var length000000FF = _headerBuffer[7]; // little endian
@@ -137,14 +139,14 @@ namespace AmigaOsBuilder
             EnsureHeaderBufferLength(headerLength + 2);
 
             fileStream.Read(_headerBuffer, 22, pathLength + 2);
-            var path = LhaEncoding.GetString(_headerBuffer, 22, pathLength);
+            var path = _encodingConverter.ConvertIsoBytesToUtf8String(_headerBuffer, 22, pathLength);
             string comment = null;
             for (var i = 0; i < pathLength; i++)
             {
                 if (_headerBuffer[22+i] == 0)
                 {
-                    path = LhaEncoding.GetString(_headerBuffer, 22, i);
-                    comment = LhaEncoding.GetString(_headerBuffer, 22 + i + 1, pathLength - i - 1);
+                    path = _encodingConverter.ConvertIsoBytesToUtf8String(_headerBuffer, 22, i);
+                    comment = _encodingConverter.ConvertIsoBytesToUtf8String(_headerBuffer, 22 + i + 1, pathLength - i - 1);
                 }
             }
 
@@ -170,9 +172,12 @@ namespace AmigaOsBuilder
             return (content, _headerBuffer);
         }
 
+
+
         public void CreateBasePaths(AliasService aliasService)
         {            
         }
+
 
         public bool FileExists(string path)
         {
@@ -188,17 +193,17 @@ namespace AmigaOsBuilder
         public string FileReadAllText(string path)
         {
             var bytes = FileReadAllBytes(path);
-            var text = LhaEncoding.GetString(bytes);
+            var text = _encodingConverter.ConvertIsoBytesToUtf8String(bytes);
             return text;
         }
 
-        public void FileWriteAllText(string path, string content)
-        {
-            path = ToAmigaPath(path);
-            var bytes = LhaEncoding.GetBytes(content);
-            var dateTime = DateTime.Now;
-            AddLhaContent(path, bytes, dateTime, 0x00);
-        }
+        //public void FileWriteAllText(string path, string content)
+        //{
+        //    path = ToAmigaPath(path);
+        //    var bytes = LhaEncoding.GetBytes(content);
+        //    var dateTime = DateTime.Now;
+        //    AddLhaContent(path, bytes, dateTime, 0x00);
+        //}
 
         public void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path)
         {
@@ -212,7 +217,7 @@ namespace AmigaOsBuilder
             //var dateTime = sourceFileInfo.LastWriteTime;
             var getDate = sourceFileHandler.GetDate(syncSourcePath);
             
-            AddLhaContent(path, sourceBytes, getDate.DateTime, getDate.Attributes);
+            AddLhaContent(path, sourceBytes, getDate.DateTime, getDate.Attributes.GetAmigaAttributes());
         }
 
         private void AddLhaContent(string path, byte[] bytes, DateTime dateTime, byte attributes)
@@ -237,7 +242,7 @@ namespace AmigaOsBuilder
             int pathBytesLength;
             if (path != null)
             {
-                var pathBytes = LhaEncoding.GetBytes(path);
+                var pathBytes = _encodingConverter.ConvertUtf8StringToIsoBytes(path);
                 pathBytesLength = pathBytes.Length;
                 headerLength = (22 + pathBytesLength);
                 fullHeaderLength = headerLength + 2;
@@ -547,10 +552,10 @@ namespace AmigaOsBuilder
 
         }
 
-        public (DateTime DateTime, byte Attributes) GetDate(string path)
+        public (DateTime DateTime, Attributes Attributes) GetDate(string path)
         {
             var content = GetSingleContentByPath(path);
-            return (content.Date, content.Attributes);
+            return (content.Date, new Attributes(content.Attributes));
         }
     }
 
@@ -568,7 +573,13 @@ namespace AmigaOsBuilder
         public bool Exists => _content != null;
 
         public DateTime LastWriteTime => _content?.Date ?? DateTime.MinValue;
-
+        public Attributes Attributes
+        {
+            get
+            {
+                return new Attributes(_content.Attributes);
+            }
+        }
         public long Length => _content?.Length ?? 0;
 
         public IStream OpenRead()
@@ -635,6 +646,53 @@ namespace AmigaOsBuilder
                 return (int) (readCount - (_totalCount - _contentLength));
             }
             return readCount;
+        }
+    }
+
+    public class EncodingConverter
+    {
+        public Encoding IsoEncoding = Encoding.GetEncoding("ISO-8859-1");
+        public Encoding Utf8Encoding => Encoding.UTF8;
+
+        public string ConvertIsoBytesToUtf8String(byte[] isoBytes)
+        {
+            var utfBytes = Encoding.Convert(IsoEncoding, Utf8Encoding, isoBytes);
+            string str = Utf8Encoding.GetString(utfBytes);
+            return str;
+            //return ConvertIsoBytesToUtf8String(bytes, 0, bytes.Length);
+        }
+
+        public string ConvertIsoBytesToUtf8String(byte[] isoBytes, int offset, int count)
+        {
+            var isoBytesSub = new byte[count];
+            Array.Copy(isoBytes, offset, isoBytesSub, 0, count);
+            return ConvertIsoBytesToUtf8String(isoBytesSub);
+
+            //var utfBytes = Encoding.Convert(IsoEncoding, Utf8Encoding, isoBytes);
+            //string str = Utf8Encoding.GetString(utfBytes, offset, count);
+            //return str;
+
+
+            //Encoding utf8 = Encoding.UTF8;
+            //byte[] utfBytes = utf8.GetBytes(Message);
+            //byte[] isoBytes = Encoding.Convert(utf8, iso, utfBytes);
+
+
+            //Encoding iso = Encoding.GetEncoding("ISO-8859-1");
+            //Encoding utf8 = Encoding.UTF8;
+            //byte[] utfBytes = utf8.GetBytes(Message);
+            //byte[] isoBytes = Encoding.Convert(utf8, iso, utfBytes);
+            //string msg = iso.GetString(isoBytes);
+        }
+
+        public byte[] ConvertUtf8StringToIsoBytes(string utfString)
+        {
+            //Encoding iso = Encoding.GetEncoding("ISO-8859-1");
+            //Encoding utf8 = Encoding.UTF8;
+            byte[] utfBytes = Utf8Encoding.GetBytes(utfString);
+            byte[] isoBytes = Encoding.Convert(Utf8Encoding, IsoEncoding, utfBytes);
+            return isoBytes;
+            //string isoString = IsoEncoding.GetString(isoBytes);
         }
     }
 }

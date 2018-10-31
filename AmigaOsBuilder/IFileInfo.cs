@@ -7,6 +7,7 @@ namespace AmigaOsBuilder
         bool Exists { get; }
         DateTime LastWriteTime { get; }
         long Length { get; }
+        Attributes Attributes { get; }
 
         IStream OpenRead();
     }

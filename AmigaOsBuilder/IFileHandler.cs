@@ -8,7 +8,7 @@ namespace AmigaOsBuilder
         void CreateBasePaths(AliasService aliasService);
         bool FileExists(string path);
         string FileReadAllText(string path);
-        void FileWriteAllText(string path, string content);
+        //void FileWriteAllText(string path, string content);
         void FileCopy(IFileHandler sourceFileHandler, string syncSourcePath, string path);
         void FileCopyBack(string path, IFileHandler contentFileHandler, string contentPath);
         void FileDelete(string path);
@@ -23,6 +23,6 @@ namespace AmigaOsBuilder
         string OutputBasePath { get; }
         byte[] FileReadAllBytes(string path);
         IList<string> DirectoryGetFiles(string path);
-        (DateTime DateTime, byte Attributes) GetDate(string path);
+        (DateTime DateTime, Attributes Attributes) GetDate(string path);
     }
 }
