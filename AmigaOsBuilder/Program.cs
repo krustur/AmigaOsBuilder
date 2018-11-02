@@ -66,13 +66,13 @@ namespace AmigaOsBuilder
                 {
                     ConfigService.SysConfig(),
                     //ConfigService.WorkConfig(),
-                    ConfigService.DevConfig()
+                    //ConfigService.DevConfig()
                 });
                 BuildIt(new List<Config>
                 {
                     ConfigService.SysLhaConfig(),
                     //ConfigService.WorkLhaConfig(),
-                    ConfigService.DevLhaConfig(),
+                    //ConfigService.DevLhaConfig(),
                 });
                 BuildIt(new List<Config>
                 {
@@ -447,20 +447,20 @@ namespace AmigaOsBuilder
                     var fileDiff = GetFileDiff(sync, contentFileHandler, outputFileHandler);
                     if (fileDiff == FileDiff.Equal)
                     {
-                        _logger.Debug(@"{SyncLogType}: [{TargetPath}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath);
-                        _logger.Debug(@"{SyncLogType} : (files are equal!) [{SourcePath}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, sync.TargetPath);
+                        _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{SyncType}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath, sync.SyncType);
+                        _logger.Debug(@"{SyncLogType} : (files are equal!) [{SourcePath}] [{SyncType}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, sync.TargetPath, sync.SyncType);
                     }
                     else
                     {
                         if (fileDiff == FileDiff.DiffTargetMissing || fileDiff == FileDiff.DiffSourceNewer)
                         {
-                            _logger.Information(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath, fileDiff);
-                            _logger.Debug(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, fileDiff);
+                            _logger.Information(@"{SyncLogType}: [{TargetPath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath, sync.SyncType, fileDiff);
+                            _logger.Information(@"{SyncLogType}: [{SourcePath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, sync.SyncType, fileDiff);
                         }
                         else
                         {
-                            _logger.Warning(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath, fileDiff);
-                            _logger.Debug(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, fileDiff);
+                            _logger.Warning(@"{SyncLogType}: [{TargetPath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath, sync.SyncType, fileDiff);
+                            _logger.Warning(@"{SyncLogType}: [{SourcePath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, sync.SyncType, fileDiff);
                         }
 
                         outputFileHandler.FileCopy(contentFileHandler, sync.SourcePath, sync.TargetPath);
@@ -476,22 +476,22 @@ namespace AmigaOsBuilder
                         {
                             case FileDiff.Equal:
                             {
-                                _logger.Debug(@"{SyncLogType}: [{SourcePath}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath);
-                                _logger.Debug(@"{SyncLogType}: (files are equal!) [{TargetPath}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath);
+                                _logger.Debug(@"{SyncLogType}: [{SourcePath}] [{SyncType}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, sync.SyncType);
+                                _logger.Debug(@"{SyncLogType}: (files are equal!) [{TargetPath}] [{SyncType}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, sync.SyncType);
                                 break;
                             }
                             case FileDiff.DiffSourceMissing:
                             case FileDiff.DiffTargetNewer:
                             {
-                                _logger.Information(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
-                                _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
+                                _logger.Information(@"{SyncLogType}: [{SourcePath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, sync.SyncType, fileDiff);
+                                _logger.Information(@"{SyncLogType}: [{TargetPath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, sync.SyncType, fileDiff);
                                 contentFileHandler.FileCopyBack(sync.SourcePath, outputFileHandler, sync.TargetPath);
                                 break;
                             }
                             case FileDiff.DiffTargetMissing:
                             {
-                                _logger.Information(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
-                                _logger.Debug(@"{SyncLogType}: (invserse) [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
+                                _logger.Information(@"{SyncLogType}: [{SourcePath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyToTarget.GetDescription(), sync.TargetPath, sync.SyncType, fileDiff);
+                                _logger.Information(@"{SyncLogType}: (invserse) [{TargetPath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyFromSource.GetDescription(), sync.SourcePath, sync.SyncType, fileDiff);
                                 outputFileHandler.FileCopy(contentFileHandler, sync.SourcePath, sync.TargetPath);
                                 break;
                             }
@@ -499,9 +499,9 @@ namespace AmigaOsBuilder
                             case FileDiff.DiffSourceNewer:
                             default:
                             {
-                                _logger.Warning(@"{SyncLogType}: [{SourcePath}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, fileDiff);
-                                _logger.Debug(@"{SyncLogType}: [{TargetPath}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, fileDiff);
-                                outputFileHandler.FileCopyBack(sync.SourcePath, outputFileHandler, sync.TargetPath);
+                                _logger.Warning(@"{SyncLogType}: [{SourcePath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyToSource.GetDescription(), sync.SourcePath, sync.SyncType, fileDiff);
+                                _logger.Warning(@"{SyncLogType}: [{TargetPath}] [{SyncType}] [{FileDiff}]", SyncLogType.CopyFromTarget.GetDescription(), sync.TargetPath, sync.SyncType, fileDiff);
+                                contentFileHandler.FileCopyBack(sync.SourcePath, outputFileHandler, sync.TargetPath);
                                 //outputFileHandler.FileCopy(contentFileHandler, sync.SourcePath, sync.TargetPath);
                                 break;
                             }
@@ -514,12 +514,12 @@ namespace AmigaOsBuilder
                 {
                     if (outputFileHandler.FileExists(sync.TargetPath))
                     {
-                        _logger.Information(@"{SyncLogType}: [{TargetPath}]", SyncLogType.DeleteTarget.GetDescription(), sync.TargetPath);
+                        _logger.Information(@"{SyncLogType}: [{TargetPath}] [{SyncType}]", SyncLogType.DeleteTarget.GetDescription(), sync.TargetPath, sync.SyncType);
                         outputFileHandler.FileDelete(sync.TargetPath);
                     }
                     else
                     {
-                        _logger.Debug(@"{SyncLogType}: (nothing to delete!) [{TargetPath}]", SyncLogType.DeleteTarget.GetDescription(), sync.TargetPath);
+                        _logger.Debug(@"{SyncLogType}: (nothing to delete!) [{TargetPath}] [{SyncType}]", SyncLogType.DeleteTarget.GetDescription(), sync.TargetPath, sync.SyncType);
                     }
                     break;
                 }

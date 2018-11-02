@@ -132,6 +132,14 @@ namespace AmigaOsBuilder
             #region OS
             new Package
             {
+                Include = true,
+                Path = "TestReverseSync_1.0",
+                Category = "Test",
+                Description = "Test content reverse",
+                //Source = ""
+            },
+            new Package
+            {
                 Include = false,
                 Path = "Workbench (clean install)_3.1",
                 Category = "OS",
