@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Web;
 
 namespace AmigaOsBuilder
 {
@@ -16,13 +17,19 @@ namespace AmigaOsBuilder
 
         public string FixPath(string path)
         {
-            var uri = new Uri("file://"+path);
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return path;
+            }
             _stringBuilder.Length = 0;
-            foreach (var segment in uri.Segments)
+            var segments = path.Split('\\');
+            bool isFirstPart = true;
+            foreach (var segment in segments)
             {
                 if (segment == "/") continue;
 
-                var partFileName = segment.Replace('/', '\\');
+                var partFileName = segment
+                    .Replace('/', '\\');
 
                 if (invalidFileNames.Contains(partFileName))
                 {
@@ -44,12 +51,71 @@ namespace AmigaOsBuilder
                         }
                     }
                 }
+                if (isFirstPart == false)
+                {
+                    _stringBuilder.Append('\\');
+                }
+                isFirstPart = false;
                 _stringBuilder.Append(partFileName);
             }
             return _stringBuilder.ToString();
         }
 
-        public object DefixPath(string path)
+
+        public string FixPathUriProblems(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return path;
+            }
+            try
+            {
+                var uri = new Uri(/*"file://"+*/path);
+                _stringBuilder.Length = 0;
+                foreach (var segment in uri.Segments)
+                {
+                    if (segment == "/") continue;
+
+                    var partFileName = segment
+                        .Replace('/', '\\')
+                        //.Replace("%20", " ")
+                        ;
+
+                    var partFileName2 = partFileName;
+                    partFileName = HttpUtility.UrlDecode(partFileName);
+                    if (partFileName2 != partFileName) { }
+
+                    if (invalidFileNames.Contains(partFileName))
+                    {
+                        partFileName = $"_amigafixed_{partFileName}";
+                    }
+                    else
+                    {
+                        foreach (var invalidFileName in invalidFileNames)
+                        {
+                            if (partFileName.ToUpperInvariant().StartsWith(invalidFileName + '.'))
+                            {
+                                partFileName = $"_amigafixed_{partFileName}";
+                                break;
+                            }
+                            else if (partFileName.ToUpperInvariant().StartsWith(invalidFileName + '\\'))
+                            {
+                                partFileName = $"_amigafixed_{partFileName}";
+                                break;
+                            }
+                        }
+                    }
+                    _stringBuilder.Append(partFileName);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+            return _stringBuilder.ToString();
+        }
+
+        public string DefixPath(string path)
         {
             var defixedPath = path.Replace("_amigafixed_", string.Empty);
             return defixedPath;

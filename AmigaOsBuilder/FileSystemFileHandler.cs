@@ -10,6 +10,7 @@ namespace AmigaOsBuilder
     {
         private readonly Logger _logger;
         private readonly WinPathFixer _winPathFixer;
+        public string OutputBasePath { get; }
 
         public FileSystemFileHandler(Logger logger, string outputBasePath)
         {
@@ -58,15 +59,9 @@ namespace AmigaOsBuilder
             var fullPath = GetFullPath(path);
             EnsurePathExists(fullPath);
             var bytes = sourceFileHandler.FileReadAllBytes(syncSourcePath);
-            fullPath = _winPathFixer.FixPath(fullPath);
+            //fullPath = _winPathFixer.FixPath(fullPath);
             File.WriteAllBytes(fullPath, bytes);
             //TODO: Write attrib/date
-        }
-
-        private void EnsurePathExists(string fullPath)
-        {
-            var directoryName = Path.GetDirectoryName(fullPath);
-            Directory.CreateDirectory(directoryName);
         }
 
         public void FileCopyBack(string path, IFileHandler contentFileHandler, string contentPath)
@@ -74,7 +69,7 @@ namespace AmigaOsBuilder
             var fullPath = GetFullPath(path);
             EnsurePathExists(fullPath);
             var bytes = contentFileHandler.FileReadAllBytes(contentPath);
-            var getDate = contentFileHandler.GetDate(contentPath);
+            //var getDate = contentFileHandler.GetDate(contentPath);
             File.WriteAllBytes(fullPath, bytes);
             //TODO: Write attrib/date
         }
@@ -102,20 +97,7 @@ namespace AmigaOsBuilder
         {
             var fullPath = GetFullPath(path);
             Directory.Delete(fullPath, recursive);
-        }
-
-        public IList<string> DirectoryGetFileSystemEntriesRecursive(string path)
-        {
-            var fullPath = GetFullPath(path);
-
-            var entries = Directory.GetFileSystemEntries(fullPath, "*", SearchOption.AllDirectories);
-
-            var fixedEntries = entries
-                .Select(GetSubPath)
-                .ToList();
-
-            return fixedEntries;
-        }
+        }       
 
         public FileType GetFileType(string path)
         {
@@ -134,20 +116,8 @@ namespace AmigaOsBuilder
             return new FileSystemFileInfo(fileInfo);
         }
 
-        public IList<string> DirectoryGetDirectories(string path)
-        {
-            var fullPath = GetFullPath(path);
+       
 
-            var directories = Directory.GetDirectories(fullPath);
-
-            var fixedDirectories = directories
-                .Select(GetSubPath)
-                .ToList();
-
-            return fixedDirectories;
-        }
-
-        public string OutputBasePath { get; }
         public byte[] FileReadAllBytes(string path)
         {
             var fullPath = GetFullPath(path);
@@ -157,30 +127,9 @@ namespace AmigaOsBuilder
             return bytes;
         }
 
-        private string GetSubPath(string fullPath)
-        {
-            var subPath = Program.RemoveRoot(OutputBasePath, fullPath);
-            return subPath;
-        }
-
-        private string GetFullPath(string path)
-        {
-            var fullPath = Path.Combine(OutputBasePath, path);
-            return fullPath;
-        }
-
-        public IList<string> DirectoryGetFiles(string path)
-        {
-            var fullPath = Path.Combine(OutputBasePath, path);
-
-            var files = Directory.GetFiles(fullPath);
-
-            return files;
-        }
-
         public (DateTime DateTime, Attributes Attributes) GetDate(string path)
         {
-            var fullPath = Path.Combine(OutputBasePath, path);
+            var fullPath = GetFullPath(path);
 
             var fileInfo = new FileInfo(fullPath);
 
@@ -190,9 +139,68 @@ namespace AmigaOsBuilder
             //return (dateTime, new Attributes(fileInfo.Attributes));
         }
 
+        public IList<string> DirectoryGetFileSystemEntriesRecursive(string path)
+        {
+            var fullPath = GetFullPath(path);
+
+            var entries = Directory.GetFileSystemEntries(fullPath, "*", SearchOption.AllDirectories);
+
+            //TODO: Defix
+            var fixedEntries = entries
+                .Select(GetSubPath)
+                .ToList();
+
+            return fixedEntries;
+        }
+
+        //public IList<string> DirectoryGetDirectories(string path)
+        //{
+        //    var fullPath = GetFullPath(path);
+
+        //    var directories = Directory.GetDirectories(fullPath);
+
+        //    //TODO: Defix
+        //    var fixedDirectories = directories
+        //        .Select(GetSubPath)
+        //        .ToList();
+
+        //    return fixedDirectories;
+        //}
+
+        //public IList<string> DirectoryGetFiles(string path)
+        //{
+        //    var fullPath = GetFullPath(path);
+
+        //    //TODO: Defix
+        //    var files = Directory.GetFiles(fullPath);
+
+        //    return files;
+        //}
+
         public void Dispose()
         {
             //_logger?.Dispose();
+        }
+
+
+        private void EnsurePathExists(string fullPath)
+        {
+            var directoryName = Path.GetDirectoryName(fullPath);
+            Directory.CreateDirectory(directoryName);
+        }
+
+        private string GetSubPath(string fullPath)
+        {
+            //TODO: Defix?
+            var subPath = _winPathFixer.DefixPath( Program.RemoveRoot(OutputBasePath, fullPath));
+            return subPath;
+        }
+
+        private string GetFullPath(string path)
+        {
+            var fullPath = Path.Combine(OutputBasePath, path);
+            fullPath = _winPathFixer.FixPath(fullPath);
+            return fullPath;
         }
     }
 

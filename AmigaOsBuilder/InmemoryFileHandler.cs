@@ -40,15 +40,15 @@ namespace AmigaOsBuilder
             throw new NotImplementedException();
         }
 
-        public IList<string> DirectoryGetDirectories(string path)
-        {
-            throw new NotImplementedException();
-        }
+        //public IList<string> DirectoryGetDirectories(string path)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public IList<string> DirectoryGetFiles(string path)
-        {
-            throw new NotImplementedException();
-        }
+        //public IList<string> DirectoryGetFiles(string path)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public IList<string> DirectoryGetFileSystemEntriesRecursive(string path)
         {

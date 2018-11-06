@@ -473,20 +473,20 @@ namespace AmigaOsBuilder
             return fileInfo;
         }
 
-        public IList<string> DirectoryGetDirectories(string path)
-        {
-            var amigaPath = ToAmigaPath(path)
-                .ToLowerInvariant();
+        //public IList<string> DirectoryGetDirectories(string path)
+        //{
+        //    var amigaPath = ToAmigaPath(path)
+        //        .ToLowerInvariant();
 
-            var directories = _content
-                .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
-                .Select(x => x.Path.Split(FolderSeparator).First())
-                .Distinct()
-                .ToList()
-                ;
+        //    var directories = _content
+        //        .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
+        //        .Select(x => x.Path.Split(FolderSeparator).First())
+        //        .Distinct()
+        //        .ToList()
+        //        ;
 
-            return directories;
-        }
+        //    return directories;
+        //}
 
         private LhaContent GetSingleContentByPath(string path)
         {
@@ -520,37 +520,37 @@ namespace AmigaOsBuilder
             return amigaPath;
         }
 
-        public IList<string> DirectoryGetFiles(string path)
-        {
-            var amigaPath = ToAmigaPath(path)
-                .ToLowerInvariant();
+        //public IList<string> DirectoryGetFiles(string path)
+        //{
+        //    var amigaPath = ToAmigaPath(path)
+        //        .ToLowerInvariant();
 
-            var files = _content
-                .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
-                .Select(x => x.Path.ToLowerInvariant())
-                .Distinct()
-                .ToList();
+        //    var files = _content
+        //        .Where(x => x.Path.ToLowerInvariant().StartsWith(amigaPath))
+        //        .Select(x => x.Path.ToLowerInvariant())
+        //        .Distinct()
+        //        .ToList();
 
-            if (amigaPath.Length != 0)
-            {
-                files = files
-                    .Select(x => x.Replace(amigaPath, string.Empty))
-                    .Distinct()
-                    .ToList();
-            }
+        //    if (amigaPath.Length != 0)
+        //    {
+        //        files = files
+        //            .Select(x => x.Replace(amigaPath, string.Empty))
+        //            .Distinct()
+        //            .ToList();
+        //    }
 
-            files = files
-                    .Where(x => x.Contains(FolderSeparator) == false)
-                    .Distinct()
-                    .ToList();
+        //    files = files
+        //            .Where(x => x.Contains(FolderSeparator) == false)
+        //            .Distinct()
+        //            .ToList();
 
-            if (files.Count > 0)
-            {
+        //    if (files.Count > 0)
+        //    {
 
-            }
-            return files;
+        //    }
+        //    return files;
 
-        }
+        //}
 
         public (DateTime DateTime, Attributes Attributes) GetDate(string path)
         {

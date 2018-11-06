@@ -95,5 +95,23 @@ namespace AmigaOsBuilder.Tests.WinPathFixerTests
 
             Assert.AreEqual(@"C:\somedrive\CONT.CON\file", result);
         }
+
+        [TestMethod]
+        public void WinPathFixer_FixPath_EmptyPath()
+        {
+            var fixer = new WinPathFixer();
+            var result = fixer.FixPath(@"");
+
+            Assert.AreEqual(@"", result);
+        }
+
+        [TestMethod]
+        public void WinPathFixer_FixPath_Spaces_NotRemoved()
+        {
+            var fixer = new WinPathFixer();
+            var result = fixer.FixPath(@"C:\somedrive\CON CON\file");
+
+            Assert.AreEqual(@"C:\somedrive\CON CON\file", result);
+        }
     }
 }
