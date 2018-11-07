@@ -229,15 +229,6 @@ namespace AmigaOsBuilder
             },
             new Package
             {
-                Include = true,
-                //Name = "A-Directories",
-                Path = "A-DirectoriesWork",
-                Category = "KrustWB",
-                Description = "A-Directories including icons (Work: drive)",
-                //Source = ""
-            },
-            new Package
-            {
                 Include = false,
                 Path = "KrustWBInstall",
                 Category = "KrustWB",
@@ -444,6 +435,14 @@ namespace AmigaOsBuilder
                 Category = "System",
                 Description = @"A tool to fine-tune your mouse",
                 Source = "http://m68k.aminet.net/package/util/mouse/FreeWheel"
+            },
+            new Package
+            {
+                Include = true,
+                Path = "JoyPortTest_0.1",
+                Category = "System",
+                Description = @"JoyPortTest  is an utility to test and check your joystick, CD32 joypad and mouse connected on amiga port 0 and 1.  ",
+                Source = "http://aminet.net/package/driver/input/JoyPortTest"
             },
             new Package
             {
@@ -723,7 +722,18 @@ namespace AmigaOsBuilder
         };
 
         private static readonly List<Package> WorkPackages = new List<Package>
-        { 
+        {
+            #region KrustWB            
+            new Package
+            {
+                Include = true,
+                //Name = "A-Directories",
+                Path = "A-DirectoriesWork",
+                Category = "KrustWB",
+                Description = "A-Directories including icons (Work: drive)",
+                //Source = ""
+            },
+            #endregion
             #region A-Games     
             new Package
             {

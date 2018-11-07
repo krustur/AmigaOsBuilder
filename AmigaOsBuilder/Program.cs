@@ -122,10 +122,8 @@ namespace AmigaOsBuilder
 
             AddContentToSyncList(config.SourceBasePath, outputFileHandler, packages, "content", SyncType.SourceToTarget, syncList, aliasService: aliasService);
             AddDeleteToSyncList(outputFileHandler, syncList);
-            if (config.ReverseSync)
-            {
-                AddContentToSyncList(config.SourceBasePath, outputFileHandler, packages, "content_reverse", SyncType.TargetToSource, syncList, aliasService: aliasService);
-            }
+            var reverseSyncType = config.ReverseSync ? SyncType.TargetToSource : SyncType.SourceToTarget;
+            AddContentToSyncList(config.SourceBasePath, outputFileHandler, packages, "content_reverse", reverseSyncType, syncList, aliasService: aliasService);
 
 
             BuildReadme(packages, syncList);
