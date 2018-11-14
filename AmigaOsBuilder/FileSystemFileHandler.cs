@@ -21,7 +21,7 @@ namespace AmigaOsBuilder
 
         public void CreateBasePaths(AliasService aliasService)
         {
-            _logger.Information("Creating output alias directories ...");
+            //_logger.Information("Creating output alias directories ...");
             Directory.CreateDirectory(OutputBasePath);
             foreach (var alias in aliasService.GetAliases())
             {
@@ -31,7 +31,7 @@ namespace AmigaOsBuilder
                 Directory.CreateDirectory(outputAliasPath);
             }
 
-            _logger.Information("Create output alias directories done!");
+            //_logger.Information("Create output alias directories done!");
         }
 
         public bool FileExists(string path)

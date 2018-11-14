@@ -129,7 +129,7 @@ namespace AmigaOsBuilder
 
         private static readonly List<Package> SysPackages = new List<Package>
         {
-            #region OS
+            #region Workbench
             new Package
             {
                 Include = true,
@@ -165,6 +165,14 @@ namespace AmigaOsBuilder
             new Package
             {
                 Include = true,
+                Path = "Workbench (intuition-v45-library)_3.1.4",
+                Category = "OS",
+                Description = "Workbench 3.1.4 operation system v-45 intuition.library. Will allow you to drag windows partially off the screen [FIX LHA CONTENT FILE]",
+                //Source = ""
+            },
+            new Package
+            {
+                Include = true,
                 Path = "WorkbenchMultiView",
                 Category = "OS",
                 Description = "Copy from Amiga OS Utilities folder. Also replaces AmigaGuide.",
@@ -189,17 +197,9 @@ namespace AmigaOsBuilder
             new Package
             {
                 Include = true,
-                Path = "BackdropSys",
+                Path = "KrustWBBackdropSys",
                 Category = "KrustWB",
-                Description = "KrustWB .backdrop file (System: drive). OS setting file that keeps track of \"Leave Out\".",
-                //Source = ""
-            },
-            new Package
-            {
-                Include = true,
-                Path = "BackdropWork",
-                Category = "KrustWB",
-                Description = "KrustWB .backdrop file (Work: drive). OS setting file that keeps track of \"Leave Out\".",
+                Description = "KrustWB .backdrop file for System: drive (OS setting file that keeps track of \"Leave Out\").",
                 //Source = ""
             },
             new Package
@@ -233,6 +233,22 @@ namespace AmigaOsBuilder
                 Path = "KrustWBInstall",
                 Category = "KrustWB",
                 Description = "Scripts to pack and install KrustWB",
+                //Source = ""
+            },
+            new Package
+            {
+                Include = true,
+                Path = "KrustWBRAMDiskInfo_0.1",
+                Category = "KrustWB",
+                Description = "Disk.info handling for RAM: drive - to support snapshot via script",
+                //Source = ""
+            },
+            new Package
+            {
+                Include = true,
+                Path = "KrustWBShellStartup",
+                Category = "KrustWB",
+                Description = "Shell-Startup script",
                 //Source = ""
             },
             #endregion
@@ -631,9 +647,9 @@ namespace AmigaOsBuilder
             new Package
             {
                 Include = true,
-                Path = "Workbench (intuition-v45-library)_3.1.4",
-                Category = "OS",
-                Description = "Workbench 3.1.4 operation system v-45 intuition.library. Will allow you to drag windows partially off the screen [FIX LHA CONTENT FILE]",
+                Path = "MMULib_46.16",
+                Category = "Library",
+                Description = "Library to ctrl the MC68K MMUs",
                 //Source = ""
             },
             #endregion
@@ -723,7 +739,7 @@ namespace AmigaOsBuilder
 
         private static readonly List<Package> WorkPackages = new List<Package>
         {
-            #region KrustWB            
+            #region KrustWB   
             new Package
             {
                 Include = true,
@@ -733,6 +749,14 @@ namespace AmigaOsBuilder
                 Description = "A-Directories including icons (Work: drive)",
                 //Source = ""
             },
+            new Package
+            {
+                Include = true,
+                Path = "KrustWBBackdropWork",
+                Category = "KrustWB",
+                Description = "KrustWB .backdrop file for Work: drive (OS setting file that keeps track of \"Leave Out\").",
+                //Source = ""
+            },            
             #endregion
             #region A-Games     
             new Package
@@ -748,6 +772,25 @@ namespace AmigaOsBuilder
 
         private static readonly List<Package> DevPackages = new List<Package>
         { 
+            #region KrustWB            
+            //new Package
+            //{
+            //    Include = true,
+            //    //Name = "A-Directories",
+            //    Path = "A-DirectoriesDev",
+            //    Category = "KrustWB",
+            //    Description = "A-Directories including icons (Dev: drive)",
+            //    //Source = ""
+            //},
+            new Package
+            {
+                Include = true,
+                Path = "KrustWBBackdropDev",
+                Category = "KrustWB",
+                Description = "KrustWB .backdrop file for Dev: drive (OS setting file that keeps track of \"Leave Out\").",
+                //Source = ""
+            },
+            #endregion
             #region Dev
             new Package
             {
@@ -767,10 +810,42 @@ namespace AmigaOsBuilder
             },
             new Package
             {
+                Include = false,
+                Path = "vbcc-bin-amigaos68k-installer_0.906",
+                Category = "Dev",
+                Description = @"Installer for: Highly optimizing portable and retargetable ISO C compiler. It supports ISO C according to ISO/IEC 9899:1989 and a subset of the new standard ISO/IEC 9899:1999 (C99).",
+                Source = "http://sun.hasenbraten.de/vbcc/"
+            },
+            new Package
+            {
+                Include = true,
+                Path = "vasmm68k_mot_os3_1.8d",
+                Category = "Dev",
+                Description = @"vasm is a portable and retargetable assembler to create linkable objects in various formats or absolute code. Motorola/Freescale 68k syntax (Devpac compatible)",
+                Source = "http://sun.hasenbraten.de/vasm"
+            },
+            new Package
+            {
+                Include = true,
+                Path = "vlink_AmigaM68k_0.16a",
+                Category = "Dev",
+                Description = @"vlink is a portable linker, written in ANSI-C, that can read and write a wide range of object- and executable file formats. ",
+                Source = "http://sun.hasenbraten.de/vlink/"
+            },
+            new Package
+            {
                 Include = true,
                 Path = "vbcc-target-m68k-amigaos_0.906",
                 Category = "Dev",
                 Description = @"VBCC Compiler target AmigaOS 2.x/3.x M680x0.",
+                Source = "http://sun.hasenbraten.de/vbcc/"
+            },
+            new Package
+            {
+                Include = true,
+                Path = "vbcc-target-m68k-amigaos-installer_0.906",
+                Category = "Dev",
+                Description = @"Installer for: VBCC Compiler target AmigaOS 2.x/3.x M680x0.",
                 Source = "http://sun.hasenbraten.de/vbcc/"
             },
             new Package

@@ -66,14 +66,14 @@ namespace AmigaOsBuilder
                 {
                     ConfigService.SysConfig(),
                     //ConfigService.WorkConfig(),
-                    //ConfigService.DevConfig()
+                    ConfigService.DevConfig()
                 });
-                BuildIt(new List<Config>
-                {
-                    ConfigService.SysLhaConfig(),
-                    //ConfigService.WorkLhaConfig(),
-                    //ConfigService.DevLhaConfig(),
-                });
+                //BuildIt(new List<Config>
+                //{
+                //    ConfigService.SysLhaConfig(),
+                //    ConfigService.WorkLhaConfig(),
+                //    ConfigService.DevLhaConfig(),
+                //});
                 BuildIt(new List<Config>
                 {
                     ConfigService.InstallerConfig(),
@@ -108,7 +108,7 @@ namespace AmigaOsBuilder
                     }
                     SynchronizeV2(syncList, outputFileHandler);
                 }
-                _logger.Information("Build done");
+                //_logger.Information("Build done");
             }
         }
 
@@ -130,7 +130,7 @@ namespace AmigaOsBuilder
 
             ProgressBar.ClearProgressBar();
 
-            _logger.Information("Building sync list done!");
+            //_logger.Information("Building sync list done!");
 
             return syncList;
         }
@@ -344,7 +344,7 @@ namespace AmigaOsBuilder
             }
 
 
-            _logger.Information("Synchronizing done!");
+            //_logger.Information("Synchronizing done!");
         }
 
         private static void BuildReadme(IList<Package> packages, IList<Sync> syncList)
@@ -379,7 +379,7 @@ namespace AmigaOsBuilder
             
             FileHandlerFactory.AddCustomFileHandler(outputPath, new InmemoryFileHandler(outputPath, builder.ToString(), new Attributes((byte)0x00)));
             ProgressBar.ClearProgressBar();
-            _logger.Information("Build Readme done!");
+            //_logger.Information("Build Readme done!");
         }
 
         private static void BuildUserStartup(IList<Config> configs, IList<Sync> syncList)
@@ -433,7 +433,7 @@ namespace AmigaOsBuilder
             FileHandlerFactory.AddCustomFileHandler(path, new InmemoryFileHandler(innerPath, str, new Attributes((byte)0x40))); // 0x40 = S
 
             ProgressBar.ClearProgressBar();
-            _logger.Information("Build user-startup done!");
+            //_logger.Information("Build user-startup done!");
         }   
 
         private static void SynchronizeFile(Sync sync, IFileHandler contentFileHandler, IFileHandler outputFileHandler)
