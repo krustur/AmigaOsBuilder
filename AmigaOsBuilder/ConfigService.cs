@@ -464,7 +464,24 @@ namespace AmigaOsBuilder
                 Description = @"Makes Compressed ADFs",
                 Source = "http://aminet.net/package/disk/misc/TransADF"
             },
-            
+            new Package(true, "DirSSCompare_1.4")
+            {
+                Category = "System",
+                Description = @"Another program to compare two dirs for search differences",
+                Source = "http://aminet.net/package/util/dir/DirSSCompare"
+            },            
+            new Package(true, "CompareDirs_1.1")
+            {
+                Category = "System",
+                Description = @"CompareDirs allows you to compare the directory stucture of two directories",
+                Source = "http://aminet.net/package/util/cli/CompareDirs"
+            },
+            new Package(true, "ALeXcompare_2.0")
+            {
+                Category = "System",
+                Description = @"cmp is a program, which compares files in two directories  (or trees)",
+                Source = "http://aminet.net/package/util/cli/ALeXcompare"
+            },            
             #endregion
 
             #region Libraries
