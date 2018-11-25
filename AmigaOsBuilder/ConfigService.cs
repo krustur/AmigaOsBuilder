@@ -674,6 +674,12 @@ namespace AmigaOsBuilder
                 Description = @"Installer for: VBCC Compiler target AmigaOS 2.x/3.x M680x0.",
                 Source = "http://sun.hasenbraten.de/vbcc/"
             },
+            new Package(true, "vbcc-PosixLib_2.6")
+            {
+                Category = "Dev",
+                Description = @"This linker library contains the most important POSIX functions and some other useful UNIX functions, which are not in the standard C-library.",
+                Source = "http://aminet.net/package/dev/c/vbcc_PosixLib"
+            },
             new Package(false, "AsmOne_1.25")
             {
                 Category = "Dev",
