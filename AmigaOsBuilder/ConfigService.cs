@@ -482,6 +482,12 @@ namespace AmigaOsBuilder
                 Description = @"cmp is a program, which compares files in two directories  (or trees)",
                 Source = "http://aminet.net/package/util/cli/ALeXcompare"
             },            
+            new Package(true, "IconGrid_1.0")
+            {
+                Category = "System",
+                Description = @"IconGrid is a Shell tool to align Workbench icons on a virtual grid",
+                Source = "http://aminet.net/package/util/cli/IconGrid"
+            },            
             #endregion
 
             #region Libraries
