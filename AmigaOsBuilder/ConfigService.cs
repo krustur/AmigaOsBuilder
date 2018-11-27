@@ -5,7 +5,11 @@ namespace AmigaOsBuilder
 {
     public class ConfigService
     {
+        /*
+            todo:
+            http://aminet.net/package/dev/misc/AmigaOS_guides
 
+        */
         public static Config SysConfig()
         {
             return new Config
@@ -487,7 +491,31 @@ namespace AmigaOsBuilder
                 Category = "System",
                 Description = @"IconGrid is a Shell tool to align Workbench icons on a virtual grid",
                 Source = "http://aminet.net/package/util/cli/IconGrid"
-            },            
+            },
+            new Package(false, "Huge_1.1")
+            {
+                Category = "System",
+                Description = @"icons, sprites, bobs Editor anno 1990 (from 1990!)",
+                Source = "http://aminet.net/package/gfx/edit/Huge"
+            },
+            new Package(true, "AmiFTP_1.843")
+            {
+                Category = "System",
+                Description = @"Easy to use GUI FTP client for OS 2.0+",
+                Source = "http://aminet.net/package/comm/tcp/AmiFTP"
+            },
+            new Package(true, "Iconian_2.98u")
+            {
+                Category = "System",
+                Description = @"OS3.0 icon editor, NewIcon support",
+                Source = "http://aminet.net/package/gfx/edit/Iconian2_98u"
+            },
+            new Package(true, "ProcessIcon_1.19")
+            {
+                Category = "System",
+                Description = @"V1.19 CLI tool to manipulate icon data",
+                Source = "http://aminet.net/package/util/wb/ProcessIcon"
+            },
             #endregion
 
             #region Libraries
@@ -720,6 +748,12 @@ namespace AmigaOsBuilder
                 Category = "Dev",
                 Description = @"68k/PPC Assembler Development Environment for the Amiga",
                 Source = "http://aminet.net/package/dev/asm/ASM-One"
+            },
+            new Package(true, "AutoDocReader_1.6.5")
+            {
+                Category = "Dev",
+                Description = @"View autodocs, C headers and text files",
+                Source = "http://aminet.net/package/dev/misc/AutoDocReader_1v65"
             },
             #endregion
 
