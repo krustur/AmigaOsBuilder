@@ -120,6 +120,7 @@ namespace AmigaOsBuilder
             // KrustWB folders
             { @"__aguides__",            @"A-Guides" },
             { @"__awhdgames__",          @"A-WHDGames" },
+            { @"__ademos__",             @"A-Demos" },
         };
         private static readonly IDictionary<string, string> DevAliases = new Dictionary<string, string>
         {
@@ -516,6 +517,18 @@ namespace AmigaOsBuilder
                 Description = @"V1.19 CLI tool to manipulate icon data",
                 Source = "http://aminet.net/package/util/wb/ProcessIcon"
             },
+            new Package(true, "IconSnap_0.3")
+            {
+                Category = "System",
+                Description = @"Snap Workbench icons to a virtual grid",
+                Source = "http://aminet.net/package/util/wb/IconSnap"
+            },
+            new Package(true, "AFnews_1.03")
+            {
+                Category = "System",
+                Description = @"Amiga Future Everywhere 68k",
+                Source = "http://aminet.net/package/comm/news/AFnews-68k"
+            },
             #endregion
 
             #region Libraries
@@ -661,6 +674,16 @@ namespace AmigaOsBuilder
                 Source = "http://aminet.net/package/util/moni/SnoopDos"
             },
 
+            #endregion
+
+            #region A-Demos
+
+            new Package(true, "ADemos")
+            {
+                Category = "Demos",
+                Description = @"Demos",
+                //Source = "http://aminet.net/package/util/moni/SnoopDos"
+            }
             #endregion
         };
 
