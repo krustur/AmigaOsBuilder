@@ -9,6 +9,35 @@ namespace AmigaOsBuilder
             todo:
             http://aminet.net/package/dev/misc/AmigaOS_guides
 
+            http://aminet.net/package/disk/misc/SD3V13 High-speed disk copier and formatter
+
+            http://aminet.net/package/mus/play/PlaySID
+
+            http://aminet.net/package/dev/gui/classact33
+
+            https://github.com/jens-maus/amissl/releases
+            http://aminet.net/package/dev/debug/SegTracker SegTracker 45.1 - A global SegList tracking utility
+            (no) http://aminet.net/search?query=enforcer 
+            (no) http://aminet.net/package/dev/debug/enforcer
+            http://aminet.net/package/dev/debug/MuForce V40 Enforcer,detect illegal RAM accesses
+            http://aminet.net/package/dev/debug/Sushi Intercept Enforcer raw serial output
+            http://aminet.net/package/util/misc/ReportPlus Multipurpose utility
+            http://aminet.net/package/text/font/CharMap Display the whole charset of a given font
+            http://aminet.net/package/disk/misc/tsgui Create or write back image files (ADF/HDF)
+
+            http://aminet.net/package/mus/play/AmigaAMP3-68k
+            http://aminet.net/package/comm/tcp/dizzytorrent2
+            http://aminet.net/package/comm/misc/twittAmiga
+
+            http://www.classicamiga.com/content/view/4585/175/ FileMaster 3.1 Beta 9 incl. key
+            http://aminet.net/package/util/dir/DiskMaster DiskMaster2 - 68K & OS4
+
+
+            SASC
+            StormC
+            DevPac
+            http://aminet.net/package/dev/misc/FlexCat-2.18.lha
+
         */
         public static Config SysConfig()
         {
@@ -121,6 +150,7 @@ namespace AmigaOsBuilder
             { @"__aguides__",            @"A-Guides" },
             { @"__awhdgames__",          @"A-WHDGames" },
             { @"__ademos__",             @"A-Demos" },
+            { @"__amods__",              @"A-Mods" },
         };
         private static readonly IDictionary<string, string> DevAliases = new Dictionary<string, string>
         {
@@ -153,6 +183,11 @@ namespace AmigaOsBuilder
                 Description = "Workbench 3.1.4 operation system (clean Install) [FIX LHA CONTENT FILE]",
                 //Source = ""
             },
+            new Package(true, "Workbench (extra files)_3.1.4")
+            {
+                Category = "OS",
+                Description = "Workbench 3.1.4 operation system (extra files) i.e. c:Reboot",
+            },
             new Package(true, "Workbench (glowicons)_3.1.4")
             {
                 Category = "OS",
@@ -178,10 +213,16 @@ namespace AmigaOsBuilder
             #endregion
 
             #region KrustWB
-            new Package(true, "Startup-Sequence")
+            new Package(true, "KrustWBStartupSequence")
             {
                 Category = "KrustWB",
                 Description = "KrustWB startup-sequence and user-startup files",
+                //Source = ""
+            },
+            new Package(true, "KrustWBMaxMemSequence")
+            {
+                Category = "KrustWB",
+                Description = "MaxMem-Sequence to boot to CLI with max memory",
                 //Source = ""
             },
             new Package(true, "KrustWBBackdropSys")
@@ -226,6 +267,7 @@ namespace AmigaOsBuilder
                 Description = "Shell-Startup script",
                 //Source = ""
             },
+            
             #endregion
 
             #region ROMS
@@ -385,17 +427,23 @@ namespace AmigaOsBuilder
                 Description = @"JoyPortTest  is an utility to test and check your joystick, CD32 joypad and mouse connected on amiga port 0 and 1.  ",
                 Source = "http://aminet.net/package/driver/input/JoyPortTest"
             },
-            new Package(true, "ToolsDaemon_2.1a")
+            new Package(false, "ToolsDaemon_2.1a")
             {
                 Category = "System",
                 Description = @"ToolsDaemon allows you to run programs simply by selecting a menu item from the menu strip of Workbench",
                 Source = "http://aminet.net/package/util/boot/ToolsDaemon21a"
             },
-            new Package(true, "ToolsDaemon_2.2")
+            new Package(false, "ToolsDaemon_2.2")
             {
                 Category = "System",
                 Description = @"These patches fix ToolsDaemon 2.1a, written by Nico François, to take advantage of V45 (OS 3.9) Workbench API",
                 Source = "http://aminet.net/package/util/boot/ToolsDaemon22"
+            },
+            new Package(true, "ToolsMenu_1.6")
+            {
+                Category = "System",
+                Description = @"Add tools to the Workbench Tools menu",
+                Source = "http://aminet.net/package/util/cdity/ToolsMenu"
             },
             new Package(false, "Info_39.18b")
             {
@@ -523,11 +571,53 @@ namespace AmigaOsBuilder
                 Description = @"Snap Workbench icons to a virtual grid",
                 Source = "http://aminet.net/package/util/wb/IconSnap"
             },
-            new Package(true, "AFnews_1.03")
+            new Package(false, "AFnews_1.03")
             {
                 Category = "System",
                 Description = @"Amiga Future Everywhere 68k",
                 Source = "http://aminet.net/package/comm/news/AFnews-68k"
+            },
+            new Package(true, "SimpleFind3_1.2")
+            {
+                Category = "System",
+                Description = @"V1.2 of the renewed File Finder",
+                Source = "http://aminet.net/package/util/dir/simplefind3"
+            },
+            new Package(true, "rewincy_0.8")
+            {
+                Category = "System",
+                Description = @"Cycle through windows/screens Alt-Tab",
+                Source = "http://aminet.net/package/util/cdity/rewincy.lha"
+            },
+            new Package(true, "DeliTracker_2.32")
+            {
+                Category = "System",
+                Description = @"Final Amiga Version, now Freeware",
+                Source = "http://aminet.net/package/mus/play/DeliTracker232"
+            },
+            new Package(true, "GetMouseInput_1.4")
+            {
+                Category = "System",
+                Description = @"V1.4 - read mouse button state",
+                Source = "http://aminet.net/package/util/boot/GetMouseInput"
+            },
+            new Package(true, "BoardsLib_3.42")
+            {
+                Category = "System",
+                Description = @"provides detailed info about expansions",
+                Source = "http://aminet.net/package/util/libs/BoardsLib"
+            },
+            new Package(true, "WhichAmiga_1.3.3")
+            {
+                Category = "System",
+                Description = @"ShowConfig kind of tool. V1.3.3",
+                Source = "http://aminet.net/package/util/moni/WhichAmiga"
+            },
+            new Package(true, "Redit_2.0")
+            {
+                Category = "System",
+                Description = @"Text editor",
+                Source = "http://aminet.net/package/text/edit/Redit"
             },
             #endregion
 
@@ -562,6 +652,18 @@ namespace AmigaOsBuilder
                 Description = @"TextEditor Custom Class for Magic User Interface",
                 Source = "http://aminet.net/package/dev/mui/MCC_TextEditor-15.50"
             },
+            new Package(true, "MCCTextEditor_15.50")
+            {
+                Category = "Library",
+                Description = @"TextEditor Custom Class for Magic User Interface",
+                Source = "http://aminet.net/package/dev/mui/MCC_TextEditor-15.50"
+            },
+            new Package(true, "MCC_NList_0.124")
+            {
+                Category = "Library",
+                Description = @"NList custom classes for MUI",
+                Source = "http://aminet.net/package/dev/mui/MCC_NList-0.124"
+            },
             new Package(false, "renderlib_40.8")
             {
                 Category = "Library",
@@ -579,6 +681,12 @@ namespace AmigaOsBuilder
                 Category = "Library",
                 Description = "Library to ctrl the MC68K MMUs",
                 //Source = ""
+            },
+            new Package(true, "WBStart_2.2")
+            {
+                Category = "Library",
+                Description = "Emulate program starting from WB (V2.2)",
+                Source = "http://aminet.net/package/util/libs/WBStart"
             },
             #endregion
 
@@ -677,13 +785,19 @@ namespace AmigaOsBuilder
             #endregion
 
             #region A-Demos
-
             new Package(true, "ADemos")
             {
                 Category = "Demos",
                 Description = @"Demos",
-                //Source = "http://aminet.net/package/util/moni/SnoopDos"
-            }
+            },
+            #endregion
+
+            #region A-Mods
+            new Package(true, "AMods")
+            {
+                Category = "Mods",
+                Description = @"Mods",
+            },
             #endregion
         };
 
@@ -772,11 +886,12 @@ namespace AmigaOsBuilder
                 Description = @"68k/PPC Assembler Development Environment for the Amiga",
                 Source = "http://aminet.net/package/dev/asm/ASM-One"
             },
-            new Package(true, "AutoDocReader_1.6.5")
+            new Package(false, "AutoDocReader_1.6.5")
             {
                 Category = "Dev",
-                Description = @"View autodocs, C headers and text files",
-                Source = "http://aminet.net/package/dev/misc/AutoDocReader_1v65"
+                Description = @"View autodocs, C headers and text files (requires cybergraphics.library)",
+                Source = "http://aminet.net/package/dev/misc/AutoDocReader_1v65", 
+                
             },
             #endregion
 

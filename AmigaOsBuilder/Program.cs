@@ -65,15 +65,15 @@ namespace AmigaOsBuilder
                 BuildIt(new List<Config>
                 {
                     ConfigService.SysConfig(),
-                    ConfigService.WorkConfig(),
+                    //ConfigService.WorkConfig(),
                     ConfigService.DevConfig()
                 });
-                BuildIt(new List<Config>
-                {
-                    ConfigService.SysLhaConfig(),
-                    ConfigService.WorkLhaConfig(),
-                    ConfigService.DevLhaConfig(),
-                });
+                //BuildIt(new List<Config>
+                //{
+                //    ConfigService.SysLhaConfig(),
+                //    ConfigService.WorkLhaConfig(),
+                //    ConfigService.DevLhaConfig(),
+                //});
                 BuildIt(new List<Config>
                 {
                     ConfigService.InstallerConfig(),
