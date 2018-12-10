@@ -7,6 +7,8 @@ namespace AmigaOsBuilder
     {
         /*
             todo:
+            http://aminet.net/package/dev/debug/HRTmon V2.22 FREE 'Action-Replay' like monitor
+            http://aminet.net/package/util/arc/ViewDiz File_id.diz GUI viewer/editor; v2.1
             http://aminet.net/package/dev/misc/AmigaOS_guides
 
             http://aminet.net/package/disk/misc/SD3V13 High-speed disk copier and formatter
@@ -619,20 +621,68 @@ namespace AmigaOsBuilder
                 Description = @"Text editor",
                 Source = "http://aminet.net/package/text/edit/Redit"
             },
+            new Package(true, "ActionReplayIVPro")
+            {
+                Category = "System",
+                Description = @"Action Replay IV PRO Software version",
+                Source = "EAB/Gurus Dreams"
+            },
+            new Package(true, "HRTmon_2.22")
+            {
+                Category = "System",
+                Description = @"V2.22 FREE 'Action-Replay' like monitor",
+                Source = "http://aminet.net/package/dev/debug/HRTmon"
+            },
+            new Package(true, "X-Copy")
+            {
+                Category = "System",
+                Description = @"X-Copy",
+                Source = "my old amiga"
+            },
+            new Package(true, "SuperDuper_3.13")
+            {
+                Category = "System",
+                Description = @"Disk copier",
+                Source = "http://aminet.net/package/disk/misc/SD3V13"
+            },
+            new Package(true, "Fungicide_1.8")
+            {
+                Category = "System",
+                Description = @"Finds new STD trojan/viriis + fully featured killer",
+                Source = "http://aminet.net/package/util/virus/fungicide18"
+            },
+            new Package(true, "VirusZIII_1.02")
+            {
+                Category = "System",
+                Description = @"VirusZ III 1.02 - Antivirus Software",
+                Source = "http://aminet.net/package/util/virus/VirusZ"
+            },
             #endregion
 
             #region Libraries
+            new Package(true, "DisLib_40.8")
+            {
+                Category = "Library",
+                Description = @"A library based MC68K disassembler",
+                Source = "http://aminet.net/package/util/libs/DisLib"
+            },
             new Package(false, "ReqTools_38.1210")
             {
                 Category = "Library",
                 Description = @"ReqTools library",
-                Source = "http://aminet.net/package/util/boot/ToolsDaemon21a"
+                Source = "Found in http://aminet.net/package/util/boot/ToolsDaemon21a"
             },
-            new Package(true, "ReqTools_39.3")
+            new Package(false, "ReqTools_39.3")
             {
                 Category = "Library",
                 Description = @"ReqTools library",
                 Source = "http://aminet.net/package/util/libs/ReqToolsLib"
+            },
+            new Package(true, "ReqTools_2.9a")
+            {
+                Category = "Library",
+                Description = @"ReqTools 2.9a - the requester toolkit (user)",
+                Source = "http://aminet.net/package/util/libs/ReqToolsUsr"
             },
             new Package(true, "guigfxnofpu_20.0")
             {
@@ -687,6 +737,30 @@ namespace AmigaOsBuilder
                 Category = "Library",
                 Description = "Emulate program starting from WB (V2.2)",
                 Source = "http://aminet.net/package/util/libs/WBStart"
+            },
+            new Package(true, "XadMaster020_12.1a")
+            {
+                Category = "Library",
+                Description = "V12.1a Powerful unarchiving tool (68020)",
+                Source = "http://aminet.net/package/util/arc/xadmaster020"
+            },
+            new Package(true, "XadMasterKey")
+            {
+                Category = "Library",
+                Description = "Free XAD system keyfile",
+                Source = "http://aminet.net/package/util/arc/xadmaster-key"
+            },
+            new Package(true, "XfdMaster_1.38")
+            {
+                Category = "Library",
+                Description = "Rel1.38 Decrunch packed files (exe/data)",
+                Source = "http://aminet.net/package/util/pack/xfdmaster"
+            },
+            new Package(true, "XvsLibrary_33.42")
+            {
+                Category = "Library",
+                Description = @"External Virus Scanner Library v33.42",
+                Source = "http://aminet.net/package/util/virus/xvslibrary"
             },
             #endregion
 
