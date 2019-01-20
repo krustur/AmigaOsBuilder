@@ -58,7 +58,7 @@ namespace AmigaOsBuilder
             return new Config
             {
                 SourceBasePath = "E:\\Amiga\\KrustWB3\\Source\\",
-                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\KrustWB\\System.lha",
+                OutputBasePath = "E:\\Amiga\\KrustWB3\\Krustur\\KrustWB\\System.lha",
                 Aliases = SysAliases,
                 Packages = SysPackages,
                 ReverseSync = false,
@@ -82,7 +82,7 @@ namespace AmigaOsBuilder
             return new Config
             {
                 SourceBasePath = "E:\\Amiga\\KrustWB3\\Source\\",
-                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\KrustWB\\Work.lha",
+                OutputBasePath = "E:\\Amiga\\KrustWB3\\Krustur\\KrustWB\\Work.lha",
                 Aliases = WorkAliases,
                 Packages = WorkPackages,
                 ReverseSync = false,
@@ -106,7 +106,7 @@ namespace AmigaOsBuilder
             return new Config
             {
                 SourceBasePath = "E:\\Amiga\\KrustWB3\\Source\\",
-                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\KrustWB\\Dev.lha",
+                OutputBasePath = "E:\\Amiga\\KrustWB3\\Krustur\\KrustWB\\Dev.lha",
                 Aliases = DevAliases,
                 Packages = DevPackages,
                 ReverseSync = false,
@@ -118,7 +118,7 @@ namespace AmigaOsBuilder
             return new Config
             {
                 SourceBasePath = "E:\\Amiga\\KrustWB3\\Source\\",
-                OutputBasePath = "E:\\Amiga\\KrustWB3\\TempDisk\\KrustWB\\i\\",
+                OutputBasePath = "E:\\Amiga\\KrustWB3\\Krustur\\KrustWB\\i\\",
                 Aliases = InstallerAliases,
                 Packages = InstallerPackages,
                 ReverseSync = true,
@@ -519,6 +519,12 @@ namespace AmigaOsBuilder
                 Description = @"Makes Compressed ADFs",
                 Source = "http://aminet.net/package/disk/misc/TransADF"
             },
+            new Package(true, "tsgui_2.2")
+            {
+                Category = "System",
+                Description = @"Create or write back image files (ADF/HDF)",
+                Source = "http://aminet.net/package/disk/misc/tsgui"
+            },
             new Package(true, "DirSSCompare_1.4")
             {
                 Category = "System",
@@ -656,6 +662,24 @@ namespace AmigaOsBuilder
                 Category = "System",
                 Description = @"VirusZ III 1.02 - Antivirus Software",
                 Source = "http://aminet.net/package/util/virus/VirusZ"
+            },
+            new Package(true, "Scout_3.6")
+            {
+                Category = "System",
+                Description = @"System monitor (MUI & TCP/IP stack optional)",
+                Source = "http://aminet.net/package/util/moni/Scout_os3"
+            },
+            new Package(true, "Smbfs_2.1")
+            {
+                Category = "System",
+                Description = @"A SMB file system wrapper for AmigaOS, using the AmiTCP V3 API",
+                Source = "https://sourceforge.net/projects/amiga-smbfs/"
+            },
+            new Package(true, "Sgrab_1.22")
+            {
+                Category = "System",
+                Description = @"Screen grabber with GUI (1.22)",
+                Source = "http://aminet.net/package/util/wb/sgrab"
             },
             #endregion
 
@@ -824,6 +848,18 @@ namespace AmigaOsBuilder
                 Category = "Programs",
                 Description = @"Legendary File Manager for Amiga Computers",
                 Source = "http://aminet.net/package/util/dopus/DOpus416JRbin"
+            },
+            new Package(true, "DPaintV")
+            {
+                Category = "Programs",
+                Description = @"Deluxe Paint V",
+                Source = "floppies"
+            },
+            new Package(true, "Cinema4D_2.1")
+            {
+                Category = "Programs",
+                Description = @"Maxon Cinema 4D 2.1",
+                Source = "floppies"
             },
             #endregion
         };
