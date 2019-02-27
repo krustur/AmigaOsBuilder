@@ -56,8 +56,10 @@ namespace AmigaOsBuilder
 
                 _logger = new LoggerConfiguration()
                     //.MinimumLevel.Debug()
+                    .Enrich.WithProperty("Application", "AmigaOsBuilder")
                     .WriteTo.Console()
                     .WriteTo.File("AmigaOsBuilder_log.txt")
+                    .WriteTo.Seq("http://localhost:5341/#/events")
                     .CreateLogger();
 
                 _pathService = new PathService();
@@ -68,12 +70,12 @@ namespace AmigaOsBuilder
                     //ConfigService.WorkConfig(),
                     ConfigService.DevConfig()
                 });
-                //BuildIt(new List<Config>
-                //{
-                //    ConfigService.SysLhaConfig(),
+                BuildIt(new List<Config>
+                {
+                    ConfigService.SysLhaConfig(),
                 //    ConfigService.WorkLhaConfig(),
-                //    ConfigService.DevLhaConfig(),
-                //});
+                    ConfigService.DevLhaConfig(),
+                });
                 BuildIt(new List<Config>
                 {
                     ConfigService.InstallerConfig(),

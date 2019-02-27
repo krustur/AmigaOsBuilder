@@ -34,6 +34,8 @@ namespace AmigaOsBuilder
             http://www.classicamiga.com/content/view/4585/175/ FileMaster 3.1 Beta 9 incl. key
             http://aminet.net/package/util/dir/DiskMaster DiskMaster2 - 68K & OS4
 
+            http://aminet.net/package/util/arc/dms111
+
 
             SASC
             StormC
@@ -366,7 +368,12 @@ namespace AmigaOsBuilder
                 Description = "Add Mount and Assign options to Amiga requester",
                 Source = "http://aminet.net/package/util/wb/AssignWedge",
             },
-            new Package(true, "Roadshow demo_1.13")
+            new Package(true, "Roadshow_1.13")
+            {
+                Category = "System",
+                Description = "Amiga TCP/IP stack",
+            },
+            new Package(false, "Roadshow demo_1.13")
             {
                 Category = "System",
                 Description = "Amiga TCP/IP stack (demo version)",
